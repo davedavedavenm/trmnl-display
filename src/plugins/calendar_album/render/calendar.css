@@ -1,0 +1,93 @@
+/* Basic Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+    background-color: transparent !important;
+}
+
+.calendar {
+  width: 100%;
+  height: 100%;
+  font-family: "Jost";
+  overflow: hidden;
+  color: #ffffff !important;
+  text-shadow: 2px 2px 4px #000000, 0px 0px 2px #000000; 
+}
+
+/* Day header - dark background, reasonable size */
+.fc-col-header-cell {
+    background-color: rgba(0,0,0,0.7) !important;
+}
+
+.fc-col-header-cell-cushion {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 0.8em !important;
+    text-shadow: 2px 2px 4px #000000;
+    padding: 2px !important;
+}
+
+/* Events */
+.fc-daygrid-event {
+    color: #ffffff !important;
+    background-color: rgba(0,0,0,0.6) !important;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 4px;
+    padding: 2px 4px !important;
+    margin-top: 2px !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+}
+
+/* Day Number */
+.fc-daygrid-day-number {
+    padding: 2px !important;
+    color: white !important;
+    font-weight: 800 !important;
+    text-shadow: 2px 2px 3px black;
+    background-color: rgba(0,0,0,0.2);
+    border-bottom-right-radius: 4px;
+}
+
+/* Grid lines - visible */
+.fc-theme-standard td, .fc-theme-standard th {
+    border-color: rgba(255,255,255,0.5) !important;
+    border-width: 1px !important;
+}
+
+/* Today Highlight */
+.fc-day-today {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* Time slot labels - bold and readable */
+.fc-timegrid-slot-label {
+    font-size: 1.1em !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    text-shadow: 2px 2px 4px #000000 !important;
+}
+
+/* Standard overrides */
+.fc-toolbar.fc-header-toolbar { margin-bottom: 2px !important; }
+.fc .fc-daygrid-body-natural .fc-daygrid-day-events { margin-bottom: 0px !important; }
+.fc .fc-timegrid-now-indicator-line { border-top-width: 3px !important; border-color: red !important; }
+.fc-scrollgrid { border-color: transparent !important; }
+.fc-scrollgrid td:last-of-type { border-right-color: transparent !important; }
+th { border-top-color: transparent; border-right-color: transparent !important; border-left-color: transparent !important; }
+.fc .fc-toolbar-title { font-size: var(--fc-title-font-size) !important; }
+.fc table { font-size: var(--fc-table-font-size) !important; }
+
+/* Smaller event font */
+.fc-timegrid-event .fc-event-main {
+    font-size: 0.85em !important;
+}
+
+.fc-event-title {
+    font-size: 0.9em !important;
+}
