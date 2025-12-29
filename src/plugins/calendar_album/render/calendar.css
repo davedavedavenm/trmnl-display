@@ -6,7 +6,7 @@
 }
 
 body {
-    background-color: transparent !important;
+    background-color: rgba(0,0,0,0.3) !important;
 }
 
 .calendar {
@@ -20,7 +20,7 @@ body {
 
 /* Day header - dark background, reasonable size */
 .fc-col-header-cell {
-    background-color: rgba(0,0,0,0.7) !important;
+    background-color: rgba(0,0,0,0.9) !important;
 }
 
 .fc-col-header-cell-cushion {
@@ -61,7 +61,7 @@ body {
 
 /* Today Highlight */
 .fc-day-today {
-    background-color: transparent !important;
+    background-color: rgba(0,0,0,0.3) !important;
     border: none !important;
 }
 
@@ -85,9 +85,25 @@ th { border-top-color: transparent; border-right-color: transparent !important; 
 
 /* Smaller event font */
 .fc-timegrid-event .fc-event-main {
-    font-size: 0.85em !important;
+    font-size: 0.7em !important;
 }
 
 .fc-event-title {
-    font-size: 0.9em !important;
+    font-size: 0.75em !important;
+}
+
+/* Force ALL day cells to have uniform shading */
+.fc-day, .fc-day-today, .fc-timegrid-col {
+    background-color: rgba(0,0,0,0.3) !important;
+    background: rgba(0,0,0,0.3) !important;
+}
+
+.fc-timegrid-col.fc-day-today {
+    background-color: rgba(0,0,0,0.3) !important;
+    background: rgba(0,0,0,0.3) !important;
+}
+
+/* Remove any today border */
+.fc-day-today {
+    border: inherit !important;
 }
