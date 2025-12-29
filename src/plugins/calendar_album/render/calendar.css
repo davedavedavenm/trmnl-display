@@ -20,7 +20,7 @@ body {
 
 /* Day header - dark background, reasonable size */
 .fc-col-header-cell {
-    background-color: rgba(0,0,0,0.9) !important;
+    background-color: rgba(0,0,0,1) !important;
 }
 
 .fc-col-header-cell-cushion {
@@ -106,4 +106,74 @@ th { border-top-color: transparent; border-right-color: transparent !important; 
 /* Remove any today border */
 .fc-day-today {
     border: inherit !important;
+}
+
+/* Force FULLY BLACK day headers */
+.fc-col-header,
+.fc-col-header-cell,
+.fc-col-header-cell a,
+.fc-scrollgrid-sync-inner,
+thead,
+thead tr,
+thead th {
+    background-color: #000000 !important;
+    background: #000000 !important;
+}
+
+/* Event time SMALLER, title BIGGER */
+.fc-event-time {
+    font-size: 0.6em !important;
+}
+
+.fc-event-title {
+    font-size: 1.0em !important;
+}
+
+/* Hour labels (time axis) SMALLER */
+.fc-timegrid-slot-label,
+.fc-timegrid-axis-cushion {
+    font-size: 0.9em !important;
+}
+
+/* Day headers - semi-transparent black */
+.fc-col-header,
+.fc-col-header-cell,
+.fc-col-header-cell a,
+.fc-scrollgrid-sync-inner,
+thead,
+thead tr,
+thead th {
+    background-color: rgba(0,0,0,0.7) !important;
+    background: rgba(0,0,0,0.7) !important;
+}
+
+/* Time axis (left column) - semi-transparent */
+.fc-timegrid-axis,
+.fc-timegrid-slot-label {
+    background-color: rgba(0,0,0,0.7) !important;
+    background: rgba(0,0,0,0.7) !important;
+}
+
+/* Fill entire viewport - no frame */
+html {
+    height: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: rgba(0,0,0,0.3) !important;
+}
+
+body {
+    height: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: rgba(0,0,0,0.3) !important;
+}
+
+#calendar, .calendar {
+    height: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
