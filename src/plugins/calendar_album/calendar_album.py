@@ -76,18 +76,20 @@ class Calendar(BasePlugin):
         current_dt = datetime.now(tz)
         start, end = self.get_view_range(view, current_dt, settings)
         logger.info(f"DEBUG: VIEW MODE = {view}"); logger.debug(f"Fetching events for {start} --> [{current_dt}] --> {end}")
-        events = self.fetch_ics_events(calendar_urls, calendar_colors, tz, start, end)
+        
+        # --- PATCH: Offline resilience - continue with empty events if fetch fails ---
+        events = []
+        try:
+            events = self.fetch_ics_events(calendar_urls, calendar_colors, tz, start, end)
+        except Exception as e:
+            logger.warning(f"Failed to fetch calendar (offline?): {e}. Continuing with empty calendar.")
+        # --- END PATCH ---
       
         if not events:
             logger.warn("No events found for ics url")
 
-        # Map 3-day view to generic for template logic if needed, but we handle it in template
-        # Keeping view variable as is so template knows which one it is
-
         if view == 'timeGridWeek' and settings.get("displayPreviousDays") != "true":
             view = 'timeGrid'
-        
-        # NOTE: For timeGridThreeDay, we will handle the mapping in the template HTML
         
         logger.info(f"DEBUG SETTINGS: startTimeInterval={settings.get('startTimeInterval')}, endTimeInterval={settings.get('endTimeInterval')}")
         template_params = {
@@ -138,7 +140,6 @@ class Calendar(BasePlugin):
             start = current_dt.replace(hour=0, minute=0, second=0, microsecond=0)
             end = start + timedelta(days=2)
         elif view == "timeGridThreeDay":
-            # Start today, show 3 days
             end = start + timedelta(days=3)
         elif view == "timeGridDay":
             end = start + timedelta(days=1)
@@ -183,7 +184,7 @@ class Calendar(BasePlugin):
 
     def fetch_calendar(self, calendar_url):
         try:
-            response = requests.get(calendar_url)
+            response = requests.get(calendar_url, timeout=10)
             response.raise_for_status()
             return icalendar.Calendar.from_ical(response.text)
         except Exception as e:
