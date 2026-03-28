@@ -112,13 +112,42 @@
 - Verified end-to-end: local discovery -> webhook POST -> LaraPaper render -> Pi display update.
 - Home Assistant integration paths identified: HA automation can either POST directly to the webhook or invoke the local Sonos script.
 
-### 14. Future Work: Optional Google OAuth Companion
+### 14. Home Assistant Audit - COMPLETE (Read-Only)
+- Identified local HA config repo: `C:\Users\Dave\repos\homelab-ha\live-config`.
+- Identified HA host access paths: `home-assistant` / `ha-super` -> `192.168.1.89:2222`.
+- Confirmed strong existing HA building blocks for screen orchestration:
+  - Sonos media players across multiple rooms
+  - `person.david` / `person.jennifer` presence tracking
+  - substantial Jen commute package and Waze-based traffic summary logic
+  - extensive helper/script/automation patterns already in use
+- Conclusion: HA should act as the orchestration layer while LaraPaper remains the rendering layer and the Pi remains the display client.
+- Recommended next HA implementation path:
+  1. add a display-mode helper in HA
+  2. build Jen commute as the first HA-driven screen mode
+  3. add Sonos and alert override modes
+  4. use HA `rest_command` / `shell_command` patterns to drive LaraPaper
+
+### 15. Home Assistant Proof Automation - COMPLETE
+- Added `packages/trmnl_display_orchestration.yaml` to the HA config.
+- Created helper entities:
+  - `input_boolean.trmnl_display_automation_enabled`
+  - `input_select.trmnl_display_mode`
+- Added `rest_command.trmnl_sonos_push` for direct HA -> LaraPaper webhook posting.
+- Added automation `automation.trmnl_sonos_push_from_ha`.
+- Validation:
+  - package deployed to `/config/packages/`
+  - `ha core check` passed
+  - HA core restarted successfully
+  - logs confirmed the automation executed from the time-pattern trigger and called services successfully
+- This provides a concrete proof that HA can orchestrate TRMNL/LaraPaper directly, not just in theory.
+
+### 16. Future Work: Optional Google OAuth Companion
 - Added a future-work track for an optional local Google Calendar API companion service.
 - Rationale: Google ICS feeds do not expose useful per-event color/category metadata in the current live calendars.
 - Goal: enable richer Google-specific metadata such as per-event colors, descriptions, attendee status, and other native fields.
 - Important constraint: this would be an advanced optional local backend, not a replacement for the shareable ICS-based plugin path.
 
-### 15. Future Work: Render Crispness / Screenshot Quality
+### 17. Future Work: Render Crispness / Screenshot Quality
 - Added a future-work track to investigate render-side sharpness improvements, not just CSS/layout tweaks.
 - LaraPaper's rendering stack exposes scale-related hooks (`scale_factor`, Browsershot/device scale options) that may improve text crispness before panel quantization.
 - This should be evaluated carefully on the physical ACeP panel because sharper source screenshots may improve legibility more than additional design changes.
@@ -138,7 +167,7 @@
 - Conclusion: do not enable dithering globally; image-heavy/photo workflows likely need tuned preprocessing rather than naive dithering.
 - Next validation needed: repeat the same test with a real photograph, not just synthetic graphics.
 
-### 16. Known Issues
+### 18. Known Issues
 - **Bus departures:** Liquid template `timespan` variable not injected into polling URL. Workaround: hardcoded full URL.
 - **Home Assistant:** URL `raspberrypi.local` not resolvable from khpi5 container. Needs correct IP.
 - **World Clock:** No timezone/city data configured.

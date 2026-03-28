@@ -82,14 +82,28 @@
 - [ ] Add more live settings/runtime wiring for Sonos plugin options
 - [ ] Explore Home Assistant automation-driven webhook updates as an alternative integration path
 
-## Phase 10: Google OAuth Companion Service [PLANNED]
+## Phase 10: Home Assistant Orchestration Layer [PLANNED]
+- [x] Audit local HA config repo and host access paths (`homelab-ha/live-config`, `home-assistant`, `ha-super`)
+- [x] Confirm relevant HA domains/entities already exist: Sonos media players, presence, commute system, Waze-based traffic, notifications
+- [x] Add initial HA orchestration package with helpers and a proof automation
+- [ ] Introduce a HA-side display mode helper (for example `input_select.trmnl_display_mode`)
+- [ ] Define screen modes such as `calendar`, `jen_commute`, `dave_commute`, `sonos`, `alert`, `idle`
+- [ ] Define priority/override order for screen modes so alerts and live context can supersede background screens
+- [ ] Add HA `rest_command` pattern(s) for posting directly to LaraPaper custom plugin webhooks
+- [ ] Add HA `shell_command` / SSH pattern(s) for invoking scripts on `khpi5` where local Python logic is preferable
+- [ ] Build Jen commute plugin + HA automation path as the first HA-driven screen mode
+- [ ] Build HA-driven Sonos mode switching as the second orchestration path
+- [ ] Build alert override path as the third orchestration path
+- [ ] Add example HA automations for webhook payload pushes and playlist/mode switching
+
+## Phase 11: Google OAuth Companion Service [PLANNED]
 - [ ] Build an optional local Google Calendar API companion service for richer metadata than ICS provides
 - [ ] Support Google OAuth login flow, callback handling, refresh token storage, and token refresh
 - [ ] Fetch richer event metadata: per-event colors, descriptions, attendee status, calendar list, and native Google attributes
 - [ ] Keep the main multi-calendar recipe compatible with simple ICS feeds; use OAuth backend only as an advanced optional source
 - [ ] Define secure local token storage and backup strategy for homelab use
 
-## Phase 11: Optimization & Advanced Features [PLANNED]
+## Phase 12: Optimization & Advanced Features [PLANNED]
 - [ ] Tune refresh interval per-plugin (currently LaraPaper serves 120s; ACeP target is still 600s)
 - [ ] Add sleep mode scheduling
 - [ ] Explore custom ACeP-optimized recipes
@@ -101,6 +115,21 @@
 - [ ] Add a real-photo comparison workflow (plain vs dither vs mild saturation preprocess)
 - [ ] Investigate optional image preprocessing controls for image-heavy plugins (saturation, contrast, sharpness)
 - [ ] Add monitoring/alerting for display health
+
+## Home Assistant Audit Notes
+- Existing HA config already includes strong building blocks for orchestration:
+  - Sonos entities: `media_player.living_room`, `media_player.bedroom`, `media_player.kitchen`, `media_player.gym`, `media_player.sonos_roam`
+  - presence entities: `person.david`, `person.jennifer`
+  - commute package/history: `jen_commute_system.yaml`
+  - Waze commute signal: `sensor.waze`
+  - existing rich automation style using helpers, scripts, notifications, and mobile app actions
+- Best architecture is:
+  - HA = orchestration and decision layer
+  - LaraPaper = rendering layer
+  - Pi = display client
+- Preferred integration methods:
+  - HA `rest_command` -> LaraPaper plugin webhook for direct payload pushes
+  - HA `shell_command` / SSH -> script on `khpi5` when local Python logic is better
 
 ## Validation Gates
 - **Gate A: Data fetch** - run sync script manually, verify all configured ICS feeds fetch successfully and payload includes expected events and source metadata.
