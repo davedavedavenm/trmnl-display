@@ -92,6 +92,8 @@
 - [ ] Port InkyPi Python plugins as image_webhook plugins (if needed)
 - [ ] Build custom color recipes using ACeP palette
 - [ ] Evaluate bb_epaper dithering options for better color rendering
+- [ ] Add a real-photo comparison workflow (plain vs dither vs mild saturation preprocess)
+- [ ] Investigate optional image preprocessing controls for image-heavy plugins (saturation, contrast, sharpness)
 - [ ] Add monitoring/alerting for display health
 
 ## Validation Gates
