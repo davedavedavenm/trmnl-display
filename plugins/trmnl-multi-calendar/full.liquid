@@ -1,0 +1,78 @@
+<div class="layout layout--col h--full w--full" style="padding: 18px 20px 12px; background:#111111; color:#f5f1e8;">
+  {% assign active_days = calendar.size %}
+  {% assign total_visible_events = 0 %}
+  {% assign max_day_events = 0 %}
+  {% for day in calendar %}
+    {% assign total_visible_events = total_visible_events | plus: day.events.size %}
+    {% if day.events.size > max_day_events %}
+      {% assign max_day_events = day.events.size %}
+    {% endif %}
+  {% endfor %}
+
+  {% if active_days <= 1 and max_day_events <= 2 %}
+    {% assign density_mode = 'hero' %}
+  {% elsif active_days <= 2 and total_visible_events <= 4 %}
+    {% assign density_mode = 'spacious' %}
+  {% elsif active_days >= 5 or total_visible_events >= 8 or max_day_events >= 4 %}
+    {% assign density_mode = 'compact' %}
+  {% else %}
+    {% assign density_mode = 'balanced' %}
+  {% endif %}
+
+  <div style="display:grid; grid-template-columns: 1.3fr 0.7fr; gap:16px; align-items:end; border-bottom:2px solid #f0ebe2; padding-bottom:10px; margin-bottom:14px;">
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <div style="font-size:11px; line-height:1; letter-spacing:0.22em; text-transform:uppercase; color:#d8c9a2; font-weight:800;">Seven Day View</div>
+      <div style="font-size:34px; line-height:0.92; letter-spacing:-0.05em; font-weight:900; color:#fffdf8;">Upcoming</div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; align-items:end;">
+      <div style="font-size:11px; line-height:1.2; letter-spacing:0.12em; text-transform:uppercase; color:#d8c9a2; font-weight:800; text-align:right;">Updated {{ updated_at }}</div>
+    </div>
+  </div>
+
+  {% if density_mode == 'hero' %}
+    {% assign calendar_grid = '1fr' %}
+  {% elsif density_mode == 'compact' %}
+    {% assign calendar_grid = 'repeat(3, minmax(0, 1fr))' %}
+  {% else %}
+    {% assign calendar_grid = 'repeat(2, minmax(0, 1fr))' %}
+  {% endif %}
+
+  <div style="display:grid; grid-template-columns:{{ calendar_grid }}; gap:14px; align-content:start; flex:1;">
+    {% for day in calendar %}
+    <div style="display:grid; grid-template-columns:{% if density_mode == 'hero' %}110px{% elsif density_mode == 'compact' %}64px{% else %}78px{% endif %} minmax(0, 1fr); min-height:{% if density_mode == 'hero' %}176px{% elsif density_mode == 'compact' %}108px{% else %}126px{% endif %}; background:#1a1a1a; border:1px solid #3b352d; border-radius:18px; overflow:hidden; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);">
+      <div style="display:flex; flex-direction:column; justify-content:space-between; padding:{% if density_mode == 'hero' %}16px 14px 14px{% elsif density_mode == 'compact' %}10px 8px 8px{% else %}12px 10px 10px{% endif %}; background:#24211d; border-right:1px solid #3b352d;">
+        {% assign day_number = day.date | slice: 0, 2 %}
+        {% assign day_label = day.date | remove_first: day_number | strip %}
+        <div>
+          <div style="font-size:{% if density_mode == 'hero' %}50px{% elsif density_mode == 'compact' %}26px{% else %}33px{% endif %}; line-height:0.86; font-weight:900; letter-spacing:-0.06em; color:#fffdf8;">{{ day_number }}</div>
+          <div style="padding-top:2px; font-size:{% if density_mode == 'hero' %}12px{% elsif density_mode == 'compact' %}9px{% else %}10px{% endif %}; line-height:1.15; text-transform:uppercase; letter-spacing:0.08em; color:#d8c9a2; font-weight:800;">{{ day_label }}</div>
+        </div>
+        <div style="font-size:{% if density_mode == 'hero' %}11px{% elsif density_mode == 'compact' %}8px{% else %}9px{% endif %}; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#b7aa9a; font-weight:800;">{{ day.total_events | default: day.events.size }} item{% if day.total_events != 1 and day.events.size != 1 %}s{% endif %}</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; justify-content:center; gap:{% if density_mode == 'hero' %}14px{% elsif density_mode == 'compact' %}7px{% else %}10px{% endif %}; padding:{% if density_mode == 'hero' %}18px 20px{% elsif density_mode == 'compact' %}10px 10px{% else %}12px 14px{% endif %};">
+        {% for event in day.events %}
+        <div style="display:grid; grid-template-columns:{% if density_mode == 'hero' %}7px{% elsif density_mode == 'compact' %}4px{% else %}5px{% endif %} minmax(0, 1fr); gap:{% if density_mode == 'hero' %}14px{% elsif density_mode == 'compact' %}8px{% else %}10px{% endif %}; align-items:start;">
+          <div style="width:{% if density_mode == 'hero' %}7px{% elsif density_mode == 'compact' %}4px{% else %}5px{% endif %}; min-height:{% if density_mode == 'hero' %}70px{% elsif density_mode == 'compact' %}34px{% else %}48px{% endif %}; border-radius:99px; background:{{ event.source_color | default: 'black' }};"></div>
+          <div style="display:flex; flex-direction:column; gap:3px; min-width:0;">
+            <div style="font-size:{% if density_mode == 'hero' %}29px{% elsif density_mode == 'compact' %}15px{% else %}19px{% endif %}; line-height:0.94; font-weight:900; letter-spacing:-0.04em; color:#fffdf8;">{{ event.summary }}</div>
+            {% if event.start %}
+            <div style="font-size:{% if density_mode == 'hero' %}14px{% elsif density_mode == 'compact' %}9px{% else %}11px{% endif %}; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#d8c9a2; font-weight:800;">{{ event.start }} - {{ event.end }}</div>
+            {% endif %}
+            {% if show_source_labels == true or show_source_labels == 'true' %}
+            <div style="display:flex; align-items:center; gap:6px; padding-top:2px;">
+              <span style="display:inline-block; width:{% if density_mode == 'hero' %}10px{% elsif density_mode == 'compact' %}6px{% else %}8px{% endif %}; height:{% if density_mode == 'hero' %}10px{% elsif density_mode == 'compact' %}6px{% else %}8px{% endif %}; border-radius:99px; background:{{ event.source_color | default: 'black' }};"></span>
+              <span style="font-size:{% if density_mode == 'hero' %}12px{% elsif density_mode == 'compact' %}9px{% else %}10px{% endif %}; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#ece5da; font-weight:900;">{{ event.source_label }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+        {% if day.hidden_events and day.hidden_events > 0 %}
+        <div style="padding-top:2px; font-size:{% if density_mode == 'compact' %}9px{% else %}11px{% endif %}; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#d8c9a2; font-weight:900;">+{{ day.hidden_events }} more</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

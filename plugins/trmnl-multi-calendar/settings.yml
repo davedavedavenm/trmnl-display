@@ -1,0 +1,291 @@
+name: Multi-Calendar
+no_screen_padding: 'no'
+dark_mode: 'no'
+strategy: webhook
+refresh_interval: 5
+id: inkypi-multi-calendar
+custom_fields:
+  - keyname: layout_style
+    name: Layout Style
+    field_type: select
+    default: editorial
+    options:
+      - Editorial: editorial
+      - Compact Agenda: compact
+      - Cards: cards
+    description: Choose how events are arranged on screen.
+
+  - keyname: days_ahead
+    name: Days Ahead
+    field_type: select
+    default: 7
+    options:
+      - 3 days: 3
+      - 7 days: 7
+      - 14 days: 14
+    description: How far ahead to include events.
+
+  - keyname: time_format
+    name: Time Format
+    field_type: select
+    default: 24h
+    options:
+      - 24 hours: 24h
+      - AM/PM: 12h
+
+  - keyname: date_format
+    name: Date Format
+    field_type: select
+    default: '%d %b (%a)'
+    options:
+      - 28 Mar (Sat): '%d %b (%a)'
+      - Sat, Mar 28: '%a, %b %d'
+      - March 28: '%B %d'
+      - 28 March: '%d %B'
+
+  - keyname: timezone_override
+    name: Time Zone Override
+    field_type: time_zone
+    optional: true
+    description: Optional timezone override for event rendering.
+
+  - keyname: show_source_labels
+    name: Show Calendar Labels
+    field_type: boolean
+    default: true
+    optional: true
+
+  - keyname: show_all_day_events
+    name: Show All-Day Events
+    field_type: boolean
+    default: true
+    optional: true
+
+  - keyname: hide_empty_days
+    name: Hide Empty Days
+    field_type: boolean
+    default: true
+    optional: true
+
+  - keyname: highlight_today
+    name: Highlight Today
+    field_type: boolean
+    default: true
+    optional: true
+
+  - keyname: max_events_per_day
+    name: Max Events Per Day
+    field_type: number
+    default: 6
+    optional: true
+
+  - keyname: number_columns
+    name: Column Count
+    field_type: number
+    default: 4
+    optional: true
+
+  - keyname: setup_notes
+    name: Setup Notes
+    field_type: text
+    optional: true
+    default: "Configure up to six ICS feeds in the companion sync script env file. See README for Google, Apple, Outlook, and CalDAV setup instructions."
+
+  - keyname: calendar_1_enabled
+    name: Calendar 1 Enabled
+    field_type: boolean
+    default: true
+  - keyname: calendar_1_label
+    name: Calendar 1 Label
+    field_type: string
+    default: Calendar 1
+  - keyname: calendar_1_color
+    name: Calendar 1 Color
+    field_type: select
+    default: blue
+    options:
+      - Blue: blue
+      - Red: red
+      - Green: green
+      - Yellow: yellow
+      - Orange: orange
+      - Black: black
+  - keyname: calendar_1_color_custom
+    name: Calendar 1 Custom Color
+    field_type: string
+    optional: true
+    description: Optional CSS color or hex override.
+  - keyname: calendar_1_ics_url
+    name: Calendar 1 ICS URL
+    field_type: url
+    optional: true
+  - keyname: calendar_1_headers
+    name: Calendar 1 Headers
+    field_type: string
+    optional: true
+    description: Optional HTTP headers in key=value&key2=value2 format.
+
+  - keyname: calendar_2_enabled
+    name: Calendar 2 Enabled
+    field_type: boolean
+    default: true
+  - keyname: calendar_2_label
+    name: Calendar 2 Label
+    field_type: string
+    default: Calendar 2
+  - keyname: calendar_2_color
+    name: Calendar 2 Color
+    field_type: select
+    default: red
+    options:
+      - Blue: blue
+      - Red: red
+      - Green: green
+      - Yellow: yellow
+      - Orange: orange
+      - Black: black
+  - keyname: calendar_2_color_custom
+    name: Calendar 2 Custom Color
+    field_type: string
+    optional: true
+  - keyname: calendar_2_ics_url
+    name: Calendar 2 ICS URL
+    field_type: url
+    optional: true
+  - keyname: calendar_2_headers
+    name: Calendar 2 Headers
+    field_type: string
+    optional: true
+    description: Optional HTTP headers in key=value&key2=value2 format.
+
+  - keyname: calendar_3_enabled
+    name: Calendar 3 Enabled
+    field_type: boolean
+    default: false
+  - keyname: calendar_3_label
+    name: Calendar 3 Label
+    field_type: string
+    default: Calendar 3
+  - keyname: calendar_3_color
+    name: Calendar 3 Color
+    field_type: select
+    default: green
+    options:
+      - Blue: blue
+      - Red: red
+      - Green: green
+      - Yellow: yellow
+      - Orange: orange
+      - Black: black
+  - keyname: calendar_3_color_custom
+    name: Calendar 3 Custom Color
+    field_type: string
+    optional: true
+  - keyname: calendar_3_ics_url
+    name: Calendar 3 ICS URL
+    field_type: url
+    optional: true
+  - keyname: calendar_3_headers
+    name: Calendar 3 Headers
+    field_type: string
+    optional: true
+    description: Optional HTTP headers in key=value&key2=value2 format.
+
+  - keyname: calendar_4_enabled
+    name: Calendar 4 Enabled
+    field_type: boolean
+    default: false
+  - keyname: calendar_4_label
+    name: Calendar 4 Label
+    field_type: string
+    default: Calendar 4
+  - keyname: calendar_4_color
+    name: Calendar 4 Color
+    field_type: select
+    default: yellow
+    options:
+      - Blue: blue
+      - Red: red
+      - Green: green
+      - Yellow: yellow
+      - Orange: orange
+      - Black: black
+  - keyname: calendar_4_color_custom
+    name: Calendar 4 Custom Color
+    field_type: string
+    optional: true
+  - keyname: calendar_4_ics_url
+    name: Calendar 4 ICS URL
+    field_type: url
+    optional: true
+  - keyname: calendar_4_headers
+    name: Calendar 4 Headers
+    field_type: string
+    optional: true
+    description: Optional HTTP headers in key=value&key2=value2 format.
+
+  - keyname: calendar_5_enabled
+    name: Calendar 5 Enabled
+    field_type: boolean
+    default: false
+  - keyname: calendar_5_label
+    name: Calendar 5 Label
+    field_type: string
+    default: Calendar 5
+  - keyname: calendar_5_color
+    name: Calendar 5 Color
+    field_type: select
+    default: orange
+    options:
+      - Blue: blue
+      - Red: red
+      - Green: green
+      - Yellow: yellow
+      - Orange: orange
+      - Black: black
+  - keyname: calendar_5_color_custom
+    name: Calendar 5 Custom Color
+    field_type: string
+    optional: true
+  - keyname: calendar_5_ics_url
+    name: Calendar 5 ICS URL
+    field_type: url
+    optional: true
+  - keyname: calendar_5_headers
+    name: Calendar 5 Headers
+    field_type: string
+    optional: true
+    description: Optional HTTP headers in key=value&key2=value2 format.
+
+  - keyname: calendar_6_enabled
+    name: Calendar 6 Enabled
+    field_type: boolean
+    default: false
+  - keyname: calendar_6_label
+    name: Calendar 6 Label
+    field_type: string
+    default: Calendar 6
+  - keyname: calendar_6_color
+    name: Calendar 6 Color
+    field_type: select
+    default: black
+    options:
+      - Blue: blue
+      - Red: red
+      - Green: green
+      - Yellow: yellow
+      - Orange: orange
+      - Black: black
+  - keyname: calendar_6_color_custom
+    name: Calendar 6 Custom Color
+    field_type: string
+    optional: true
+  - keyname: calendar_6_ics_url
+    name: Calendar 6 ICS URL
+    field_type: url
+    optional: true
+  - keyname: calendar_6_headers
+    name: Calendar 6 Headers
+    field_type: string
+    optional: true
+    description: Optional HTTP headers in key=value&key2=value2 format.

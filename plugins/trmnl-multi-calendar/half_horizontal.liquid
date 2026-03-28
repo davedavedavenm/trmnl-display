@@ -1,0 +1,39 @@
+{% assign active_days = calendar.size %}
+
+<div class="layout layout--col h--full w--full" style="padding: 12px 14px 10px; background:#111111; color:#f5f1e8;">
+  <div style="display:flex; justify-content:space-between; align-items:end; border-bottom:2px solid #f0ebe2; padding-bottom:6px; margin-bottom:8px;">
+    <div style="font-size:22px; line-height:0.95; letter-spacing:-0.04em; font-weight:900; color:#fffdf8;">Upcoming</div>
+    <div style="font-size:9px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#d8c9a2; font-weight:800;">{{ active_days }} days</div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; flex:1; align-content:start;">
+    {% for day in calendar limit:2 %}
+    <div style="display:grid; grid-template-columns:58px minmax(0, 1fr); background:#1a1a1a; border:1px solid #3b352d; border-radius:14px; overflow:hidden; min-height:96px;">
+      <div style="padding:10px 8px; background:#24211d; border-right:1px solid #3b352d; display:flex; flex-direction:column; justify-content:space-between;">
+        {% assign day_number = day.date | slice: 0, 2 %}
+        {% assign day_label = day.date | remove_first: day_number | strip %}
+        <div>
+          <div style="font-size:24px; line-height:0.86; font-weight:900; letter-spacing:-0.05em; color:#fffdf8;">{{ day_number }}</div>
+          <div style="font-size:8px; line-height:1.1; text-transform:uppercase; letter-spacing:0.08em; color:#d8c9a2; font-weight:800;">{{ day_label }}</div>
+        </div>
+      </div>
+      <div style="padding:10px 10px; display:flex; flex-direction:column; justify-content:center; gap:6px;">
+        {% for event in day.events limit:2 %}
+        <div style="display:grid; grid-template-columns:4px minmax(0, 1fr); gap:7px; align-items:start;">
+          <div style="width:4px; min-height:28px; border-radius:99px; background:{{ event.source_color | default: 'black' }};"></div>
+          <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+            <div style="font-size:13px; line-height:0.96; font-weight:900; letter-spacing:-0.03em; color:#fffdf8;">{{ event.summary }}</div>
+            {% if event.start %}
+            <div style="font-size:8px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#d8c9a2; font-weight:800;">{{ event.start }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+        {% if day.hidden_events and day.hidden_events > 0 %}
+        <div style="font-size:8px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#d8c9a2; font-weight:900;">+{{ day.hidden_events }} more</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

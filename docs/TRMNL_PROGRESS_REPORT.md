@@ -67,12 +67,60 @@
 - UK Bus Departures TransportAPI (recipe) - polling URL hardcoded to fix Liquid template bug
 - Uptime Kuma Statuspage (recipe)
 
-### 10. Known Issues
+### 10. Multi-Calendar Plugin - IN PROGRESS
+- Built a working webhook-driven multi-calendar proof of concept using `scripts/trmnl_calendar_multi.py`.
+- Current implementation merges multiple Google ICS feeds locally on khpi5 and POSTs the result to LaraPaper.
+- Current recipe package lives in `plugins/trmnl-multi-calendar/` and is import/export compatible in structure.
+- Source labels and source colors are already present in payload and render path.
+- Expanded the recipe schema to support up to 6 calendar feeds, per-calendar labels, per-calendar colors, optional custom colors, and optional HTTP headers.
+- Added provider setup guidance for Google, Apple/iCloud, Outlook, and generic CalDAV/ICS.
+- Added split-screen support with dedicated `half_horizontal.liquid` and `quadrant.liquid` templates for mashups.
+- Migrated the live khpi5 runtime to the new 6-calendar env format and added a third live calendar feed.
+- Added event-level color resolution logic: native event color -> category mapping -> calendar color fallback.
+- Added an explicit dark-mode, high-contrast treatment to improve physical ACeP readability.
+- Baseline verified: events are fetched, merged, posted, rendered, and shown on the physical display.
+- Live khpi5 deployment has now been migrated to the new 6-calendar-ready env format and revalidated end to end.
+- Current gap: the layout still needs a stronger design pass.
+
+### 11. Official Calendar Feature Audit - COMPLETE
+- Audited official TRMNL **Google Calendar** integration page.
+- Audited official TRMNL **CalDAV** integration page.
+- Extracted common feature surface to guide the custom plugin roadmap:
+  - multiple layouts (`Agenda`, `Default`, `Week`, `Rolling Week`, `Work Week`, `Month`, `Rolling Month`)
+  - `12h/24h`, multiple date formats, timezone override
+  - include descriptions, include event times, include past events
+  - fixed week, week start day, fixed start/end time
+  - ignored phrases, event status filter, highlight today
+  - week numbers, current time indicator, vertical alignment
+  - CalDAV-specific ideas: multiple ICS URLs, optional HTTP headers
+
+### 12. Provider Compatibility Notes - COMPLETE
+- **Google Calendar:** use `Settings -> Integrate calendar -> Secret address in iCal format`.
+- **Apple/iCloud:** use `Public Calendar` sharing and copy the generated link.
+- **Outlook.com / Outlook on the web:** subscribe via ICS/web URL; updates may lag significantly.
+- **Generic CalDAV/ICS:** official TRMNL CalDAV plugin accepts published ICS endpoints and optional HTTP headers.
+- **Google CalDAV:** not a realistic current path for this project; Google Calendar is better accessed via ICS (simple) or Google Calendar API via OAuth (richer, more complex).
+
+### 13. Future Work: Optional Google OAuth Companion
+- Added a future-work track for an optional local Google Calendar API companion service.
+- Rationale: Google ICS feeds do not expose useful per-event color/category metadata in the current live calendars.
+- Goal: enable richer Google-specific metadata such as per-event colors, descriptions, attendee status, and other native fields.
+- Important constraint: this would be an advanced optional local backend, not a replacement for the shareable ICS-based plugin path.
+
+### 14. Future Work: Render Crispness / Screenshot Quality
+- Added a future-work track to investigate render-side sharpness improvements, not just CSS/layout tweaks.
+- LaraPaper's rendering stack exposes scale-related hooks (`scale_factor`, Browsershot/device scale options) that may improve text crispness before panel quantization.
+- This should be evaluated carefully on the physical ACeP panel because sharper source screenshots may improve legibility more than additional design changes.
+
+### 15. Known Issues
 - **Bus departures:** Liquid template `timespan` variable not injected into polling URL. Workaround: hardcoded full URL.
 - **Home Assistant:** URL `raspberrypi.local` not resolvable from khpi5 container. Needs correct IP.
 - **World Clock:** No timezone/city data configured.
 - **Duplicate device bug:** LaraPaper auto-assign creates ghost devices when `assign_new_devices=1` and Go client sends empty `ID` header. Fix: disabled auto-assign, set correct config.
 - **Force refresh:** No UI button. Must run `ssh inky-pi 'sudo systemctl restart trmnl-display'`.
+- **Calendar UX:** current multi-calendar layout works but needs a proper polished design pass and richer configuration options.
+- **Calendar settings:** recipe schema is now much richer, but live runtime wiring of all settings into the sync script/UI has not yet been completed.
+- **Calendar crispness:** render-side sharpness tuning has not yet been tested; current improvements are mostly contrast and styling based.
 
 ## Architecture
 
@@ -120,9 +168,21 @@
 | Web UI | `http://192.168.1.143:4567` |
 
 ## Next Planned Steps
-1. Set up LaraPaper auto-update via watchtower or cron on khpi5.
-2. Clean up old BYOS server from Pi Zero.
-3. Fix Home Assistant URL for khpi5 container resolution.
-4. Configure World Clock timezones.
-5. Explore and install more color-capable recipes.
-6. Consider custom recipe development for ACeP 7-color palette.
+1. Migrate the live khpi5 calendar sync to the new 6-calendar-ready env format.
+2. Validate the new script end to end on the physical screen.
+3. Continue productizing the calendar plugin settings so runtime behavior matches the shareable schema.
+4. Redesign the multi-calendar layout with e-ink-first polish while preserving the working data path.
+5. Build a local Sonos plugin using LAN APIs instead of TRMNL cloud OAuth.
+6. Continue stage-by-stage E2E validation after each change (fetch -> render -> device pull -> physical screen).
+
+## Validation Baseline (Current)
+- **Data fetch:** `python main.py` on khpi5 successfully fetched both configured ICS feeds and posted to LaraPaper.
+- **Server render:** `/api/display` returned a fresh generated image URL for the device.
+- **Client service:** `trmnl-display.service` on inky-pi is active and polling LaraPaper successfully.
+- **Physical display:** calendar data is visible on screen, confirming the end-to-end pipeline works at baseline.
+
+## Validation Stage: 6-Calendar Runtime Migration
+- **Stage 1:** migrated live env from legacy `TRMNL_ICS_*` variables to `TRMNL_CAL1_* ... TRMNL_CAL6_*` format.
+- **Stage 2:** manual sync execution on khpi5 fetched both live calendars successfully and returned HTTP 200 from the webhook endpoint.
+- **Stage 3:** `/api/display` returned a fresh generated image (`670c3848-be8f-4383-9fa5-7e5fdb1bdac3.png`) after the migration.
+- **Stage 4:** `trmnl-display.service` restarted cleanly and invoked `show_img` on the Pi, confirming device pull + physical render path still works.
