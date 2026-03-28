@@ -56,6 +56,7 @@
 - [x] Add recipe-level options: timezone override, week start day, highlight today
 - [x] Add import/export-safe `settings.yml` compatible with LaraPaper/TRMNL ZIP format
 - [x] Validate schema/script migration end-to-end on the physical display
+- [x] Wire initial live runtime support for key settings (`theme`, `days_ahead`, `show_source_labels`, `max_events_per_day`)
 - [ ] Continue validating every subsequent stage end-to-end before moving on
 
 ## Phase 8: Calendar UX & Visual Design [PLANNED]

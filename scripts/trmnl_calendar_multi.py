@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 import datetime
 import locale
 import os
+import json
+import subprocess
 from typing import Dict, List
 
 import icalendar
@@ -53,6 +55,8 @@ TRMNL_HIDE_EMPTY_DAYS = env_bool("TRMNL_HIDE_EMPTY_DAYS", True)
 TRMNL_MAX_EVENTS_PER_DAY = env_int("TRMNL_MAX_EVENTS_PER_DAY", 6)
 TRMNL_TIME_FORMAT_MODE = os.getenv("TRMNL_TIME_MODE", "24h").strip().lower() or "24h"
 TRMNL_THEME = os.getenv("TRMNL_THEME", "dark").strip().lower() or "dark"
+TRMNL_PLUGIN_ID = os.getenv("TRMNL_PLUGIN_ID", "16").strip()
+TRMNL_LARAPAPER_CONTAINER = os.getenv("TRMNL_LARAPAPER_CONTAINER", "larapaper-app-1").strip() or "larapaper-app-1"
 
 if TRMNL_LOCALE:
     locale.setlocale(locale.LC_ALL, TRMNL_LOCALE)
@@ -71,6 +75,54 @@ def normalize_dt(value):
     if isinstance(value, datetime.date):
         return value
     return None
+
+
+def config_bool(value, default: bool) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def config_int(value, default: int) -> int:
+    if value in (None, ""):
+        return default
+    try:
+        return int(str(value).strip())
+    except ValueError:
+        return default
+
+
+def load_plugin_config() -> Dict[str, object]:
+    if not TRMNL_PLUGIN_ID:
+        return {}
+
+    php = (
+        "require '/var/www/html/vendor/autoload.php';"
+        "$app = require '/var/www/html/bootstrap/app.php';"
+        "$app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();"
+        f"$cfg = DB::table('plugins')->where('id', {TRMNL_PLUGIN_ID})->value('configuration');"
+        "echo $cfg ?: '{}';"
+    )
+
+    try:
+        result = subprocess.run(
+            ["docker", "exec", TRMNL_LARAPAPER_CONTAINER, "php", "-r", php],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=True,
+        )
+        text = (result.stdout or "").strip()
+        if not text:
+            return {}
+        data = json.loads(text)
+        return data if isinstance(data, dict) else {}
+    except Exception as exc:
+        if DEBUG:
+            print(f"Plugin config load failed: {exc}")
+        return {}
 
 
 def normalize_color(value: str, fallback: str) -> str:
@@ -130,15 +182,16 @@ def event_color_for(event, source_color: str) -> str:
 
 
 def build_calendar_sources() -> List[Dict[str, object]]:
+    plugin_config = load_plugin_config()
     sources: List[Dict[str, object]] = []
 
     for idx in range(1, 7):
-        enabled = env_bool(f"TRMNL_CAL{idx}_ENABLED", False)
-        url = os.getenv(f"TRMNL_CAL{idx}_URL", "").strip()
-        label = os.getenv(f"TRMNL_CAL{idx}_LABEL", f"Calendar {idx}").strip() or f"Calendar {idx}"
-        color = os.getenv(f"TRMNL_CAL{idx}_COLOR", PALETTE[(idx - 1) % len(PALETTE)]).strip().lower()
-        custom_color = os.getenv(f"TRMNL_CAL{idx}_COLOR_CUSTOM", "").strip()
-        headers_raw = os.getenv(f"TRMNL_CAL{idx}_HEADERS", "").strip()
+        enabled = config_bool(plugin_config.get(f"calendar_{idx}_enabled"), env_bool(f"TRMNL_CAL{idx}_ENABLED", False))
+        url = str(plugin_config.get(f"calendar_{idx}_ics_url") or os.getenv(f"TRMNL_CAL{idx}_URL", "")).strip()
+        label = str(plugin_config.get(f"calendar_{idx}_label") or os.getenv(f"TRMNL_CAL{idx}_LABEL", f"Calendar {idx}")).strip() or f"Calendar {idx}"
+        color = str(plugin_config.get(f"calendar_{idx}_color") or os.getenv(f"TRMNL_CAL{idx}_COLOR", PALETTE[(idx - 1) % len(PALETTE)])).strip().lower()
+        custom_color = str(plugin_config.get(f"calendar_{idx}_color_custom") or os.getenv(f"TRMNL_CAL{idx}_COLOR_CUSTOM", "")).strip()
+        headers_raw = str(plugin_config.get(f"calendar_{idx}_headers") or os.getenv(f"TRMNL_CAL{idx}_HEADERS", "")).strip()
 
         if not enabled or not url:
             continue
@@ -286,12 +339,41 @@ def flatten_events(days: List[Dict[str, object]]) -> List[Dict[str, object]]:
 
 
 def main() -> None:
+    global START_DATE, NOW
+    global TRMNL_DATE_FORMAT, TRMNL_SHOW_ALL_DAY, TRMNL_HIDE_EMPTY_DAYS, TRMNL_MAX_EVENTS_PER_DAY, TRMNL_NUMBER_COLUMNS, TRMNL_TIME_FORMAT_MODE, TRMNL_THEME
+    global TRMNL_DAYS, TRMNL_TZ
+
+    plugin_config = load_plugin_config()
     if not TRMNL_WEBHOOK_URL:
         raise RuntimeError("TRMNL_WEBHOOK_URL is required")
 
     sources = build_calendar_sources()
     if not sources:
         raise RuntimeError("No enabled calendar sources configured")
+
+    days_ahead = config_int(plugin_config.get("days_ahead"), TRMNL_DAYS)
+    time_mode = str(plugin_config.get("time_format") or TRMNL_TIME_FORMAT_MODE).strip().lower() or TRMNL_TIME_FORMAT_MODE
+    date_format = str(plugin_config.get("date_format") or TRMNL_DATE_FORMAT)
+    timezone_override = str(plugin_config.get("timezone_override") or TRMNL_TZ).strip() or TRMNL_TZ
+    show_source_labels = config_bool(plugin_config.get("show_source_labels"), TRMNL_SHOW_SOURCE_LABELS)
+    show_all_day = config_bool(plugin_config.get("show_all_day_events"), TRMNL_SHOW_ALL_DAY)
+    hide_empty_days = config_bool(plugin_config.get("hide_empty_days"), TRMNL_HIDE_EMPTY_DAYS)
+    max_events_per_day = config_int(plugin_config.get("max_events_per_day"), TRMNL_MAX_EVENTS_PER_DAY)
+    number_columns = config_int(plugin_config.get("number_columns"), TRMNL_NUMBER_COLUMNS)
+    theme = str(plugin_config.get("theme") or TRMNL_THEME).strip().lower() or TRMNL_THEME
+
+    NOW = datetime.datetime.now(pytz.timezone(timezone_override))
+    START_DATE = NOW.date()
+
+    TRMNL_DATE_FORMAT = date_format
+    TRMNL_SHOW_ALL_DAY = show_all_day
+    TRMNL_HIDE_EMPTY_DAYS = hide_empty_days
+    TRMNL_MAX_EVENTS_PER_DAY = max_events_per_day
+    TRMNL_NUMBER_COLUMNS = number_columns
+    TRMNL_TIME_FORMAT_MODE = time_mode
+    TRMNL_THEME = theme
+    TRMNL_DAYS = days_ahead
+    TRMNL_TZ = timezone_override
 
     merged_days = merge_days([fetch_source(source) for source in sources])
     flat_events = flatten_events(merged_days)
@@ -301,13 +383,13 @@ def main() -> None:
             "updated_at": NOW.strftime(TRMNL_UPDATED_AT_FORMAT),
             "title": TRMNL_TITLE,
             "calendar": merged_days,
-            "columns": TRMNL_NUMBER_COLUMNS,
-            "show_source_labels": TRMNL_SHOW_SOURCE_LABELS,
+            "columns": number_columns,
+            "show_source_labels": show_source_labels,
             "events": flat_events,
-            "time_format": TRMNL_TIME_FORMAT_MODE,
+            "time_format": time_mode,
             "today_in_tz": NOW.isoformat(),
             "source_count": len(sources),
-            "theme": TRMNL_THEME,
+            "theme": theme,
         }
     }
 

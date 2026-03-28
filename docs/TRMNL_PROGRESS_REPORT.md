@@ -78,9 +78,10 @@
 - Migrated the live khpi5 runtime to the new 6-calendar env format and added a third live calendar feed.
 - Added event-level color resolution logic: native event color -> category mapping -> calendar color fallback.
 - Added an explicit dark-mode, high-contrast treatment to improve physical ACeP readability.
+- Wired live LaraPaper custom settings into the runtime script for key behaviors (`theme`, `days_ahead`, `show_source_labels`, `max_events_per_day`).
 - Baseline verified: events are fetched, merged, posted, rendered, and shown on the physical display.
 - Live khpi5 deployment has now been migrated to the new 6-calendar-ready env format and revalidated end to end.
-- Current gap: the layout still needs a stronger design pass.
+- Current gap: the layout still needs a stronger final design pass.
 
 ### 11. Official Calendar Feature Audit - COMPLETE
 - Audited official TRMNL **Google Calendar** integration page.
@@ -134,7 +135,7 @@
 - **Duplicate device bug:** LaraPaper auto-assign creates ghost devices when `assign_new_devices=1` and Go client sends empty `ID` header. Fix: disabled auto-assign, set correct config.
 - **Force refresh:** No UI button. Must run `ssh inky-pi 'sudo systemctl restart trmnl-display'`.
 - **Calendar UX:** current multi-calendar layout works but needs a proper polished design pass and richer configuration options.
-- **Calendar settings:** recipe schema is now much richer, but live runtime wiring of all settings into the sync script/UI has not yet been completed.
+- **Calendar settings:** key settings are now wired through, but not every field from the schema is implemented in the runtime yet.
 - **Calendar crispness:** render-side sharpness tuning has not yet been tested; current improvements are mostly contrast and styling based.
 - **Photo quality:** LaraPaper color rendering is improved by careful preprocessing, but a true real-photo comparison against old InkyPi behavior is still outstanding.
 
