@@ -72,10 +72,15 @@
 - [ ] Test render-side sharpness improvements via LaraPaper/device scale settings
 
 ## Phase 9: Local Sonos Integration [PLANNED]
-- [ ] Build a local Sonos webhook plugin using Sonos LAN APIs / `soco`
-- [ ] Support room name, artist, track, album, play state, volume, album art
-- [ ] Avoid TRMNL cloud OAuth dependency entirely
-- [ ] Make Sonos plugin exportable/shareable as a recipe package
+- [x] Build a local Sonos webhook plugin using Sonos LAN APIs / `soco`
+- [x] Support room name, artist, track, album, play state, album art
+- [x] Avoid TRMNL cloud OAuth dependency entirely
+- [x] Make Sonos plugin exportable/shareable as a recipe package
+- [x] Add queue preview (`Up Next`)
+- [x] Add grouped-room / multi-room awareness
+- [x] Add automatic scheduled refresh for the local Sonos script on khpi5
+- [ ] Add more live settings/runtime wiring for Sonos plugin options
+- [ ] Explore Home Assistant automation-driven webhook updates as an alternative integration path
 
 ## Phase 10: Google OAuth Companion Service [PLANNED]
 - [ ] Build an optional local Google Calendar API companion service for richer metadata than ICS provides
