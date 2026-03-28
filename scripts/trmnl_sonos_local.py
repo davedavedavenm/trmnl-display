@@ -1,0 +1,128 @@
+from dotenv import load_dotenv
+import datetime
+import os
+import requests
+import soco
+
+load_dotenv()
+WEBHOOK_URL = os.getenv("TRMNL_WEBHOOK_URL", "").strip()
+PREFERRED_ROOM = os.getenv("TRMNL_SONOS_ROOM", "").strip()
+UPDATED_AT_FORMAT = os.getenv("TRMNL_UPDATED_AT_FORMAT", "%d %b %H:%M")
+
+def build_groups(speakers):
+    groups = {}
+    for sp in speakers:
+        coord = sp.group.coordinator
+        key = coord.uid
+        groups.setdefault(key, {"coordinator": coord, "members": []})
+        groups[key]["members"].append(sp.player_name)
+    return list(groups.values())
+
+
+def pick_group(groups):
+    if PREFERRED_ROOM:
+        for group in groups:
+            members = [name.lower() for name in group["members"]]
+            if PREFERRED_ROOM.lower() in members or group["coordinator"].player_name.lower() == PREFERRED_ROOM.lower():
+                return group
+
+    active, fallback = [], []
+    for group in groups:
+        coord = group["coordinator"]
+        info = coord.get_current_transport_info()
+        track = coord.get_current_track_info()
+        state = info.get("current_transport_state", "")
+        if state == "PLAYING":
+            active.append(group)
+        elif track.get("title"):
+            fallback.append(group)
+
+    if active:
+        return active[0]
+    if fallback:
+        return fallback[0]
+    return groups[0] if groups else None
+
+def main():
+    if not WEBHOOK_URL:
+        raise RuntimeError("TRMNL_WEBHOOK_URL is required")
+    speakers = soco.discover(timeout=5) or []
+    groups = build_groups(list(speakers))
+    selected_group = pick_group(groups)
+    if selected_group is None:
+        raise RuntimeError("No Sonos speakers discovered")
+    speaker = selected_group["coordinator"]
+    transport = speaker.get_current_transport_info()
+    track = speaker.get_current_track_info()
+    state = transport.get("current_transport_state", "UNKNOWN")
+    queue_preview = []
+    try:
+        queue = list(speaker.get_queue(start=0, max_items=8))
+        current_pos = int(track.get("playlist_position") or 1) - 1
+        if current_pos < 0:
+            current_pos = 0
+        for item in queue[current_pos + 1:current_pos + 4]:
+            queue_preview.append(
+                {
+                    "title": getattr(item, "title", "") or "Unknown Track",
+                    "artist": getattr(item, "creator", "") or "",
+                    "album": getattr(item, "album", "") or "",
+                }
+            )
+    except Exception:
+        queue_preview = []
+
+    active_groups = []
+    for group in groups:
+        coord = group["coordinator"]
+        info = coord.get_current_transport_info()
+        now_track = coord.get_current_track_info()
+        if info.get("current_transport_state") == "PLAYING":
+            active_groups.append(
+                {
+                    "room_name": coord.player_name,
+                    "members": group["members"],
+                    "title": now_track.get("title") or "",
+                    "artist": now_track.get("artist") or "",
+                    "uri": now_track.get("uri") or "",
+                }
+            )
+
+    same_content_rooms = []
+    selected_uri = track.get("uri") or ""
+    for group in active_groups:
+        if group["room_name"] == speaker.player_name:
+            continue
+        if selected_uri and group["uri"] == selected_uri:
+            same_content_rooms.extend(group["members"])
+
+    other_active_rooms = []
+    for group in active_groups:
+        if group["room_name"] == speaker.player_name:
+            continue
+        other_active_rooms.extend(group["members"])
+
+    payload = {
+        "merge_variables": {
+            "updated_at": datetime.datetime.now().strftime(UPDATED_AT_FORMAT),
+            "room_name": speaker.player_name,
+            "group_rooms": selected_group["members"],
+            "group_size": len(selected_group["members"]),
+            "state": state.replace("_", " "),
+            "title": track.get("title") or "Nothing Playing",
+            "artist": track.get("artist") or "Unknown Artist",
+            "album": track.get("album") or "",
+            "album_art_url": track.get("album_art") or "",
+            "source": track.get("uri", "").split(":", 1)[0] if track.get("uri") else "",
+            "multiple_active": len(active_groups) > 1,
+            "other_active_rooms": other_active_rooms,
+            "same_content_rooms": same_content_rooms,
+            "next_tracks": queue_preview,
+        }
+    }
+    response = requests.post(WEBHOOK_URL, json=payload, timeout=20)
+    if response.status_code != 200:
+        raise RuntimeError(f"Webhook failed: {response.status_code} {response.text}")
+
+if __name__ == "__main__":
+    main()

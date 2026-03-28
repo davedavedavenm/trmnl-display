@@ -102,13 +102,23 @@
 - **Generic CalDAV/ICS:** official TRMNL CalDAV plugin accepts published ICS endpoints and optional HTTP headers.
 - **Google CalDAV:** not a realistic current path for this project; Google Calendar is better accessed via ICS (simple) or Google Calendar API via OAuth (richer, more complex).
 
-### 13. Future Work: Optional Google OAuth Companion
+### 13. Local Sonos Plugin - IN PROGRESS
+- Built a local Sonos now-playing proof of concept using `soco` on `khpi5`.
+- Sonos discovery works locally without TRMNL cloud OAuth.
+- Current implementation detects active rooms/groups, reads current track metadata, album art, and queue preview.
+- Added multi-room context support: grouped rooms, same-content rooms, and other active rooms.
+- Added a shareable recipe package under `plugins/trmnl-sonos-local/`.
+- Installed a `khpi5` cron-driven local refresh path for the Sonos script (`/home/dave/run_trmnl_sonos.sh`).
+- Verified end-to-end: local discovery -> webhook POST -> LaraPaper render -> Pi display update.
+- Home Assistant integration paths identified: HA automation can either POST directly to the webhook or invoke the local Sonos script.
+
+### 14. Future Work: Optional Google OAuth Companion
 - Added a future-work track for an optional local Google Calendar API companion service.
 - Rationale: Google ICS feeds do not expose useful per-event color/category metadata in the current live calendars.
 - Goal: enable richer Google-specific metadata such as per-event colors, descriptions, attendee status, and other native fields.
 - Important constraint: this would be an advanced optional local backend, not a replacement for the shareable ICS-based plugin path.
 
-### 14. Future Work: Render Crispness / Screenshot Quality
+### 15. Future Work: Render Crispness / Screenshot Quality
 - Added a future-work track to investigate render-side sharpness improvements, not just CSS/layout tweaks.
 - LaraPaper's rendering stack exposes scale-related hooks (`scale_factor`, Browsershot/device scale options) that may improve text crispness before panel quantization.
 - This should be evaluated carefully on the physical ACeP panel because sharper source screenshots may improve legibility more than additional design changes.
@@ -138,6 +148,7 @@
 - **Calendar settings:** key settings are now wired through, but not every field from the schema is implemented in the runtime yet.
 - **Calendar crispness:** render-side sharpness tuning has not yet been tested; current improvements are mostly contrast and styling based.
 - **Photo quality:** LaraPaper color rendering is improved by careful preprocessing, but a true real-photo comparison against old InkyPi behavior is still outstanding.
+- **Sonos polish:** the local Sonos plugin is functional and respectable, but still has room for layout polish and broader settings/runtime wiring.
 
 ## Architecture
 
