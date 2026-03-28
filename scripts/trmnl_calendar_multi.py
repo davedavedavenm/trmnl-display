@@ -52,6 +52,7 @@ TRMNL_SHOW_ALL_DAY = env_bool("TRMNL_SHOW_ALL_DAY_EVENTS", True)
 TRMNL_HIDE_EMPTY_DAYS = env_bool("TRMNL_HIDE_EMPTY_DAYS", True)
 TRMNL_MAX_EVENTS_PER_DAY = env_int("TRMNL_MAX_EVENTS_PER_DAY", 6)
 TRMNL_TIME_FORMAT_MODE = os.getenv("TRMNL_TIME_MODE", "24h").strip().lower() or "24h"
+TRMNL_THEME = os.getenv("TRMNL_THEME", "dark").strip().lower() or "dark"
 
 if TRMNL_LOCALE:
     locale.setlocale(locale.LC_ALL, TRMNL_LOCALE)
@@ -306,6 +307,7 @@ def main() -> None:
             "time_format": TRMNL_TIME_FORMAT_MODE,
             "today_in_tz": NOW.isoformat(),
             "source_count": len(sources),
+            "theme": TRMNL_THEME,
         }
     }
 

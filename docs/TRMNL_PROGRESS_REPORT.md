@@ -112,7 +112,22 @@
 - LaraPaper's rendering stack exposes scale-related hooks (`scale_factor`, Browsershot/device scale options) that may improve text crispness before panel quantization.
 - This should be evaluated carefully on the physical ACeP panel because sharper source screenshots may improve legibility more than additional design changes.
 
-### 15. Known Issues
+### 15. Color Pipeline Experiment - COMPLETE
+- Built controlled LaraPaper comparison plugins for image-heavy rendering.
+- Compared four render paths on the physical display:
+  - plain palette mapping
+  - dithering enabled via `image-dither`
+  - saturation preprocessed to `0.0`
+  - saturation preprocessed to `0.5`
+- Findings:
+  - plain palette mapping preserves distinct ACeP colors well for simple graphics
+  - generic dithering adds objectionable visible noise/patterning on this panel for this content
+  - saturation `0.0` collapses color separation too aggressively
+  - saturation `0.5` is a more promising preprocessing direction than full desaturation
+- Conclusion: do not enable dithering globally; image-heavy/photo workflows likely need tuned preprocessing rather than naive dithering.
+- Next validation needed: repeat the same test with a real photograph, not just synthetic graphics.
+
+### 16. Known Issues
 - **Bus departures:** Liquid template `timespan` variable not injected into polling URL. Workaround: hardcoded full URL.
 - **Home Assistant:** URL `raspberrypi.local` not resolvable from khpi5 container. Needs correct IP.
 - **World Clock:** No timezone/city data configured.
@@ -121,6 +136,7 @@
 - **Calendar UX:** current multi-calendar layout works but needs a proper polished design pass and richer configuration options.
 - **Calendar settings:** recipe schema is now much richer, but live runtime wiring of all settings into the sync script/UI has not yet been completed.
 - **Calendar crispness:** render-side sharpness tuning has not yet been tested; current improvements are mostly contrast and styling based.
+- **Photo quality:** LaraPaper color rendering is improved by careful preprocessing, but a true real-photo comparison against old InkyPi behavior is still outstanding.
 
 ## Architecture
 
