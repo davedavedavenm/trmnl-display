@@ -1,5 +1,23 @@
 # InkyPi Development Quick Start
 
+## Live TRMNL Workflow
+
+For the current homelab setup, local development is only the first stage.
+
+- Local machine: authoring and repo changes
+- `khpi5`: live LaraPaper server and companion-script runtime
+- Pi Zero / Inky device: final display client
+
+If you are working on TRMNL recipes, LaraPaper webhooks, local companion scripts, or Home Assistant orchestration:
+
+1. Develop and sanity-check locally.
+2. Deploy the relevant change to `khpi5`.
+3. Re-run the live script or webhook flow on `khpi5`.
+4. Confirm LaraPaper produced a fresh render.
+5. Confirm the Pi client pulled the image and the physical panel updated.
+
+See [Live Deployment Workflow](./LIVE_DEPLOYMENT_WORKFLOW.md) for the required validation flow.
+
 ## Development Without Hardware
 
 The `--dev` flag enables complete development without requiring:

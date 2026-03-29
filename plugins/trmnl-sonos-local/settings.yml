@@ -13,6 +13,16 @@ custom_fields:
       - Dark: dark
       - Light: light
     description: Choose a high-contrast presentation for the screen.
+  - keyname: album_art_mode
+    name: Album Art Mode
+    field_type: select
+    default: vivid
+    options:
+      - Vivid Color: vivid
+      - Balanced Color: balanced
+      - Raw Source: raw
+      - Monochrome: mono
+    description: Choose how album artwork is rendered on the 7-colour ACeP display.
   - keyname: preferred_room
     name: Preferred Room
     field_type: string

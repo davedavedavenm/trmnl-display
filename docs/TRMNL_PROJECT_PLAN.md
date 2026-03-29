@@ -80,6 +80,7 @@
 - [x] Add grouped-room / multi-room awareness
 - [x] Add automatic scheduled refresh for the local Sonos script on khpi5
 - [x] Add initial local album-art preprocessing path for Sonos rendering
+- [x] Restore a shareable full-colour Sonos artwork path with recipe-level render modes
 - [ ] Add more live settings/runtime wiring for Sonos plugin options
 - [ ] Explore Home Assistant automation-driven webhook updates as an alternative integration path
 
@@ -96,6 +97,11 @@
 - [ ] Build HA-driven Sonos mode switching as the second orchestration path
 - [ ] Build alert override path as the third orchestration path
 - [ ] Add example HA automations for webhook payload pushes and playlist/mode switching
+
+## Immediate Working Focus
+- [ ] Reposition repository docs around the Home Assistant Edition direction without changing the working Sonos page layout
+- [ ] Commit and preserve the current colour-correct Sonos recipe as the baseline implementation
+- [ ] Start the next shareable recipe/orchestration step from Phase 10 rather than reopening Sonos visual redesign
 
 ## Phase 11: Google OAuth Companion Service [PLANNED]
 - [ ] Build an optional local Google Calendar API companion service for richer metadata than ICS provides

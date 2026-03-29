@@ -2,6 +2,46 @@
 
 <img src="./docs/images/inky_clock.jpg" />
 
+## Current Direction
+This repository started as the upstream InkyPi project and now also carries an active TRMNL/LaraPaper-based homelab deployment focused on a Home Assistant-led e-paper appliance.
+
+The current live system is:
+- `khpi5` runs LaraPaper and the local companion scripts for private plugins
+- the Pi Zero / Inky device acts as a thin TRMNL display client
+- Home Assistant is the intended orchestration layer for screen modes and automations
+
+For current project aims and live status, start with:
+- [TRMNL Project Plan](./docs/TRMNL_PROJECT_PLAN.md)
+- [TRMNL Progress Report](./docs/TRMNL_PROGRESS_REPORT.md)
+- [Live Deployment Workflow](./docs/LIVE_DEPLOYMENT_WORKFLOW.md)
+
+## Primary Focus
+The main product direction is no longer "generic web UI for an e-ink Pi". It is:
+
+- **Home Assistant Edition**
+  - Home Assistant decides what the screen should show and when
+  - LaraPaper renders the active recipe
+  - the Pi display client only fetches and renders the final image
+- **Shareable TRMNL recipes/plugins**
+  - recipes should be exportable, reusable, and standards-compliant
+  - local helper scripts are acceptable, but recipe-facing settings should live in `settings.yml`
+  - whenever possible, plugin behaviour should align with official TRMNL conventions
+- **ACeP-first colour rendering**
+  - the target display is a 7-colour panel
+  - colour regressions are bugs unless they are an explicit selectable mode
+
+## Current Product Tracks
+- Multi-calendar recipe productization
+- Local Sonos recipe with full-colour rendering
+- Home Assistant orchestration for mode switching and overrides
+- Recipe/shareability improvements so useful local work can be published cleanly
+
+## Working Rules For This Repo
+- Treat local edits as incomplete until the corresponding change is deployed to `khpi5` and validated end to end.
+- For TRMNL/LaraPaper work, follow the path `local edit -> deploy to khpi5 -> verify LaraPaper render/preview -> verify device pull -> verify physical screen`.
+- "Full colour" in this repo means using the display's supported ACeP palette, not grayscale-safe fallback rendering.
+- Prefer official TRMNL documentation and official/community-supported recipe guidance when choosing architecture or plugin behavior.
+- When a screen looks grayscale, inspect the live LaraPaper output first. Do not assume the recipe is at fault before checking the `khpi5` device model and palette configuration.
 
 ## About InkyPi 
 InkyPi is an open-source, customizable E-Ink display powered by a Raspberry Pi. Designed for simplicity and flexibility, it allows you to effortlessly display the content you care about, with a simple web interface that makes setup and configuration effortless.
@@ -112,10 +152,10 @@ sudo bash install/uninstall.sh
 ## Roadmap
 The InkyPi project is constantly evolving, with many exciting features and improvements planned for the future.
 
-- Plugins, plugins, plugins
-- Modular layouts to mix and match plugins
-- Support for buttons with customizable action bindings
-- Improved Web UI on mobile devices
+- Productize the Home Assistant Edition workflow
+- Continue building shareable TRMNL recipes/plugins
+- Improve orchestration between Home Assistant, LaraPaper, and the display client
+- Preserve strong ACeP colour behaviour across recipes
 
 Check out the public [trello board](https://trello.com/b/SWJYWqe4/inkypi) to explore upcoming features and vote on what you'd like to see next!
 

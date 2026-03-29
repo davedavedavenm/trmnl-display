@@ -10,7 +10,7 @@ Current capabilities:
 - grouped-room awareness
 - multiple active room awareness
 - current title / artist / album
-- album art
+- album art with selectable render modes
 - queue preview (`Up Next`)
 - shareable recipe structure (`settings.yml` + `full.liquid`)
 
@@ -26,12 +26,22 @@ Suggested runtime env:
 ```env
 TRMNL_WEBHOOK_URL=http://localhost:4567/api/custom_plugins/YOUR-UUID
 TRMNL_SONOS_ROOM=
-TRMNL_UPDATED_AT_FORMAT=%d %b %H:%M
+TRMNL_UPDATED_AT_FORMAT="%d %b %H:%M"
+TRMNL_ALBUM_ART_SATURATION=0.65
+TRMNL_ALBUM_ART_CONTRAST=1.1
+TRMNL_ALBUM_ART_BALANCED_SATURATION=0.9
+TRMNL_ALBUM_ART_BALANCED_CONTRAST=1.05
+TRMNL_ALBUM_ART_VIVID_SATURATION=1.2
+TRMNL_ALBUM_ART_VIVID_CONTRAST=1.0
+TRMNL_ALBUM_ART_MONO_SATURATION=0.0
+TRMNL_ALBUM_ART_MONO_CONTRAST=1.1
 ```
 
 Notes:
 - If `TRMNL_SONOS_ROOM` is blank, the script picks the first actively playing group, then falls back to the first room with track metadata.
 - The plugin can be driven either by the local Sonos script or by Home Assistant automations pushing webhook payloads.
+- For the current 7-colour ACeP display, colour output is a requirement. If preprocessing is adjusted for readability, keep a colour-capable path available rather than silently drifting into grayscale-like output.
+- If the Sonos screen suddenly becomes grayscale, check the LaraPaper preview/current PNG and the live `inky_impression_7_3` device model on `khpi5` before changing recipe code.
 
 ## Configuration Reference
 
@@ -39,6 +49,8 @@ The recipe exposes these user-facing options:
 
 - `Theme`
   - `dark` or `light`
+- `Album Art Mode`
+  - `vivid`, `balanced`, `raw`, or `mono`
 - `Preferred Room`
   - optional room name to pin instead of auto-selection
 - `Show Album`
@@ -54,11 +66,14 @@ The local script provides these payload features:
 - playback state
 - track / artist / album
 - album art URL
+- preprocessed album-art variants for shareable recipe modes
 - grouped-room context
 - multiple active room context
 - next tracks from queue
 
 If you share this plugin, note that the recipe alone is not enough: it requires a companion local process to discover Sonos speakers and POST webhook data.
+
+To keep the recipe shareable, the user-facing render choice lives in `settings.yml` and the script sends all artwork variants needed by the template. That keeps the recipe exportable while still allowing local tuning on the server.
 
 ## Automatic Refresh
 
@@ -68,6 +83,8 @@ On the current homelab setup, the Sonos script is run every minute on `khpi5` vi
 - `/home/dave/.env.sonos-trmnl`
 
 That keeps the LaraPaper webhook plugin updated without any cloud dependency.
+
+This also means a repo-only change is not enough. Update the live script/template on `khpi5`, trigger a fresh run, and verify the physical display after each Sonos change.
 
 ## Home Assistant Integration Options
 

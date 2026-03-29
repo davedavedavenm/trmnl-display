@@ -110,6 +110,10 @@
 - Added a shareable recipe package under `plugins/trmnl-sonos-local/`.
 - Installed a `khpi5` cron-driven local refresh path for the Sonos script (`/home/dave/run_trmnl_sonos.sh`).
 - Added local album-art preprocessing in the Sonos script so LaraPaper receives a preprocessed image instead of only the raw Sonos URL.
+- Restored a full-colour Sonos path by generating multiple album-art variants server-side and exposing recipe-level render modes (`vivid`, `balanced`, `raw`, `mono`) through `settings.yml`.
+- Diagnosed a live colour regression correctly by inspecting the LaraPaper preview/generated PNG instead of treating the physical panel as the only source of truth.
+- Root cause of the regression: live LaraPaper model drift on `khpi5` had changed `inky_impression_7_3` to `colors=2`, `bit_depth=1`, `palette=bw`.
+- Additional Sonos-specific finding: when no album art is present, subtle accent colours can quantize away; stronger ACeP-safe solid fills survive the render pipeline more reliably.
 - Verified end-to-end: local discovery -> webhook POST -> LaraPaper render -> Pi display update.
 - Home Assistant integration paths identified: HA automation can either POST directly to the webhook or invoke the local Sonos script.
 
@@ -179,6 +183,7 @@
 - **Calendar crispness:** render-side sharpness tuning has not yet been tested; current improvements are mostly contrast and styling based.
 - **Photo quality:** LaraPaper color rendering is improved by careful preprocessing, but a true real-photo comparison against old InkyPi behavior is still outstanding.
 - **Sonos polish:** the local Sonos plugin is functional and respectable, but still has room for layout polish and broader settings/runtime wiring.
+- **Operational memory:** first inspect LaraPaper preview/current PNG when debugging display appearance. Only treat the panel as the differentiator after the server render is known.
 
 ## Architecture
 
