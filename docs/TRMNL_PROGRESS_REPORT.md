@@ -10,10 +10,10 @@
 - Audited 700+ community recipes and 201 OSS catalog recipes for color e-ink compatibility.
 
 ### 2. Hardware Audit
-- **Confirmed Device:** Pimoroni Inky Impression 7.3" Spectra 6 Edition (`PIM773`) (800x480).
-- **Panel Type:** E Ink Spectra 6 (Red, Green, Blue, Yellow, Black, White) - NOT grayscale only.
+- **Confirmed Device:** Pimoroni Inky Impression 7.3" (800x480).
+- **Panel Type:** 7-color ACeP (Black, White, Red, Green, Blue, Yellow, Orange) - NOT grayscale only.
 - **Driver:** `bb_epaper` via `show_img` binary with `EP73_SPECTRA_800x480` panel driver.
-- **Refresh Mode:** Full refresh only. No partial/fast refresh available.
+- **Refresh Mode:** Only `REFRESH_FULL` works on ACeP. No partial/fast refresh available.
 - **Refresh Interval:** 15-30 seconds per refresh. Recommended 600s (10 min) poll interval.
 - **Panel Lifetime:** ~50,000-100,000 refresh cycles.
 - **Permissions:** User `dave` has spi/gpio/i2c group membership. No sudo required.
@@ -27,7 +27,7 @@
 - Mock server deployed and validated on Pi.
 - Go client (`trmnl-display`) built and tested on Pi Zero.
 - Physical screen render confirmed: `show_img` -> SPI -> EPD works end-to-end.
-- Color render verified on the full-colour Spectra 6 render path via BMP test image.
+- Color render verified: 4-bpp (7-color) mode confirmed via BMP test image.
 
 ### 5. BYOS Server - LaraPaper on khpi5 - COMPLETE
 - **Evaluated byos_fastapi:** Too heavy for Pi Zero (requires Chromium, d3blocks, 100MB+ RAM).
@@ -37,9 +37,7 @@
 - Device registered: MAC `88:A2:9E:2B:2B:B9`, API key `VAtHzgSkFcV6dtvbGSYxrE`.
 
 ### 6. Color E-Ink Configuration - COMPLETE
-- Updated LaraPaper `inky_impression_7_3` device model for the Spectra 6 panel.
-- Corrected a later repo/server assumption drift: the live 7.3" Pimoroni panel is Spectra 6 (`PIM773`), not a 7-colour orange-capable panel.
-- Live LaraPaper model is now aligned to the Spectra 6 palette: `colors=6`, `bit_depth=3`, `palette=color-spectra6`.
+- Updated LaraPaper `inky_impression_7_3` device model: 7 colors, 3-bit, palette `color-7a`.
 - Updated `show_img.json` on Pi: removed `panel_2bit` to enable 4-bpp color mode.
 - Verified: LaraPaper generates 4-bit colormap PNGs when device model is set correctly.
 - `trmnl-liquid-cli` installed in LaraPaper container for recipe rendering.
@@ -51,7 +49,7 @@
 
 ### 8. Recipe Research - COMPLETE
 - Audited all 201 OSS catalog recipes and TRMNL official catalog.
-- **Zero recipes explicitly support the Pimoroni 7.3\" Spectra 6 panel**, but many use semantic colors that map well.
+- **Zero recipes explicitly support 7-color ACeP**, but many use semantic colors that map well.
 - Identified top candidates: Uptime Kuma, Crypto Fear & Greed, Air Quality, F1 Dashboard, US Weather Maps.
 - Comics and photos work but with heavy dithering.
 
@@ -79,7 +77,7 @@
 - Added split-screen support with dedicated `half_horizontal.liquid` and `quadrant.liquid` templates for mashups.
 - Migrated the live khpi5 runtime to the new 6-calendar env format and added a third live calendar feed.
 - Added event-level color resolution logic: native event color -> category mapping -> calendar color fallback.
-- Added an explicit dark-mode, high-contrast treatment to improve physical Spectra 6 readability.
+- Added an explicit dark-mode, high-contrast treatment to improve physical ACeP readability.
 - Wired live LaraPaper custom settings into the runtime script for key behaviors (`theme`, `days_ahead`, `show_source_labels`, `max_events_per_day`).
 - Baseline verified: events are fetched, merged, posted, rendered, and shown on the physical display.
 - Live khpi5 deployment has now been migrated to the new 6-calendar-ready env format and revalidated end to end.
@@ -115,7 +113,7 @@
 - Restored a full-colour Sonos path by generating multiple album-art variants server-side and exposing recipe-level render modes (`vivid`, `balanced`, `raw`, `mono`) through `settings.yml`.
 - Diagnosed a live colour regression correctly by inspecting the LaraPaper preview/generated PNG instead of treating the physical panel as the only source of truth.
 - Root cause of the regression: live LaraPaper model drift on `khpi5` had changed `inky_impression_7_3` to `colors=2`, `bit_depth=1`, `palette=bw`.
-- Additional Sonos-specific finding: when no album art is present, subtle accent colours can quantize away; stronger Spectra 6-safe solid fills survive the render pipeline more reliably.
+- Additional Sonos-specific finding: when no album art is present, subtle accent colours can quantize away; stronger ACeP-safe solid fills survive the render pipeline more reliably.
 - Verified end-to-end: local discovery -> webhook POST -> LaraPaper render -> Pi display update.
 - Home Assistant integration paths identified: HA automation can either POST directly to the webhook or invoke the local Sonos script.
 
@@ -174,7 +172,7 @@
 ### 18. Future Work: Render Crispness / Screenshot Quality
 - Added a future-work track to investigate render-side sharpness improvements, not just CSS/layout tweaks.
 - LaraPaper's rendering stack exposes scale-related hooks (`scale_factor`, Browsershot/device scale options) that may improve text crispness before panel quantization.
-- This should be evaluated carefully on the physical Spectra 6 panel because sharper source screenshots may improve legibility more than additional design changes.
+- This should be evaluated carefully on the physical ACeP panel because sharper source screenshots may improve legibility more than additional design changes.
 
 ### 19. Color Pipeline Experiment - COMPLETE
 - Built controlled LaraPaper comparison plugins for image-heavy rendering.
@@ -184,7 +182,7 @@
   - saturation preprocessed to `0.0`
   - saturation preprocessed to `0.5`
 - Findings:
-- plain palette mapping preserves distinct Spectra 6 colors well for simple graphics
+  - plain palette mapping preserves distinct ACeP colors well for simple graphics
   - generic dithering adds objectionable visible noise/patterning on this panel for this content
   - saturation `0.0` collapses color separation too aggressively
   - saturation `0.5` is a more promising preprocessing direction than full desaturation
@@ -203,7 +201,6 @@
 - **Photo quality:** LaraPaper color rendering is improved by careful preprocessing, but a true real-photo comparison against old InkyPi behavior is still outstanding.
 - **Sonos polish:** the local Sonos plugin is functional and respectable, but still has room for layout polish and broader settings/runtime wiring.
 - **Operational memory:** first inspect LaraPaper preview/current PNG when debugging display appearance. Only treat the panel as the differentiator after the server render is known.
-- **Hardware source of truth:** use the Pimoroni 7.3" product page for the live screen specification; do not reintroduce 7-colour/orange assumptions unless the physical hardware changes.
 
 ## Architecture
 
@@ -222,7 +219,7 @@
     | Docker: ghcr.io/usetrmnl/larapaper:latest
     | Port 4567
     | Renders Liquid templates via headless browser
-    | Applies device palette via ImageStage->colormap()
+    | Applies 7-color palette via ImageStage->colormap()
     | Returns: {image_url, filename, refresh_rate}
     v
     Pi Zero downloads PNG -> show_img -> SPI -> EPD

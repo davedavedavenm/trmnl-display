@@ -13,12 +13,12 @@ import requests
 
 load_dotenv()
 
-PALETTE = ["black", "red", "blue", "green", "yellow"]
+PALETTE = ["black", "red", "blue", "green", "yellow", "orange"]
 CATEGORY_COLOR_MAP = {
     "work": "blue",
     "family": "green",
     "personal": "red",
-    "travel": "yellow",
+    "travel": "orange",
     "holiday": "yellow",
     "vacation": "yellow",
     "birthday": "red",
@@ -217,7 +217,7 @@ def build_calendar_sources() -> List[Dict[str, object]]:
 
     legacy_urls = [item.strip() for item in os.getenv("TRMNL_ICS_URL", "").split(",") if item.strip()]
     legacy_labels = [item.strip() for item in os.getenv("TRMNL_ICS_LABELS", "").split(",") if item.strip()]
-    legacy_colors = [item.strip() for item in os.getenv("TRMNL_ICS_COLORS", "blue,red,green,yellow,black").split(",") if item.strip()]
+    legacy_colors = [item.strip() for item in os.getenv("TRMNL_ICS_COLORS", "blue,red,orange,green,yellow,black").split(",") if item.strip()]
 
     for idx, url in enumerate(legacy_urls, start=1):
         sources.append(
