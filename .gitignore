@@ -168,7 +168,17 @@ mock_display_output/
 
 # IDE files
 .idea
+.vscode/
+*.code-workspace
 
 # Static Files added by install/update_vendors.sh
 /src/static/scripts/
 /src/static/styles/
+
+# Local TRMNL/LaraPaper artifacts
+local_config.json
+current_cal.png
+temp_*.png
+temp_*.sh
+youtube-to-docs-artifacts/
+nul

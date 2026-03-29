@@ -1,0 +1,71 @@
+{% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
+{% assign show_map_link = trmnl.plugin_settings.custom_fields_values.show_map_link | default: true %}
+{% assign show_home_prep = trmnl.plugin_settings.custom_fields_values.show_home_prep | default: true %}
+{% if theme_mode == 'dark' %}
+  {% assign bg = '#111111' %}
+  {% assign fg = '#fffdf8' %}
+  {% assign soft = '#d8c9a2' %}
+  {% assign panel = '#1a1a1a' %}
+  {% assign border = '#3b352d' %}
+{% else %}
+  {% assign bg = '#f6f1e8' %}
+  {% assign fg = '#141414' %}
+  {% assign soft = '#6f6558' %}
+  {% assign panel = '#fffdfa' %}
+  {% assign border = '#d5ccbf' %}
+{% endif %}
+<div class="layout layout--col h--full w--full" style="padding:16px 18px 12px; background:{{ bg }}; color:{{ fg }};">
+  <div style="display:grid; grid-template-columns:1fr auto; gap:16px; align-items:end; border-bottom:2px solid {{ fg }}; padding-bottom:10px; margin-bottom:12px;">
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <div style="font-size:11px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:800;">Jen Commute</div>
+      <div style="font-size:36px; line-height:0.9; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{{ headline | default: 'Heading Out' }}</div>
+    </div>
+    <div style="font-size:10px; line-height:1.2; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:800; text-align:right;">Updated {{ updated_at }}</div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 220px minmax(0, 1fr); gap:20px; flex:1; align-items:start;">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; flex-direction:column; gap:4px; padding:14px 16px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }};">
+        <div style="font-size:12px; line-height:1; text-transform:uppercase; letter-spacing:0.14em; color:{{ soft }}; font-weight:800;">ETA</div>
+        <div style="font-size:58px; line-height:0.86; letter-spacing:-0.06em; font-weight:900; color:{{ fg }};">{{ eta_minutes | default: '?' }}</div>
+        <div style="font-size:12px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">minutes</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:4px; padding:14px 16px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }};">
+        <div style="font-size:12px; line-height:1; text-transform:uppercase; letter-spacing:0.14em; color:{{ soft }}; font-weight:800;">Route</div>
+        <div style="font-size:20px; line-height:1; letter-spacing:-0.02em; font-weight:900; color:{{ fg }};">{{ route_label | default: 'Direct' }}</div>
+        <div style="font-size:11px; line-height:1.2; color:{{ soft }}; font-weight:800;">{{ distance_km }} km</div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; min-width:0;">
+      <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px 12px;">
+        <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:1px solid {{ border }}; border-radius:18px; background:{{ panel }};">
+          <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">State</div>
+          <div style="font-size:18px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">{{ commute_state }}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:1px solid {{ border }}; border-radius:18px; background:{{ panel }};">
+          <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Heading Home</div>
+          <div style="font-size:18px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">{{ heading_home }}</div>
+        </div>
+      </div>
+
+      {% if show_home_prep == true or show_home_prep == 'true' %}
+      <div style="padding:14px 16px; border:1px solid {{ border }}; border-radius:20px; background:{{ panel }}; display:flex; flex-direction:column; gap:5px;">
+        <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Home Prep</div>
+        <div style="font-size:22px; line-height:1; letter-spacing:-0.02em; font-weight:900; color:{{ fg }};">{{ home_prep_status }}</div>
+        {% if prep_note %}
+        <div style="font-size:12px; line-height:1.25; color:{{ soft }}; font-weight:700;">{{ prep_note }}</div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if show_map_link == true or show_map_link == 'true' and map_url %}
+      <div style="padding:14px 16px; border:1px solid {{ border }}; border-radius:20px; background:{{ panel }}; display:flex; flex-direction:column; gap:5px;">
+        <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Route Link</div>
+        <div style="font-size:13px; line-height:1.25; color:{{ fg }}; font-weight:800;">Google Maps ready in HA/mobile notification flow</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
