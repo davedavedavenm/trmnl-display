@@ -142,22 +142,27 @@
 - Validation:
   - package deployed to `/config/packages/`
   - `ha core check` passed
-  - HA core restarted successfully
-  - logs confirmed the automation executed from the time-pattern trigger and called services successfully
+- HA core restarted successfully
+- logs confirmed the automation executed from the time-pattern trigger and called services successfully
 - This provides a concrete proof that HA can orchestrate TRMNL/LaraPaper directly, not just in theory.
 
-### 16. Future Work: Optional Google OAuth Companion
+### 16. Jen Commute Recipe Track - STARTED
+- Added a shareable `plugins/trmnl-jen-commute/` recipe package to this repo.
+- Positioned `jen_commute` as the next Home Assistant-driven screen after Sonos stabilization.
+- Working rule for this track: keep commute decision logic in Home Assistant and keep the recipe webhook payload simple and shareable.
+
+### 17. Future Work: Optional Google OAuth Companion
 - Added a future-work track for an optional local Google Calendar API companion service.
 - Rationale: Google ICS feeds do not expose useful per-event color/category metadata in the current live calendars.
 - Goal: enable richer Google-specific metadata such as per-event colors, descriptions, attendee status, and other native fields.
 - Important constraint: this would be an advanced optional local backend, not a replacement for the shareable ICS-based plugin path.
 
-### 17. Future Work: Render Crispness / Screenshot Quality
+### 18. Future Work: Render Crispness / Screenshot Quality
 - Added a future-work track to investigate render-side sharpness improvements, not just CSS/layout tweaks.
 - LaraPaper's rendering stack exposes scale-related hooks (`scale_factor`, Browsershot/device scale options) that may improve text crispness before panel quantization.
 - This should be evaluated carefully on the physical ACeP panel because sharper source screenshots may improve legibility more than additional design changes.
 
-### 15. Color Pipeline Experiment - COMPLETE
+### 19. Color Pipeline Experiment - COMPLETE
 - Built controlled LaraPaper comparison plugins for image-heavy rendering.
 - Compared four render paths on the physical display:
   - plain palette mapping
@@ -172,7 +177,7 @@
 - Conclusion: do not enable dithering globally; image-heavy/photo workflows likely need tuned preprocessing rather than naive dithering.
 - Next validation needed: repeat the same test with a real photograph, not just synthetic graphics.
 
-### 18. Known Issues
+### 20. Known Issues
 - **Bus departures:** Liquid template `timespan` variable not injected into polling URL. Workaround: hardcoded full URL.
 - **Home Assistant:** URL `raspberrypi.local` not resolvable from khpi5 container. Needs correct IP.
 - **World Clock:** No timezone/city data configured.
