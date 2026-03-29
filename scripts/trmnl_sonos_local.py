@@ -12,10 +12,13 @@ UPDATED_AT_FORMAT = os.getenv("TRMNL_UPDATED_AT_FORMAT", "%d %b %H:%M")
 def build_groups(speakers):
     groups = {}
     for sp in speakers:
-        coord = sp.group.coordinator
-        key = coord.uid
-        groups.setdefault(key, {"coordinator": coord, "members": []})
-        groups[key]["members"].append(sp.player_name)
+        try:
+            coord = sp.group.coordinator
+            key = coord.uid
+            groups.setdefault(key, {"coordinator": coord, "members": []})
+            groups[key]["members"].append(sp.player_name)
+        except Exception:
+            continue
     return list(groups.values())
 
 
@@ -28,14 +31,17 @@ def pick_group(groups):
 
     active, fallback = [], []
     for group in groups:
-        coord = group["coordinator"]
-        info = coord.get_current_transport_info()
-        track = coord.get_current_track_info()
-        state = info.get("current_transport_state", "")
-        if state == "PLAYING":
-            active.append(group)
-        elif track.get("title"):
-            fallback.append(group)
+        try:
+            coord = group["coordinator"]
+            info = coord.get_current_transport_info()
+            track = coord.get_current_track_info()
+            state = info.get("current_transport_state", "")
+            if state == "PLAYING":
+                active.append(group)
+            elif track.get("title"):
+                fallback.append(group)
+        except Exception:
+            continue
 
     if active:
         return active[0]
@@ -74,19 +80,22 @@ def main():
 
     active_groups = []
     for group in groups:
-        coord = group["coordinator"]
-        info = coord.get_current_transport_info()
-        now_track = coord.get_current_track_info()
-        if info.get("current_transport_state") == "PLAYING":
-            active_groups.append(
-                {
-                    "room_name": coord.player_name,
-                    "members": group["members"],
-                    "title": now_track.get("title") or "",
-                    "artist": now_track.get("artist") or "",
-                    "uri": now_track.get("uri") or "",
-                }
-            )
+        try:
+            coord = group["coordinator"]
+            info = coord.get_current_transport_info()
+            now_track = coord.get_current_track_info()
+            if info.get("current_transport_state") == "PLAYING":
+                active_groups.append(
+                    {
+                        "room_name": coord.player_name,
+                        "members": group["members"],
+                        "title": now_track.get("title") or "",
+                        "artist": now_track.get("artist") or "",
+                        "uri": now_track.get("uri") or "",
+                    }
+                )
+        except Exception:
+            continue
 
     same_content_rooms = []
     selected_uri = track.get("uri") or ""
