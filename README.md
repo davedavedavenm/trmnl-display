@@ -5,6 +5,10 @@
 ## Current Direction
 This repository started as the upstream InkyPi project and now also carries an active TRMNL/LaraPaper-based homelab deployment focused on a Home Assistant-led e-paper appliance.
 
+Current hardware source of truth for the live setup:
+- Pimoroni Inky Impression 7.3" Spectra 6 Edition (`PIM773`, 800x480)
+- reference: [Pimoroni product page](https://shop.pimoroni.com/products/inky-impression?variant=55186435244411)
+
 The current live system is:
 - `khpi5` runs LaraPaper and the local companion scripts for private plugins
 - the Pi Zero / Inky device acts as a thin TRMNL display client
@@ -26,8 +30,8 @@ The main product direction is no longer "generic web UI for an e-ink Pi". It is:
   - recipes should be exportable, reusable, and standards-compliant
   - local helper scripts are acceptable, but recipe-facing settings should live in `settings.yml`
   - whenever possible, plugin behaviour should align with official TRMNL conventions
-- **ACeP-first colour rendering**
-  - the target display is a 7-colour panel
+- **Spectra 6-first colour rendering**
+  - the target display is a Pimoroni Inky Impression 7.3" Spectra 6 Edition (`PIM773`)
   - colour regressions are bugs unless they are an explicit selectable mode
 
 ## Current Product Tracks
@@ -63,7 +67,7 @@ Reference material:
 ## Working Rules For This Repo
 - Treat local edits as incomplete until the corresponding change is deployed to `khpi5` and validated end to end.
 - For TRMNL/LaraPaper work, follow the path `local edit -> deploy to khpi5 -> verify LaraPaper render/preview -> verify device pull -> verify physical screen`.
-- "Full colour" in this repo means using the display's supported ACeP palette, not grayscale-safe fallback rendering.
+- "Full colour" in this repo means using the display's supported Spectra 6 palette, not grayscale-safe fallback rendering.
 - Prefer official TRMNL documentation and official/community-supported recipe guidance when choosing architecture or plugin behavior.
 - When a screen looks grayscale, inspect the live LaraPaper output first. Do not assume the recipe is at fault before checking the `khpi5` device model and palette configuration.
 
@@ -179,7 +183,7 @@ The InkyPi project is constantly evolving, with many exciting features and impro
 - Productize the Home Assistant Edition workflow
 - Continue building shareable TRMNL recipes/plugins
 - Improve orchestration between Home Assistant, LaraPaper, and the display client
-- Preserve strong ACeP colour behaviour across recipes
+- Preserve strong Spectra 6 colour behaviour across recipes
 
 Check out the public [trello board](https://trello.com/b/SWJYWqe4/inkypi) to explore upcoming features and vote on what you'd like to see next!
 

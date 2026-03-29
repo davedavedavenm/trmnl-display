@@ -117,7 +117,6 @@ custom_fields:
       - Red: red
       - Green: green
       - Yellow: yellow
-      - Orange: orange
       - Black: black
   - keyname: calendar_1_color_custom
     name: Calendar 1 Custom Color
@@ -151,7 +150,6 @@ custom_fields:
       - Red: red
       - Green: green
       - Yellow: yellow
-      - Orange: orange
       - Black: black
   - keyname: calendar_2_color_custom
     name: Calendar 2 Custom Color
@@ -184,7 +182,6 @@ custom_fields:
       - Red: red
       - Green: green
       - Yellow: yellow
-      - Orange: orange
       - Black: black
   - keyname: calendar_3_color_custom
     name: Calendar 3 Custom Color
@@ -217,7 +214,6 @@ custom_fields:
       - Red: red
       - Green: green
       - Yellow: yellow
-      - Orange: orange
       - Black: black
   - keyname: calendar_4_color_custom
     name: Calendar 4 Custom Color
@@ -244,13 +240,12 @@ custom_fields:
   - keyname: calendar_5_color
     name: Calendar 5 Color
     field_type: select
-    default: orange
+    default: yellow
     options:
       - Blue: blue
       - Red: red
       - Green: green
       - Yellow: yellow
-      - Orange: orange
       - Black: black
   - keyname: calendar_5_color_custom
     name: Calendar 5 Custom Color
@@ -283,7 +278,6 @@ custom_fields:
       - Red: red
       - Green: green
       - Yellow: yellow
-      - Orange: orange
       - Black: black
   - keyname: calendar_6_color_custom
     name: Calendar 6 Custom Color

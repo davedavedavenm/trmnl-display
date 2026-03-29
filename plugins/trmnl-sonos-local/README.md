@@ -40,7 +40,7 @@ TRMNL_ALBUM_ART_MONO_CONTRAST=1.1
 Notes:
 - If `TRMNL_SONOS_ROOM` is blank, the script picks the first actively playing group, then falls back to the first room with track metadata.
 - The plugin can be driven either by the local Sonos script or by Home Assistant automations pushing webhook payloads.
-- For the current 7-colour ACeP display, colour output is a requirement. If preprocessing is adjusted for readability, keep a colour-capable path available rather than silently drifting into grayscale-like output.
+- For the current Pimoroni Inky Impression 7.3" Spectra 6 display (`PIM773`), colour output is a requirement. If preprocessing is adjusted for readability, keep a colour-capable path available rather than silently drifting into grayscale-like output.
 - If the Sonos screen suddenly becomes grayscale, check the LaraPaper preview/current PNG and the live `inky_impression_7_3` device model on `khpi5` before changing recipe code.
 
 ## Configuration Reference
