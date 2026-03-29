@@ -36,6 +36,30 @@ The main product direction is no longer "generic web UI for an e-ink Pi". It is:
 - Home Assistant orchestration for mode switching and overrides
 - Recipe/shareability improvements so useful local work can be published cleanly
 
+## Community Patterns
+The current architecture is consistent with how the TRMNL and wider e-paper/Home Assistant community is already working:
+
+- **Home Assistant decides, recipe/plugin renders**
+  - community TRMNL projects such as [ha_trmnl_weather_station](https://github.com/TilmanGriesel/ha_trmnl_weather_station) use Home Assistant to assemble live state and push it into a TRMNL recipe/plugin via webhook
+- **Screenshot flows are common, but they are a different product tradeoff**
+  - official TRMNL guidance supports a Home Assistant Screenshot flow for dashboard capture, and wider Inkplate projects use scheduled Lovelace screenshots for e-paper panels
+  - this is useful for dense dashboards, but it is less shareable and less recipe-native than structured payloads and Liquid templates
+- **Thin display clients are normal**
+  - many open-source e-paper/Home Assistant projects treat the display device as a fetch-and-render endpoint while the server or Home Assistant instance does the real orchestration work
+
+This repo therefore prefers:
+- Home Assistant for orchestration and decision logic
+- LaraPaper/TRMNL recipes for presentation
+- thin display clients that only fetch and render the prepared image
+
+Reference material:
+- [TRMNL Home Assistant Integration](https://help.trmnl.com/en/articles/12494449-home-assistant-integration)
+- [TRMNL Home Assistant Screenshot](https://help.trmnl.com/en/articles/13281388-home-assistant-screenshot)
+- [TRMNL Image Display](https://help.trmnl.com/en/articles/11479051-image-display)
+- [ha_trmnl_weather_station](https://github.com/TilmanGriesel/ha_trmnl_weather_station)
+- [hass-inkplate-dashboards](https://github.com/brodykenrick/hass-inkplate-dashboards)
+- [Home-Assistant-eink-remote-display](https://github.com/briandorey/Home-Assistant-eink-remote-display)
+
 ## Working Rules For This Repo
 - Treat local edits as incomplete until the corresponding change is deployed to `khpi5` and validated end to end.
 - For TRMNL/LaraPaper work, follow the path `local edit -> deploy to khpi5 -> verify LaraPaper render/preview -> verify device pull -> verify physical screen`.

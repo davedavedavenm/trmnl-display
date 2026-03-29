@@ -151,6 +151,18 @@
 - Positioned `jen_commute` as the next Home Assistant-driven screen after Sonos stabilization.
 - Working rule for this track: keep commute decision logic in Home Assistant and keep the recipe webhook payload simple and shareable.
 
+### 16a. Community Pattern Audit - COMPLETE
+- Confirmed that official TRMNL guidance supports Home Assistant integration and a separate screenshot-based dashboard path.
+- Confirmed that community TRMNL examples already use the pattern `Home Assistant state -> webhook payload -> TRMNL recipe/plugin render`.
+- Confirmed that broader e-paper/Home Assistant projects commonly use thin display clients with server-side or HA-side orchestration.
+- Conclusion: this repo should stay recipe-first and payload-first for shareable work, while treating screenshot flows as a valid but secondary option for dense dashboards.
+- Reference set:
+  - [TRMNL Home Assistant Integration](https://help.trmnl.com/en/articles/12494449-home-assistant-integration)
+  - [TRMNL Home Assistant Screenshot](https://help.trmnl.com/en/articles/13281388-home-assistant-screenshot)
+  - [ha_trmnl_weather_station](https://github.com/TilmanGriesel/ha_trmnl_weather_station)
+  - [hass-inkplate-dashboards](https://github.com/brodykenrick/hass-inkplate-dashboards)
+  - [Home-Assistant-eink-remote-display](https://github.com/briandorey/Home-Assistant-eink-remote-display)
+
 ### 17. Future Work: Optional Google OAuth Companion
 - Added a future-work track for an optional local Google Calendar API companion service.
 - Rationale: Google ICS feeds do not expose useful per-event color/category metadata in the current live calendars.
