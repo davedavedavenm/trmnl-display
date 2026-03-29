@@ -29,8 +29,8 @@ The companion sync script lives at `scripts/trmnl_calendar_multi.py` and is resp
 ## Color Model
 
 The recipe supports both:
-- curated named colors for predictable ACeP e-ink rendering: `black`, `red`, `blue`, `green`, `yellow`, `orange`
-- optional custom text colors for future/non-ACeP use
+- curated named colors for predictable Spectra 6 e-ink rendering: `black`, `red`, `blue`, `green`, `yellow`
+- optional custom text colors for future/non-Spectra 6 use
 
 ## Provider Setup
 
