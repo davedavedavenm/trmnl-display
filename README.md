@@ -65,6 +65,7 @@ Reference material:
 - For TRMNL/LaraPaper work, follow the path `local edit -> deploy to khpi5 -> verify LaraPaper render/preview -> verify device pull -> verify physical screen`.
 - "Full colour" in this repo means using the display's supported ACeP palette, not grayscale-safe fallback rendering.
 - Prefer official TRMNL documentation and official/community-supported recipe guidance when choosing architecture or plugin behavior.
+- When documentation and real-world render behavior conflict, prefer the empirically validated live render path until a replacement is tested side by side on the actual screen.
 - When a screen looks grayscale, inspect the live LaraPaper output first. Do not assume the recipe is at fault before checking the `khpi5` device model and palette configuration.
 
 ## About InkyPi 

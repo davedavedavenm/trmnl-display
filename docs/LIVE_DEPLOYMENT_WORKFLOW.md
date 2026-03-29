@@ -66,6 +66,12 @@ When making decisions about TRMNL recipes, private plugins, palettes, BYOS behav
 - then use official or well-supported community recipe guidance
 - document any deliberate divergence in this repo
 
+## Empirical Override Rule
+When vendor documentation, product naming, or nominal hardware taxonomy conflicts with a render path that has already been validated on the live stack:
+- prefer the empirically validated live render behavior
+- do not change live palette/model assumptions without side-by-side proof that the new path is better on the actual screen
+- treat the currently working LaraPaper + `trmnl-display` + `show_img` output as canonical until a replacement is tested and accepted
+
 ## Current Server Roles
 - LaraPaper host: `khpi5`
 - Display client: Pi Zero / Inky hardware
