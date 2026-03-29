@@ -16,7 +16,7 @@ custom_fields:
   - keyname: album_art_mode
     name: Album Art Mode
     field_type: select
-    default: vivid
+    default: raw
     options:
       - Vivid Color: vivid
       - Balanced Color: balanced
