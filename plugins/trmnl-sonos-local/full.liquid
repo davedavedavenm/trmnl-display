@@ -15,11 +15,11 @@
   {% assign panel = '#1a1a1a' %}
   {% assign border = '#3b352d' %}
 {% endif %}
-<div class="layout layout--col h--full w--full" style="padding:12px 18px 10px; background:{{ bg }}; color:{{ fg }}; overflow:hidden;">
+<div class="layout layout--col h--full w--full" style="padding:10px 16px 10px; background:{{ bg }}; color:{{ fg }}; overflow:hidden;">
   <div style="display:grid; grid-template-columns: 1fr auto; gap:14px; align-items:end; border-bottom:2px solid {{ fg }}; padding-bottom:8px; margin-bottom:10px;">
     <div style="display:flex; flex-direction:column; gap:4px;">
       <div style="font-size:11px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:800;">{{ room_name }}</div>
-      <div style="font-size:32px; line-height:0.9; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{% if state == 'PLAYING' %}Now Playing{% else %}Recently Played{% endif %}</div>
+      <div style="font-size:30px; line-height:0.92; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{% if state == 'PLAYING' %}Now Playing{% else %}Recently Played{% endif %}</div>
     </div>
     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
       <div style="font-size:12px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">{{ state }}</div>
@@ -27,9 +27,9 @@
     </div>
   </div>
 
-  <div style="display:grid; grid-template-columns:{% if show_album_art == true or show_album_art == 'true' %}250px minmax(0, 1fr){% else %}1fr{% endif %}; gap:20px; flex:1; align-items:start; min-height:0;">
+  <div style="display:grid; grid-template-columns:{% if show_album_art == true or show_album_art == 'true' %}230px minmax(0, 1fr){% else %}1fr{% endif %}; gap:18px; flex:1; align-items:start; min-height:0;">
     {% if show_album_art == true or show_album_art == 'true' %}
-    <div style="height:250px; border:1px solid {{ border }}; border-radius:24px; overflow:hidden; background:{{ panel }}; display:flex; align-items:center; justify-content:center; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);">
+    <div style="height:230px; border:none; border-radius:22px; overflow:hidden; background:transparent; display:flex; align-items:center; justify-content:center; box-shadow:none;">
       {% if album_art_url %}
       <img class="image" src="{{ album_art_url }}" style="width:100%; height:100%; object-fit:cover;">
       {% else %}
@@ -37,9 +37,9 @@
       {% endif %}
     </div>
     {% endif %}
-    <div style="display:flex; flex-direction:column; justify-content:flex-start; gap:10px; min-width:0; padding-top:2px; min-height:0;">
-      <div style="font-size:46px; line-height:0.9; letter-spacing:-0.055em; font-weight:900; color:{{ fg }};">{{ title | default: 'Nothing Playing' }}</div>
-      <div style="font-size:24px; line-height:1; letter-spacing:-0.025em; font-weight:800; color:{{ soft }};">{{ artist | default: 'Unknown Artist' }}</div>
+    <div style="display:flex; flex-direction:column; justify-content:flex-start; gap:8px; min-width:0; padding-top:0; min-height:0;">
+      <div style="font-size:40px; line-height:0.92; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{{ title | default: 'Nothing Playing' }}</div>
+      <div style="font-size:22px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ soft }};">{{ artist | default: 'Unknown Artist' }}</div>
       {% if show_album == true or show_album == 'true' %}
       <div style="font-size:13px; line-height:1.2; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">{{ album }}</div>
       {% endif %}
@@ -53,13 +53,13 @@
       <div style="font-size:11px; line-height:1.2; text-transform:uppercase; letter-spacing:0.1em; color:{{ soft }}; font-weight:800;">Other active rooms: {{ other_active_rooms | join: ', ' }}</div>
       {% endif %}
 
-      <div style="display:grid; grid-template-columns:{% if group_size and group_size > 1 or same_content_rooms and same_content_rooms.size > 0 or multiple_active == true or multiple_active == 'true' %} repeat(2, minmax(0, 1fr)) {% else %}1fr{% endif %}; gap:8px 12px; padding-top:6px; max-width:520px;">
-        <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:1px solid {{ border }}; border-radius:18px; background:{{ panel }};">
+      <div style="display:grid; grid-template-columns:{% if group_size and group_size > 1 or same_content_rooms and same_content_rooms.size > 0 or multiple_active == true or multiple_active == 'true' %} repeat(2, minmax(0, 1fr)) {% else %}1fr{% endif %}; gap:8px 12px; padding-top:4px; max-width:520px;">
+        <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:none; border-radius:18px; background:transparent;">
           <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Source</div>
           <div style="font-size:18px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">{{ source | default: 'Unknown' }}</div>
         </div>
         {% if group_size and group_size > 1 or same_content_rooms and same_content_rooms.size > 0 or multiple_active == true or multiple_active == 'true' %}
-        <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:1px solid {{ border }}; border-radius:18px; background:{{ panel }};">
+        <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:none; border-radius:18px; background:transparent;">
           <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Rooms</div>
           <div style="font-size:16px; line-height:1.15; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">
             {% if same_content_rooms and same_content_rooms.size > 0 %}
@@ -74,11 +74,15 @@
         {% endif %}
       </div>
 
-      {% if (show_next_tracks == true or show_next_tracks == 'true') and next_tracks and next_tracks.size > 0 %}
-      <div style="padding-top:8px; display:flex; flex-direction:column; gap:6px; max-width:560px; min-height:0;">
+      {% assign next_tracks_enabled = false %}
+      {% if show_next_tracks == true or show_next_tracks == 'true' %}
+        {% assign next_tracks_enabled = true %}
+      {% endif %}
+      {% if next_tracks_enabled and next_tracks and next_tracks.size > 0 %}
+      <div style="padding-top:6px; display:flex; flex-direction:column; gap:5px; max-width:560px; min-height:0;">
         <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.14em; color:{{ soft }}; font-weight:900;">Up Next</div>
         {% for item in next_tracks limit:3 %}
-        <div style="display:grid; grid-template-columns:20px minmax(0, 1fr); gap:8px; align-items:start; padding:6px 0; border-top:1px solid {{ border }};">
+        <div style="display:grid; grid-template-columns:20px minmax(0, 1fr); gap:8px; align-items:start; padding:6px 0; border-top:1px solid {{ fg }};">
           <div style="font-size:16px; line-height:1; font-weight:900; color:{{ soft }};">{{ forloop.index }}</div>
           <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
             <div style="font-size:16px; line-height:0.95; letter-spacing:-0.02em; font-weight:900; color:{{ fg }};">{{ item.title }}</div>
