@@ -1,13 +1,35 @@
 from dotenv import load_dotenv
+from io import BytesIO
 import datetime
 import os
+import base64
 import requests
 import soco
+from PIL import Image, ImageEnhance, ImageOps
 
 load_dotenv()
 WEBHOOK_URL = os.getenv("TRMNL_WEBHOOK_URL", "").strip()
 PREFERRED_ROOM = os.getenv("TRMNL_SONOS_ROOM", "").strip()
 UPDATED_AT_FORMAT = os.getenv("TRMNL_UPDATED_AT_FORMAT", "%d %b %H:%M")
+ALBUM_ART_SATURATION = float(os.getenv("TRMNL_ALBUM_ART_SATURATION", "0.65"))
+ALBUM_ART_CONTRAST = float(os.getenv("TRMNL_ALBUM_ART_CONTRAST", "1.1"))
+
+
+def build_processed_album_art_data_uri(url: str) -> str:
+    if not url:
+        return ""
+    try:
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+        img = Image.open(BytesIO(response.content)).convert("RGB")
+        img = ImageEnhance.Color(img).enhance(ALBUM_ART_SATURATION)
+        img = ImageEnhance.Contrast(img).enhance(ALBUM_ART_CONTRAST)
+        img = ImageOps.exif_transpose(img)
+        out = BytesIO()
+        img.save(out, format="PNG")
+        return "data:image/png;base64," + base64.b64encode(out.getvalue()).decode("ascii")
+    except Exception:
+        return ""
 
 def build_groups(speakers):
     groups = {}
@@ -61,6 +83,8 @@ def main():
     transport = speaker.get_current_transport_info()
     track = speaker.get_current_track_info()
     state = transport.get("current_transport_state", "UNKNOWN")
+    raw_album_art_url = track.get("album_art") or ""
+    processed_album_art = build_processed_album_art_data_uri(raw_album_art_url)
     queue_preview = []
     try:
         queue = list(speaker.get_queue(start=0, max_items=8))
@@ -121,7 +145,8 @@ def main():
             "title": track.get("title") or "Nothing Playing",
             "artist": track.get("artist") or "Unknown Artist",
             "album": track.get("album") or "",
-            "album_art_url": track.get("album_art") or "",
+            "album_art_url": raw_album_art_url,
+            "album_art_data_uri": processed_album_art,
             "source": track.get("uri", "").split(":", 1)[0] if track.get("uri") else "",
             "multiple_active": len(active_groups) > 1,
             "other_active_rooms": other_active_rooms,

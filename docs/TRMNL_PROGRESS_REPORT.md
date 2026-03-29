@@ -109,6 +109,7 @@
 - Added multi-room context support: grouped rooms, same-content rooms, and other active rooms.
 - Added a shareable recipe package under `plugins/trmnl-sonos-local/`.
 - Installed a `khpi5` cron-driven local refresh path for the Sonos script (`/home/dave/run_trmnl_sonos.sh`).
+- Added local album-art preprocessing in the Sonos script so LaraPaper receives a preprocessed image instead of only the raw Sonos URL.
 - Verified end-to-end: local discovery -> webhook POST -> LaraPaper render -> Pi display update.
 - Home Assistant integration paths identified: HA automation can either POST directly to the webhook or invoke the local Sonos script.
 

@@ -79,6 +79,7 @@
 - [x] Add queue preview (`Up Next`)
 - [x] Add grouped-room / multi-room awareness
 - [x] Add automatic scheduled refresh for the local Sonos script on khpi5
+- [x] Add initial local album-art preprocessing path for Sonos rendering
 - [ ] Add more live settings/runtime wiring for Sonos plugin options
 - [ ] Explore Home Assistant automation-driven webhook updates as an alternative integration path
 
