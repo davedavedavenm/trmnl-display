@@ -15,10 +15,10 @@
 - [x] Point Pi Zero client at khpi5:4567
 
 ## Phase 3: Color E-Ink [COMPLETE]
-- [x] Identify panel as Pimoroni Inky Impression 7.3" Spectra 6 Edition (`PIM773`), not grayscale
-- [x] Research bb_epaper full-colour mode for the 800x480 Spectra 6 panel
-- [x] Fix show_img.json for the full-colour panel mode
-- [x] Update LaraPaper device model for the 7.3" Spectra 6 panel
+- [x] Identify panel as 7-color ACeP (not grayscale)
+- [x] Research bb_epaper color mode (4-bpp via BBEP_7COLOR)
+- [x] Fix show_img.json (remove panel_2bit for 7-color mode)
+- [x] Update LaraPaper device model (7 colors, 3-bit, color-7a palette)
 - [x] Verify color image generation pipeline
 
 ## Phase 4: Systemd & Persistence [COMPLETE]
@@ -66,7 +66,7 @@
 - [ ] Add explicit light/dark theme option in plugin settings and runtime wiring
 - [ ] Create a strong default layout: compact editorial agenda
 - [ ] Create alternate layouts: cards, week strip, agenda focus
-- [ ] Keep e-ink-first color behavior using the Spectra 6-safe palette
+- [ ] Keep e-ink-first color behavior using the 7-color ACeP-safe palette
 - [ ] Add support for higher-density event display when more days/events are present
 - [ ] Validate readability on the physical 800x480 panel at typical viewing distance
 - [ ] Test render-side sharpness improvements via LaraPaper/device scale settings
@@ -113,13 +113,13 @@
 - [ ] Define secure local token storage and backup strategy for homelab use
 
 ## Phase 12: Optimization & Advanced Features [PLANNED]
-- [ ] Tune refresh interval per-plugin (currently LaraPaper serves 120s; target is still 600s)
+- [ ] Tune refresh interval per-plugin (currently LaraPaper serves 120s; ACeP target is still 600s)
 - [ ] Add sleep mode scheduling
-- [ ] Explore custom Spectra 6-optimized recipes
+- [ ] Explore custom ACeP-optimized recipes
 - [ ] Consider image_webhook plugin for custom Python-generated content
 - [ ] Add dark mode / night schedule
 - [ ] Port InkyPi Python plugins as image_webhook plugins (if needed)
-- [ ] Build custom color recipes using the Spectra 6 palette
+- [ ] Build custom color recipes using ACeP palette
 - [ ] Evaluate bb_epaper dithering options for better color rendering
 - [ ] Add a real-photo comparison workflow (plain vs dither vs mild saturation preprocess)
 - [ ] Investigate optional image preprocessing controls for image-heavy plugins (saturation, contrast, sharpness)

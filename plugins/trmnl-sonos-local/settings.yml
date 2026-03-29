@@ -22,7 +22,7 @@ custom_fields:
       - Balanced Color: balanced
       - Raw Source: raw
       - Monochrome: mono
-    description: Choose how album artwork is rendered on the 7.3 inch Spectra 6 display.
+    description: Choose how album artwork is rendered on the 7-colour ACeP display.
   - keyname: preferred_room
     name: Preferred Room
     field_type: string

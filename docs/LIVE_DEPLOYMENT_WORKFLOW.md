@@ -35,7 +35,7 @@ For any change that affects a TRMNL plugin, LaraPaper webhook flow, companion sc
 - Gate E: unrelated recipes still render cleanly
 
 ## Colour Rule
-For the current 7.3" panel, the target is full Spectra 6 palette usage, not grayscale fallback.
+For the current 7.3" panel, the target is full ACeP palette usage, not grayscale fallback.
 
 In practice that means:
 - preserve distinct colours where the panel can render them well
@@ -50,7 +50,7 @@ If image preprocessing is used, it must be tunable and must not silently collaps
 When Sonos appears grayscale:
 - check the live Sonos payload first to see whether album art is present
 - inspect the live LaraPaper preview/PNG
-- verify the `inky_impression_7_3` device model on `khpi5` is still using the Spectra 6 colour palette and not a 1-bit black/white model
+- verify the `inky_impression_7_3` device model on `khpi5` is still using the 7-colour palette and not a 1-bit black/white model
 - only then adjust recipe styling or artwork preprocessing
 
 ## Known Root Cause
