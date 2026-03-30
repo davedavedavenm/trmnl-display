@@ -96,6 +96,7 @@
 - [x] Build Jen commute recipe package in repo
 - [x] Build Jen commute plugin + HA automation path as the first HA-driven screen mode
 - [x] Build HA-driven Sonos mode switching as the second orchestration path
+- [x] Build the first helper-driven central resolver for `calendar` / `sonos` / `jen_commute` / `alert`
 - [ ] Build alert override path as the third orchestration path
 - [ ] Add example HA automations for webhook payload pushes and playlist/mode switching
 
@@ -105,7 +106,7 @@
 - [x] Start the next shareable recipe/orchestration step from Phase 10 rather than reopening Sonos visual redesign
 - [x] Wire the first minimal HA -> `jen_commute` webhook payload path in `homelab-ha/live-config`
 - [x] Add the first HA -> LaraPaper playlist mode-switch bridge without forcing it on while automation remains disabled
-- [ ] Implement the first customizable HA display resolver using helpers, a central policy decision, and LaraPaper playlist activation
+- [x] Implement the first customizable HA display resolver using helpers, a central policy decision, and LaraPaper playlist activation
 
 ## Phase 11: Google OAuth Companion Service [PLANNED]
 - [ ] Build an optional local Google Calendar API companion service for richer metadata than ICS provides
