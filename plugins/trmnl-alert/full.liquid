@@ -1,0 +1,58 @@
+{% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
+{% assign screen_label = trmnl.plugin_settings.custom_fields_values.screen_label | default: 'Alert' %}
+{% assign show_footer = trmnl.plugin_settings.custom_fields_values.show_footer | default: true %}
+{% assign severity_value = severity | default: 'medium' | downcase %}
+
+{% if theme_mode == 'dark' %}
+  {% assign bg = '#101010' %}
+  {% assign fg = '#fffdf8' %}
+  {% assign soft = '#d8c9a2' %}
+  {% assign panel = '#1a1a1a' %}
+{% else %}
+  {% assign bg = '#f6f1e8' %}
+  {% assign fg = '#141414' %}
+  {% assign soft = '#6f6558' %}
+  {% assign panel = '#fffdfa' %}
+{% endif %}
+
+{% assign accent = '#FFA500' %}
+{% assign accent_text = '#000000' %}
+{% if severity_value == 'high' or severity_value == 'critical' %}
+  {% assign accent = '#FF0000' %}
+  {% assign accent_text = '#FFFFFF' %}
+{% elsif severity_value == 'low' %}
+  {% assign accent = '#FFFF00' %}
+  {% assign accent_text = '#000000' %}
+{% endif %}
+
+<div class="layout layout--col h--full w--full" style="padding:18px 18px 14px; background:{{ bg }}; color:{{ fg }};">
+  <div style="display:grid; grid-template-columns:1fr auto; gap:14px; align-items:end; border-bottom:2px solid {{ fg }}; padding-bottom:10px; margin-bottom:14px;">
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div style="display:inline-flex; align-self:flex-start; padding:5px 10px; border-radius:999px; background:{{ accent }}; color:{{ accent_text }}; font-size:11px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; font-weight:900;">{{ screen_label }}</div>
+      <div style="font-size:38px; line-height:0.92; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{{ title | default: 'Attention Required' }}</div>
+    </div>
+    <div style="font-size:10px; line-height:1.2; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:800; text-align:right;">Updated {{ updated_at }}</div>
+  </div>
+
+  <div style="display:flex; flex:1; min-height:0;">
+    <div style="display:flex; flex-direction:column; gap:12px; width:100%; padding:16px 18px; border:none; border-radius:24px; background:{{ panel }};">
+      <div style="display:inline-flex; align-self:flex-start; padding:6px 12px; border-radius:999px; background:{{ accent }}; color:{{ accent_text }}; font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900;">
+        {{ severity_value }}
+      </div>
+
+      <div style="font-size:27px; line-height:1.08; letter-spacing:-0.03em; font-weight:800; color:{{ fg }};">
+        {{ message | default: 'No alert message provided.' }}
+      </div>
+
+      {% assign footer_enabled = false %}
+      {% if show_footer == true or show_footer == 'true' %}
+        {% assign footer_enabled = true %}
+      {% endif %}
+      {% if footer_enabled and footer %}
+      <div style="margin-top:auto; padding-top:10px; border-top:1px solid {{ fg }}; font-size:11px; line-height:1.25; text-transform:uppercase; letter-spacing:0.1em; color:{{ soft }}; font-weight:800;">
+        {{ footer }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

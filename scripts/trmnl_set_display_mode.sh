@@ -19,7 +19,7 @@ plugin_name_for_mode() {
     sonos) echo "${TRMNL_MODE_PLUGIN_SONOS:-Sonos Local}" ;;
     jen_commute) echo "${TRMNL_MODE_PLUGIN_JEN_COMMUTE:-Jen Commute}" ;;
     dave_commute) echo "${TRMNL_MODE_PLUGIN_DAVE_COMMUTE:-}" ;;
-    alert) echo "${TRMNL_MODE_PLUGIN_ALERT:-}" ;;
+    alert) echo "${TRMNL_MODE_PLUGIN_ALERT:-Alert}" ;;
     *) return 1 ;;
   esac
 }
