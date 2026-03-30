@@ -1,0 +1,16 @@
+[Unit]
+Description=TRMNL mode bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dave
+WorkingDirectory=/home/dave
+EnvironmentFile=/home/dave/.env.trmnl-mode-bridge
+ExecStart=/usr/bin/python3 /home/dave/bin/trmnl-mode-bridge.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

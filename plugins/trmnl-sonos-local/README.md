@@ -97,7 +97,7 @@ If you already have Sonos entities in Home Assistant, there are two good local i
 
 2. **Automation -> run local script**
    - Trigger on `media_player` changes.
-   - Use `shell_command` or SSH to run `trmnl_sonos_local.py` on `khpi5`.
+   - Use a local trigger path on `khpi5` to run `trmnl_sonos_local.py`.
    - Best if you want to keep the Sonos LAN logic in one place.
 
 The first option may be simpler if you want HA-driven automations such as:

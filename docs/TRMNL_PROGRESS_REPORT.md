@@ -149,12 +149,12 @@
 ### 15a. Home Assistant Playlist Switching Bridge - COMPLETE
 - Added a local mode-switch script under `scripts/trmnl_set_display_mode.sh`.
 - Deployed that script to `khpi5` as `/home/dave/bin/trmnl-set-display-mode`.
+- Added a small authenticated HTTP mode bridge on `khpi5` so Home Assistant can request playlist changes without SSHing out of the HA core container.
 - Confirmed LaraPaper's native playlist model is the correct switch mechanism: devices render from the first active playlist with an available item.
-- Added a HA `shell_command` pattern that SSHes to `khpi5` and activates the corresponding LaraPaper playlist for the requested mode.
-- Generated a dedicated SSH key on Home Assistant and authorized it on `khpi5` for this local mode-switch path.
+- Updated Home Assistant to call the local bridge with `rest_command`.
 - Verified end to end:
-  - HA host can call the `khpi5` switch script non-interactively
-  - `calendar`, `jen_commute`, and `sonos` playlists can be activated on demand
+  - HA resolves `calendar`, `sonos`, and `alert` correctly
+  - `khpi5` accepts those mode changes on demand
   - active playlist was restored to `sonos` after testing
 - Important current constraint: the global mode-switch automation remains gated by `input_boolean.trmnl_display_automation_enabled`, which is still the correct safe default until priority rules are defined.
 

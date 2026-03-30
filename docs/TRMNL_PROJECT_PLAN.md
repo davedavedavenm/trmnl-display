@@ -92,7 +92,7 @@
 - [x] Define screen modes such as `calendar`, `jen_commute`, `dave_commute`, `sonos`, `alert`, `idle`
 - [ ] Define priority/override order for screen modes so alerts and live context can supersede background screens
 - [x] Add HA `rest_command` pattern(s) for posting directly to LaraPaper custom plugin webhooks
-- [x] Add HA `shell_command` / SSH pattern(s) for invoking scripts on `khpi5` where local Python logic is preferable
+- [x] Add a HA -> `khpi5` bridge for invoking local LaraPaper playlist switching logic
 - [x] Build Jen commute recipe package in repo
 - [x] Build Jen commute plugin + HA automation path as the first HA-driven screen mode
 - [x] Build HA-driven Sonos mode switching as the second orchestration path
@@ -141,7 +141,7 @@
   - Pi = display client
 - Preferred integration methods:
   - HA `rest_command` -> LaraPaper plugin webhook for direct payload pushes
-  - HA `shell_command` / SSH -> script on `khpi5` when local Python logic is better
+  - HA `rest_command` -> local HTTP bridge on `khpi5` when playlist switching must happen on the server
 
 ## Validation Gates
 - **Gate A: Data fetch** - run sync script manually, verify all configured ICS feeds fetch successfully and payload includes expected events and source metadata.
