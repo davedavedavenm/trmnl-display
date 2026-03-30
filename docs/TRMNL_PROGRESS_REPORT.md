@@ -158,6 +158,34 @@
   - active playlist was restored to `sonos` after testing
 - Important current constraint: the global mode-switch automation remains gated by `input_boolean.trmnl_display_automation_enabled`, which is still the correct safe default until priority rules are defined.
 
+### 15b. First Customizable Display Resolver - COMPLETE
+- Added the first helper-driven policy layer in Home Assistant.
+- New helper categories now exist for:
+  - default mode
+  - manual override
+  - per-mode enable flags
+  - Sonos hold minutes
+  - Sonos hold-until timestamp
+  - initial alert-active and dave-commute-active signals
+- Added a central resolver automation that computes the final display mode from one place instead of letting feature automations compete directly.
+- Decision order in the first pass:
+  - manual override
+  - alert
+  - sonos
+  - jen_commute
+  - dave_commute
+  - configured default mode
+  - idle
+- Adjusted the architecture so:
+  - feature automations push payloads and expose signals
+  - the resolver owns `input_select.trmnl_display_mode`
+  - the LaraPaper playlist bridge applies the chosen mode
+- Validation:
+  - package deployed to Home Assistant
+  - `ha core check` passed
+  - HA restarted successfully
+  - active LaraPaper playlist remained on `sonos` because the master automation switch is still off, which is the intended safe default
+
 ### 16. Jen Commute Recipe Track - STARTED
 - Added a shareable `plugins/trmnl-jen-commute/` recipe package to this repo.
 - Positioned `jen_commute` as the next Home Assistant-driven screen after Sonos stabilization.
