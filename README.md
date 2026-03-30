@@ -13,6 +13,7 @@ The current live system is:
 For current project aims and live status, start with:
 - [TRMNL Project Plan](./docs/TRMNL_PROJECT_PLAN.md)
 - [TRMNL Progress Report](./docs/TRMNL_PROGRESS_REPORT.md)
+- [HA Display Orchestration Plan](./docs/HA_DISPLAY_ORCHESTRATION_PLAN.md)
 - [Live Deployment Workflow](./docs/LIVE_DEPLOYMENT_WORKFLOW.md)
 
 ## Primary Focus
