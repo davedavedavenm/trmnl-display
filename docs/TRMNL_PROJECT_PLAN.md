@@ -97,7 +97,7 @@
 - [x] Build Jen commute plugin + HA automation path as the first HA-driven screen mode
 - [x] Build HA-driven Sonos mode switching as the second orchestration path
 - [x] Build the first helper-driven central resolver for `calendar` / `sonos` / `jen_commute` / `alert`
-- [ ] Build alert override path as the third orchestration path
+- [x] Build alert override path as the third orchestration path
 - [ ] Add example HA automations for webhook payload pushes and playlist/mode switching
 
 ## Immediate Working Focus

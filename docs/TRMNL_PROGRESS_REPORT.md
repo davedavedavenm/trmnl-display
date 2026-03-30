@@ -186,6 +186,20 @@
   - HA restarted successfully
   - active LaraPaper playlist remained on `sonos` because the master automation switch is still off, which is the intended safe default
 
+### 15c. Alert Override Path - COMPLETE
+- Added a shareable `plugins/trmnl-alert/` recipe package to the repo.
+- Created a live LaraPaper `Alert` plugin on `khpi5`.
+- Added a new HA webhook path for the alert plugin.
+- Added helper fields for alert title, message, footer, and severity.
+- Added simple HA scripts for:
+  - setting the active alert payload
+  - clearing the alert-active signal
+- Verified end to end:
+  - alert webhook payload POST succeeds
+  - LaraPaper `alert` playlist can be activated on demand
+  - active playlist was restored to `sonos` after testing
+- Current shape is intentionally simple: the alert path now exists as a real override screen, and richer alert sources can be wired into it later.
+
 ### 16. Jen Commute Recipe Track - STARTED
 - Added a shareable `plugins/trmnl-jen-commute/` recipe package to this repo.
 - Positioned `jen_commute` as the next Home Assistant-driven screen after Sonos stabilization.
