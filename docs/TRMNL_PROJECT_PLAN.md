@@ -94,7 +94,7 @@
 - [x] Add HA `rest_command` pattern(s) for posting directly to LaraPaper custom plugin webhooks
 - [ ] Add HA `shell_command` / SSH pattern(s) for invoking scripts on `khpi5` where local Python logic is preferable
 - [x] Build Jen commute recipe package in repo
-- [ ] Build Jen commute plugin + HA automation path as the first HA-driven screen mode
+- [x] Build Jen commute plugin + HA automation path as the first HA-driven screen mode
 - [ ] Build HA-driven Sonos mode switching as the second orchestration path
 - [ ] Build alert override path as the third orchestration path
 - [ ] Add example HA automations for webhook payload pushes and playlist/mode switching
@@ -103,7 +103,7 @@
 - [x] Reposition repository docs around the Home Assistant Edition direction without changing the working Sonos page layout
 - [x] Commit and preserve the current colour-correct Sonos recipe as the baseline implementation
 - [x] Start the next shareable recipe/orchestration step from Phase 10 rather than reopening Sonos visual redesign
-- [ ] Wire the first minimal HA -> `jen_commute` webhook payload path in `homelab-ha/live-config`
+- [x] Wire the first minimal HA -> `jen_commute` webhook payload path in `homelab-ha/live-config`
 
 ## Phase 11: Google OAuth Companion Service [PLANNED]
 - [ ] Build an optional local Google Calendar API companion service for richer metadata than ICS provides
