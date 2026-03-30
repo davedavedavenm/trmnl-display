@@ -5,6 +5,14 @@ strategy: webhook
 refresh_interval: 5
 id: inkypi-jen-morning
 custom_fields:
+  - keyname: layout_variant
+    name: Layout Variant
+    field_type: select
+    default: editorial
+    options:
+      - Editorial: editorial
+      - Structured: structured
+    description: Choose the visual style used in both standalone and mashup layouts.
   - keyname: screen_label
     name: Screen Label
     field_type: string

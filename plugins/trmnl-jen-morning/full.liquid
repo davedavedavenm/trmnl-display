@@ -1,4 +1,5 @@
 {% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
+{% assign layout_variant = trmnl.plugin_settings.custom_fields_values.layout_variant | default: 'editorial' %}
 {% assign screen_label = trmnl.plugin_settings.custom_fields_values.screen_label | default: 'Jen Morning' %}
 {% assign headline_fallback = trmnl.plugin_settings.custom_fields_values.headline_fallback | default: 'Time To Work' %}
 {% assign eta_label = trmnl.plugin_settings.custom_fields_values.eta_label | default: 'ETA' %}
@@ -14,22 +15,30 @@
   {% assign bg = '#111111' %}
   {% assign fg = '#fffdf8' %}
   {% assign soft = '#d8c9a2' %}
+  {% assign soft_2 = '#8c816d' %}
   {% assign panel = '#1a1a1a' %}
   {% assign panel_alt = '#24211d' %}
-  {% assign border = '#3b352d' %}
+  {% assign border = '#fffdf8' %}
   {% assign accent = '#ffa500' %}
   {% assign accent_text = '#000000' %}
 {% else %}
   {% assign bg = '#f6f1e8' %}
   {% assign fg = '#141414' %}
   {% assign soft = '#6f6558' %}
+  {% assign soft_2 = '#8f8576' %}
   {% assign panel = '#fffdfa' %}
   {% assign panel_alt = '#ece3d7' %}
-  {% assign border = '#d5ccbf' %}
+  {% assign border = '#141414' %}
   {% assign accent = '#ffa500' %}
   {% assign accent_text = '#000000' %}
 {% endif %}
 
+{% assign distance_enabled = false %}
+{% if show_distance == true or show_distance == 'true' %}
+  {% assign distance_enabled = true %}
+{% endif %}
+
+{% if layout_variant == 'structured' %}
 <div class="layout layout--col h--full w--full" style="padding:16px 18px 12px; background:{{ bg }}; color:{{ fg }}; overflow:hidden;">
   <div style="display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:14px; align-items:end; margin-bottom:14px;">
     <div style="display:flex; flex-direction:column; gap:5px; min-width:0;">
@@ -55,10 +64,6 @@
       <div style="padding:14px 16px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel_alt }}; display:flex; flex-direction:column; gap:5px;">
         <div style="font-size:10px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Distance</div>
         <div style="font-size:22px; line-height:0.95; letter-spacing:-0.04em; font-weight:900; color:{{ fg }};">
-          {% assign distance_enabled = false %}
-          {% if show_distance == true or show_distance == 'true' %}
-            {% assign distance_enabled = true %}
-          {% endif %}
           {% if distance_enabled and distance_value != '' and distance_value != '?' %}
             {{ distance_value }} {{ distance_unit_label }}
           {% else %}
@@ -73,27 +78,41 @@
         <div style="font-size:11px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">{{ route_section_label }}</div>
         <div style="font-size:28px; line-height:0.96; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{{ route_value }}</div>
       </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="layout layout--col h--full w--full" style="padding:18px 20px 16px; background:{{ bg }}; color:{{ fg }}; overflow:hidden;">
+  <div style="display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:14px; align-items:start; margin-bottom:18px;">
+    <div style="display:flex; flex-direction:column; gap:7px; min-width:0;">
+      <div style="display:inline-flex; align-self:flex-start; padding:5px 12px; border-radius:999px; background:{{ accent }}; color:{{ accent_text }}; font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; font-weight:900;">{{ screen_label }}</div>
+      <div style="font-size:46px; line-height:0.86; letter-spacing:-0.08em; font-weight:900; color:{{ fg }};">{{ headline | default: headline_fallback }}</div>
+    </div>
+    <div style="padding-top:8px; font-size:10px; line-height:1.15; letter-spacing:0.14em; text-transform:uppercase; color:{{ soft }}; font-weight:900; text-align:right;">{{ updated_at }}</div>
+  </div>
 
-      <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px;">
-        <div style="padding:12px 14px; border:1px solid {{ border }}; border-radius:18px; background:{{ panel_alt }}; display:flex; flex-direction:column; gap:4px;">
-          <div style="font-size:9px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">State</div>
-          <div style="font-size:18px; line-height:1; letter-spacing:-0.03em; font-weight:900; color:{{ fg }};">{{ commute_state | default: 'idle' | replace: '_', ' ' }}</div>
-        </div>
-        <div style="padding:12px 14px; border:1px solid {{ border }}; border-radius:18px; background:{{ panel_alt }}; display:flex; flex-direction:column; gap:4px;">
-          <div style="font-size:9px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Heading Home</div>
-          <div style="font-size:18px; line-height:1; letter-spacing:-0.03em; font-weight:900; color:{{ fg }};">{{ heading_home | default: 'No' }}</div>
+  <div style="display:grid; grid-template-columns:280px minmax(0, 1fr); gap:26px; flex:1; min-height:0;">
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div style="font-size:11px; line-height:1; letter-spacing:0.2em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">{{ eta_label }}</div>
+      <div style="display:flex; align-items:flex-start; gap:14px; min-width:0;">
+        <div style="width:14px; height:176px; background:{{ accent }}; flex:0 0 auto;"></div>
+        <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
+          <div style="display:flex; align-items:flex-end; gap:10px; min-width:0;">
+            <div style="font-size:128px; line-height:0.76; letter-spacing:-0.14em; font-weight:900; color:{{ fg }};">{{ eta_value }}</div>
+            <div style="padding-bottom:22px; font-size:12px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft_2 }}; font-weight:900;">{{ eta_unit_label }}</div>
+          </div>
+          <div style="width:100%; height:3px; background:{{ border }};"></div>
         </div>
       </div>
+    </div>
 
-      {% if home_prep_status %}
-      <div style="padding:14px 16px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }}; display:flex; flex-direction:column; gap:6px;">
-        <div style="font-size:10px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Home Prep</div>
-        <div style="font-size:22px; line-height:0.98; letter-spacing:-0.04em; font-weight:900; color:{{ fg }};">{{ home_prep_status }}</div>
-        {% if prep_note %}
-        <div style="font-size:12px; line-height:1.25; color:{{ soft }}; font-weight:800;">{{ prep_note }}</div>
-        {% endif %}
-      </div>
+    <div style="display:flex; flex-direction:column; justify-content:flex-start; gap:12px; min-width:0; padding-top:44px;">
+      <div style="font-size:11px; line-height:1; letter-spacing:0.2em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">{{ route_section_label }}</div>
+      <div style="font-size:44px; line-height:0.9; letter-spacing:-0.08em; font-weight:900; color:{{ fg }};">{{ route_value }}</div>
+      {% if distance_enabled and distance_value != '' and distance_value != '?' %}
+      <div style="font-size:12px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft_2 }}; font-weight:900;">{{ distance_value }} {{ distance_unit_label }}</div>
       {% endif %}
     </div>
   </div>
 </div>
+{% endif %}

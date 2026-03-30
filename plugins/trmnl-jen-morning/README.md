@@ -35,6 +35,7 @@ Example payload:
 ```
 
 User-editable settings:
+- `Layout Variant`: switch between `Editorial` and `Structured`
 - `Screen Label`: small chip above the headline
 - `Headline Fallback`: used if the webhook payload omits `headline`
 - `Theme`: light or dark
@@ -58,3 +59,4 @@ Notes:
 - The intended Home Assistant pattern is: a dedicated TRMNL package pushes payloads and temporarily sets a TRMNL manual override during the configured morning window.
 - The intended quote/content split should come from a LaraPaper mashup with a separate quote recipe, not from embedding quotes inside this plugin.
 - Keep the recipe reusable by leaving commute-specific decision logic in Home Assistant or another upstream orchestrator. The plugin should stay focused on presentation and small user-configurable labels.
+- LaraPaper standalone preview renders the plugin `full` layout, while the live split-screen playlist renders `half_vertical`. They should now share the same visual family and settings, but they will not be pixel-identical because they are different layout sizes.
