@@ -2,59 +2,77 @@
 {% assign screen_label = trmnl.plugin_settings.custom_fields_values.screen_label | default: 'Jen Morning' %}
 {% assign eta_value = eta_minutes | default: '?' %}
 {% assign route_value = route_label | default: 'Direct route' %}
+{% assign distance_value = distance_km | default: '' %}
+{% assign commute_state_value = commute_state | default: 'idle' | replace: '_', ' ' %}
+{% assign heading_home_value = heading_home | default: 'No' %}
 
 {% if theme_mode == 'dark' %}
   {% assign bg = '#111111' %}
   {% assign fg = '#fffdf8' %}
   {% assign soft = '#d8c9a2' %}
+  {% assign soft_2 = '#8c816d' %}
   {% assign panel = '#1a1a1a' %}
   {% assign panel_alt = '#24211d' %}
-  {% assign border = '#3b352d' %}
+  {% assign border = '#fffdf8' %}
   {% assign accent = '#ffa500' %}
   {% assign accent_text = '#000000' %}
 {% else %}
   {% assign bg = '#f6f1e8' %}
   {% assign fg = '#141414' %}
   {% assign soft = '#6f6558' %}
+  {% assign soft_2 = '#8f8576' %}
   {% assign panel = '#fffdfa' %}
   {% assign panel_alt = '#ece3d7' %}
-  {% assign border = '#d5ccbf' %}
+  {% assign border = '#141414' %}
   {% assign accent = '#ffa500' %}
   {% assign accent_text = '#000000' %}
 {% endif %}
 
-<div class="layout layout--col h--full w--full" style="padding:12px 12px 10px; background:{{ bg }}; color:{{ fg }}; overflow:hidden;">
-  <div style="display:flex; flex-direction:column; gap:6px; border-bottom:2px solid {{ fg }}; padding-bottom:8px; margin-bottom:10px;">
-    <div style="display:flex; justify-content:space-between; align-items:start; gap:8px;">
-      <div style="display:inline-flex; align-self:flex-start; padding:4px 9px; border-radius:999px; background:{{ accent }}; color:{{ accent_text }}; font-size:9px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900;">{{ screen_label }}</div>
-      <div style="font-size:8px; line-height:1.1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900; text-align:right;">{{ updated_at }}</div>
+<div class="layout layout--col h--full w--full" style="padding:14px 14px 12px; background:{{ bg }}; color:{{ fg }}; overflow:hidden;">
+  <div style="display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:10px; align-items:start; margin-bottom:12px;">
+    <div style="display:flex; flex-direction:column; gap:7px; min-width:0;">
+      <div style="display:inline-flex; align-self:flex-start; padding:4px 10px; border-radius:999px; background:{{ accent }}; color:{{ accent_text }}; font-size:9px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; font-weight:900;">{{ screen_label }}</div>
+      <div style="font-size:27px; line-height:0.88; letter-spacing:-0.07em; font-weight:900; color:{{ fg }};">{{ headline | default: 'Time To Work' }}</div>
     </div>
-    <div style="font-size:24px; line-height:0.9; letter-spacing:-0.06em; font-weight:900; color:{{ fg }};">{{ headline | default: 'Time To Work' }}</div>
+    <div style="padding-top:2px; font-size:8px; line-height:1.15; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900; text-align:right;">{{ updated_at }}</div>
   </div>
 
-  <div style="display:flex; flex-direction:column; gap:10px; flex:1; min-height:0;">
-    <div style="padding:14px 14px 12px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }}; display:flex; flex-direction:column; gap:6px;">
-      <div style="font-size:9px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">ETA</div>
-      <div style="font-size:52px; line-height:0.82; letter-spacing:-0.08em; font-weight:900; color:{{ fg }};">{{ eta_value }}</div>
-      <div style="font-size:9px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">minutes</div>
-    </div>
+  <div style="display:flex; flex-direction:column; gap:12px; flex:1; min-height:0;">
+    <div style="display:grid; grid-template-columns:12px minmax(0, 1fr); gap:12px; align-items:start; min-height:186px;">
+      <div style="width:12px; height:100%; background:{{ border }};"></div>
+      <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <div style="font-size:9px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">ETA</div>
+          <div style="display:flex; align-items:flex-end; gap:8px; min-width:0;">
+            <div style="font-size:86px; line-height:0.8; letter-spacing:-0.11em; font-weight:900; color:{{ fg }};">{{ eta_value }}</div>
+            <div style="padding-bottom:13px; font-size:10px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:{{ fg }}; font-weight:900;">min</div>
+          </div>
+        </div>
 
-    <div style="padding:14px 14px 12px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel_alt }}; display:flex; flex-direction:column; gap:6px;">
-      <div style="font-size:9px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Route</div>
-      <div style="font-size:18px; line-height:0.96; letter-spacing:-0.04em; font-weight:900; color:{{ fg }};">{{ route_value }}</div>
-      {% if distance_km and distance_km != '?' and distance_km != '' %}
-      <div style="font-size:10px; line-height:1; letter-spacing:0.1em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">{{ distance_km }} km</div>
-      {% endif %}
-    </div>
+        <div style="height:3px; background:{{ border }}; width:100%;"></div>
 
-    <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:auto;">
-      <div style="padding:10px 11px; border:1px solid {{ border }}; border-radius:16px; background:{{ panel }}; display:flex; flex-direction:column; gap:4px;">
-        <div style="font-size:8px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">State</div>
-        <div style="font-size:13px; line-height:1; letter-spacing:-0.03em; font-weight:900; color:{{ fg }};">{{ commute_state | default: 'idle' | replace: '_', ' ' }}</div>
+        <div style="display:flex; flex-direction:column; gap:4px; min-width:0;">
+          <div style="font-size:9px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Route</div>
+          <div style="font-size:27px; line-height:0.92; letter-spacing:-0.06em; font-weight:900; color:{{ fg }};">{{ route_value }}</div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-top:2px;">
+            {% if distance_value != '' and distance_value != '?' %}
+            <div style="font-size:10px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ fg }}; font-weight:900;">{{ distance_value }} km</div>
+            <div style="width:14px; height:2px; background:{{ border }};"></div>
+            {% endif %}
+            <div style="font-size:9px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft_2 }}; font-weight:900;">live commute</div>
+          </div>
+        </div>
       </div>
-      <div style="padding:10px 11px; border:1px solid {{ border }}; border-radius:16px; background:{{ panel }}; display:flex; flex-direction:column; gap:4px;">
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-top:auto;">
+      <div style="padding:10px 11px 9px; border:2px solid {{ border }}; display:flex; flex-direction:column; gap:4px;">
+        <div style="font-size:8px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">State</div>
+        <div style="font-size:16px; line-height:0.96; letter-spacing:-0.04em; font-weight:900; color:{{ fg }};">{{ commute_state_value }}</div>
+      </div>
+      <div style="padding:10px 11px 9px; border:2px solid {{ border }}; display:flex; flex-direction:column; gap:4px;">
         <div style="font-size:8px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Heading Home</div>
-        <div style="font-size:13px; line-height:1; letter-spacing:-0.03em; font-weight:900; color:{{ fg }};">{{ heading_home | default: 'No' }}</div>
+        <div style="font-size:16px; line-height:0.96; letter-spacing:-0.04em; font-weight:900; color:{{ fg }};">{{ heading_home_value }}</div>
       </div>
     </div>
   </div>
