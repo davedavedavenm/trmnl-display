@@ -28,3 +28,8 @@ custom_fields:
     field_type: boolean
     default: true
     optional: true
+  - keyname: quote_panel_label
+    name: Quote Panel Label
+    field_type: string
+    default: Quote
+    optional: true
