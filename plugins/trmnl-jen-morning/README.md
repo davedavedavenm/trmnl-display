@@ -51,6 +51,7 @@ Suggested LaraPaper setup:
    - `Jen Morning` on the left
    - a quote recipe such as `Potter Quotes` on the right
    - layout `1Lx1R`
+4. For the currently used playlist-level wiring, see `docs/JEN_MORNING_MASHUP.md` and `scripts/larapaper_manage_mashup.sh`.
 
 Notes:
 - This is a separate morning screen, not a replacement for the main `Jen Commute` recipe.
