@@ -88,14 +88,14 @@
 - [x] Audit local HA config repo and host access paths (`homelab-ha/live-config`, `home-assistant`, `ha-super`)
 - [x] Confirm relevant HA domains/entities already exist: Sonos media players, presence, commute system, Waze-based traffic, notifications
 - [x] Add initial HA orchestration package with helpers and a proof automation
-- [ ] Introduce a HA-side display mode helper (for example `input_select.trmnl_display_mode`)
-- [ ] Define screen modes such as `calendar`, `jen_commute`, `dave_commute`, `sonos`, `alert`, `idle`
+- [x] Introduce a HA-side display mode helper (for example `input_select.trmnl_display_mode`)
+- [x] Define screen modes such as `calendar`, `jen_commute`, `dave_commute`, `sonos`, `alert`, `idle`
 - [ ] Define priority/override order for screen modes so alerts and live context can supersede background screens
 - [x] Add HA `rest_command` pattern(s) for posting directly to LaraPaper custom plugin webhooks
-- [ ] Add HA `shell_command` / SSH pattern(s) for invoking scripts on `khpi5` where local Python logic is preferable
+- [x] Add HA `shell_command` / SSH pattern(s) for invoking scripts on `khpi5` where local Python logic is preferable
 - [x] Build Jen commute recipe package in repo
 - [x] Build Jen commute plugin + HA automation path as the first HA-driven screen mode
-- [ ] Build HA-driven Sonos mode switching as the second orchestration path
+- [x] Build HA-driven Sonos mode switching as the second orchestration path
 - [ ] Build alert override path as the third orchestration path
 - [ ] Add example HA automations for webhook payload pushes and playlist/mode switching
 
@@ -104,6 +104,7 @@
 - [x] Commit and preserve the current colour-correct Sonos recipe as the baseline implementation
 - [x] Start the next shareable recipe/orchestration step from Phase 10 rather than reopening Sonos visual redesign
 - [x] Wire the first minimal HA -> `jen_commute` webhook payload path in `homelab-ha/live-config`
+- [x] Add the first HA -> LaraPaper playlist mode-switch bridge without forcing it on while automation remains disabled
 
 ## Phase 11: Google OAuth Companion Service [PLANNED]
 - [ ] Build an optional local Google Calendar API companion service for richer metadata than ICS provides
