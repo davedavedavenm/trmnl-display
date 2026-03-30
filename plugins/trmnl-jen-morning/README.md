@@ -8,6 +8,7 @@ It is separate from the main Jen commute automation/state machine and should not
 Recipe files:
 - `plugins/trmnl-jen-morning/settings.yml`
 - `plugins/trmnl-jen-morning/full.liquid`
+- `plugins/trmnl-jen-morning/half_vertical.liquid`
 
 Expected payload fields:
 - required:
@@ -17,8 +18,10 @@ Expected payload fields:
   - `route_label`
 - optional:
   - `distance_km`
-  - `quote_text`
-  - `quote_source`
+  - `commute_state`
+  - `heading_home`
+  - `home_prep_status`
+  - `prep_note`
 
 Example payload:
 
@@ -30,8 +33,9 @@ Example payload:
     "eta_minutes": "42",
     "route_label": "Woollard Ln",
     "distance_km": "29.4",
-    "quote_text": "Happiness can be found, even in the darkest of times.",
-    "quote_source": "Albus Dumbledore"
+    "commute_state": "active",
+    "heading_home": "No",
+    "home_prep_status": "Leave in 10 minutes"
   }
 }
 ```
@@ -39,3 +43,4 @@ Example payload:
 Notes:
 - This is a separate morning screen, not a replacement for the main `Jen Commute` recipe.
 - The intended Home Assistant pattern is: a dedicated TRMNL package pushes payloads and temporarily sets a TRMNL manual override during the configured morning window.
+- The intended quote/content split should come from a LaraPaper mashup with a separate quote recipe, not from embedding quotes inside this plugin.

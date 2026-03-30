@@ -1,0 +1,61 @@
+{% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
+{% assign screen_label = trmnl.plugin_settings.custom_fields_values.screen_label | default: 'Jen Morning' %}
+{% assign eta_value = eta_minutes | default: '?' %}
+{% assign route_value = route_label | default: 'Direct route' %}
+
+{% if theme_mode == 'dark' %}
+  {% assign bg = '#111111' %}
+  {% assign fg = '#fffdf8' %}
+  {% assign soft = '#d8c9a2' %}
+  {% assign panel = '#1a1a1a' %}
+  {% assign panel_alt = '#24211d' %}
+  {% assign border = '#3b352d' %}
+  {% assign accent = '#ffa500' %}
+  {% assign accent_text = '#000000' %}
+{% else %}
+  {% assign bg = '#f6f1e8' %}
+  {% assign fg = '#141414' %}
+  {% assign soft = '#6f6558' %}
+  {% assign panel = '#fffdfa' %}
+  {% assign panel_alt = '#ece3d7' %}
+  {% assign border = '#d5ccbf' %}
+  {% assign accent = '#ffa500' %}
+  {% assign accent_text = '#000000' %}
+{% endif %}
+
+<div class="layout layout--col h--full w--full" style="padding:12px 12px 10px; background:{{ bg }}; color:{{ fg }}; overflow:hidden;">
+  <div style="display:flex; flex-direction:column; gap:6px; border-bottom:2px solid {{ fg }}; padding-bottom:8px; margin-bottom:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:start; gap:8px;">
+      <div style="display:inline-flex; align-self:flex-start; padding:4px 9px; border-radius:999px; background:{{ accent }}; color:{{ accent_text }}; font-size:9px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900;">{{ screen_label }}</div>
+      <div style="font-size:8px; line-height:1.1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900; text-align:right;">{{ updated_at }}</div>
+    </div>
+    <div style="font-size:24px; line-height:0.9; letter-spacing:-0.06em; font-weight:900; color:{{ fg }};">{{ headline | default: 'Time To Work' }}</div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:10px; flex:1; min-height:0;">
+    <div style="padding:14px 14px 12px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }}; display:flex; flex-direction:column; gap:6px;">
+      <div style="font-size:9px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">ETA</div>
+      <div style="font-size:52px; line-height:0.82; letter-spacing:-0.08em; font-weight:900; color:{{ fg }};">{{ eta_value }}</div>
+      <div style="font-size:9px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">minutes</div>
+    </div>
+
+    <div style="padding:14px 14px 12px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel_alt }}; display:flex; flex-direction:column; gap:6px;">
+      <div style="font-size:9px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Route</div>
+      <div style="font-size:18px; line-height:0.96; letter-spacing:-0.04em; font-weight:900; color:{{ fg }};">{{ route_value }}</div>
+      {% if distance_km and distance_km != '?' and distance_km != '' %}
+      <div style="font-size:10px; line-height:1; letter-spacing:0.1em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">{{ distance_km }} km</div>
+      {% endif %}
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:auto;">
+      <div style="padding:10px 11px; border:1px solid {{ border }}; border-radius:16px; background:{{ panel }}; display:flex; flex-direction:column; gap:4px;">
+        <div style="font-size:8px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">State</div>
+        <div style="font-size:13px; line-height:1; letter-spacing:-0.03em; font-weight:900; color:{{ fg }};">{{ commute_state | default: 'idle' | replace: '_', ' ' }}</div>
+      </div>
+      <div style="padding:10px 11px; border:1px solid {{ border }}; border-radius:16px; background:{{ panel }}; display:flex; flex-direction:column; gap:4px;">
+        <div style="font-size:8px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Heading Home</div>
+        <div style="font-size:13px; line-height:1; letter-spacing:-0.03em; font-weight:900; color:{{ fg }};">{{ heading_home | default: 'No' }}</div>
+      </div>
+    </div>
+  </div>
+</div>
