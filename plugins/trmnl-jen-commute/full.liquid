@@ -1,6 +1,9 @@
 {% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
 {% assign show_map_link = trmnl.plugin_settings.custom_fields_values.show_map_link | default: true %}
 {% assign show_home_prep = trmnl.plugin_settings.custom_fields_values.show_home_prep | default: true %}
+{% assign screen_label = trmnl.plugin_settings.custom_fields_values.screen_label | default: 'Jen Commute' %}
+{% assign commute_state_display = commute_state | default: 'idle' | replace: '_', ' ' %}
+{% assign heading_home_display = heading_home | default: 'No' %}
 {% if theme_mode == 'dark' %}
   {% assign bg = '#111111' %}
   {% assign fg = '#fffdf8' %}
@@ -17,7 +20,7 @@
 <div class="layout layout--col h--full w--full" style="padding:16px 18px 12px; background:{{ bg }}; color:{{ fg }};">
   <div style="display:grid; grid-template-columns:1fr auto; gap:16px; align-items:end; border-bottom:2px solid {{ fg }}; padding-bottom:10px; margin-bottom:12px;">
     <div style="display:flex; flex-direction:column; gap:4px;">
-      <div style="font-size:11px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:800;">Jen Commute</div>
+      <div style="font-size:11px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:800;">{{ screen_label }}</div>
       <div style="font-size:36px; line-height:0.9; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{{ headline | default: 'Heading Out' }}</div>
     </div>
     <div style="font-size:10px; line-height:1.2; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:800; text-align:right;">Updated {{ updated_at }}</div>
@@ -34,7 +37,13 @@
       <div style="display:flex; flex-direction:column; gap:4px; padding:14px 16px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }};">
         <div style="font-size:12px; line-height:1; text-transform:uppercase; letter-spacing:0.14em; color:{{ soft }}; font-weight:800;">Route</div>
         <div style="font-size:20px; line-height:1; letter-spacing:-0.02em; font-weight:900; color:{{ fg }};">{{ route_label | default: 'Direct' }}</div>
-        <div style="font-size:11px; line-height:1.2; color:{{ soft }}; font-weight:800;">{{ distance_km }} km</div>
+        <div style="font-size:11px; line-height:1.2; color:{{ soft }}; font-weight:800;">
+          {% if distance_km and distance_km != '?' and distance_km != '' %}
+            {{ distance_km }} km
+          {% else %}
+            Distance unavailable
+          {% endif %}
+        </div>
       </div>
     </div>
 
@@ -42,11 +51,11 @@
       <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px 12px;">
         <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:1px solid {{ border }}; border-radius:18px; background:{{ panel }};">
           <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">State</div>
-          <div style="font-size:18px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">{{ commute_state }}</div>
+          <div style="font-size:18px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">{{ commute_state_display }}</div>
         </div>
         <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:1px solid {{ border }}; border-radius:18px; background:{{ panel }};">
           <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Heading Home</div>
-          <div style="font-size:18px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">{{ heading_home }}</div>
+          <div style="font-size:18px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">{{ heading_home_display }}</div>
         </div>
       </div>
 
@@ -60,7 +69,11 @@
       </div>
       {% endif %}
 
-      {% if show_map_link == true or show_map_link == 'true' and map_url %}
+      {% assign map_enabled = false %}
+      {% if show_map_link == true or show_map_link == 'true' %}
+        {% assign map_enabled = true %}
+      {% endif %}
+      {% if map_enabled and map_url %}
       <div style="padding:14px 16px; border:1px solid {{ border }}; border-radius:20px; background:{{ panel }}; display:flex; flex-direction:column; gap:5px;">
         <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Route Link</div>
         <div style="font-size:13px; line-height:1.25; color:{{ fg }}; font-weight:800;">Google Maps ready in HA/mobile notification flow</div>

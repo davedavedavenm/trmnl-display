@@ -150,6 +150,10 @@
 - Added a shareable `plugins/trmnl-jen-commute/` recipe package to this repo.
 - Positioned `jen_commute` as the next Home Assistant-driven screen after Sonos stabilization.
 - Working rule for this track: keep commute decision logic in Home Assistant and keep the recipe webhook payload simple and shareable.
+- Added a live LaraPaper custom plugin on `khpi5` and a matching HA webhook path.
+- Tightened the recipe contract so it uses a cleaner shareable payload, optional screen labeling, and safer empty-state handling.
+- Fixed a recipe bug where the map-link panel could render without a valid `map_url`.
+- Tightened the HA automation so it only claims the display mode when commute context is actually active, rather than hijacking the screen while idle.
 
 ### 16a. Community Pattern Audit - COMPLETE
 - Confirmed that official TRMNL guidance supports Home Assistant integration and a separate screenshot-based dashboard path.
