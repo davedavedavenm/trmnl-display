@@ -1,97 +1,115 @@
 {% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
-{% assign show_map_link = trmnl.plugin_settings.custom_fields_values.show_map_link | default: true %}
-{% assign show_home_prep = trmnl.plugin_settings.custom_fields_values.show_home_prep | default: true %}
 {% assign screen_label = trmnl.plugin_settings.custom_fields_values.screen_label | default: 'Jen Morning' %}
 {% assign quote_panel_label = trmnl.plugin_settings.custom_fields_values.quote_panel_label | default: 'Quote' %}
-{% assign commute_state_display = commute_state | default: 'idle' | replace: '_', ' ' %}
-{% assign heading_home_display = heading_home | default: 'No' %}
 {% assign quote_text_value = quote_text | default: '' %}
 {% assign quote_source_value = quote_source | default: '' %}
+{% assign headline_value = headline | default: 'Time To Work' %}
+{% assign route_value = route_label | default: 'Route unavailable' %}
+{% assign eta_raw = eta_minutes | default: '?' | append: '' %}
+{% assign eta_whole = eta_raw | split: '.' | first %}
+{% assign distance_value = distance_km | default: '' | append: '' %}
+{% assign has_distance = false %}
+{% if distance_value != blank and distance_value != '?' %}
+  {% assign has_distance = true %}
+{% endif %}
 {% assign has_quote_panel = false %}
 {% if quote_text_value != blank %}
   {% assign has_quote_panel = true %}
 {% endif %}
 {% if theme_mode == 'dark' %}
-  {% assign bg = '#111111' %}
-  {% assign fg = '#fffdf8' %}
-  {% assign soft = '#d8c9a2' %}
-  {% assign panel = '#1a1a1a' %}
-  {% assign border = '#3b352d' %}
+  {% assign bg = '#14110f' %}
+  {% assign paper = '#1b1714' %}
+  {% assign ink = '#fff7eb' %}
+  {% assign muted = '#d1b78a' %}
+  {% assign rule = '#8a6b2c' %}
+  {% assign accent = '#f2b233' %}
 {% else %}
-  {% assign bg = '#f6f1e8' %}
-  {% assign fg = '#141414' %}
-  {% assign soft = '#6f6558' %}
-  {% assign panel = '#fffdfa' %}
-  {% assign border = '#d5ccbf' %}
+  {% assign bg = '#f3eee2' %}
+  {% assign paper = '#fbf7ef' %}
+  {% assign ink = '#13110d' %}
+  {% assign muted = '#7b6441' %}
+  {% assign rule = '#d3b06a' %}
+  {% assign accent = '#c88a11' %}
 {% endif %}
-<div class="layout layout--col h--full w--full" style="padding:16px 18px 12px; background:{{ bg }}; color:{{ fg }};">
-  <div style="display:grid; grid-template-columns:1fr auto; gap:16px; align-items:end; border-bottom:2px solid {{ fg }}; padding-bottom:10px; margin-bottom:12px;">
-    <div style="display:flex; flex-direction:column; gap:4px;">
-      <div style="font-size:11px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:800;">{{ screen_label }}</div>
-      <div style="font-size:36px; line-height:0.9; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{{ headline | default: 'Heading Out' }}</div>
-    </div>
-    <div style="font-size:10px; line-height:1.2; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:800; text-align:right;">Updated {{ updated_at }}</div>
-  </div>
+<div class="layout layout--col h--full w--full" style="padding:18px 20px 16px; background:{{ bg }}; color:{{ ink }};">
+  <div style="position:relative; flex:1; display:flex; flex-direction:column; border:2px solid {{ ink }}; background:{{ paper }}; overflow:hidden;">
+    <div style="position:absolute; top:0; right:0; width:148px; height:148px; border-left:2px solid {{ ink }}; border-bottom:2px solid {{ ink }}; background:
+      linear-gradient(135deg, transparent 0 51%, {{ accent }} 51% 56%, transparent 56% 100%); opacity:0.88;"></div>
 
-  <div style="display:grid; grid-template-columns:{% if has_quote_panel %}1.15fr 0.85fr{% else %}220px minmax(0, 1fr){% endif %}; gap:18px; flex:1; align-items:start;">
-    <div style="display:flex; flex-direction:column; gap:12px; min-width:0;">
-      <div style="display:flex; flex-direction:column; gap:4px; padding:14px 16px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }};">
-        <div style="font-size:12px; line-height:1; text-transform:uppercase; letter-spacing:0.14em; color:{{ soft }}; font-weight:800;">ETA</div>
-        <div style="font-size:58px; line-height:0.86; letter-spacing:-0.06em; font-weight:900; color:{{ fg }};">{{ eta_minutes | default: '?' }}</div>
-        <div style="font-size:12px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">minutes</div>
+    <div style="display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:14px; align-items:start; padding:18px 20px 14px; border-bottom:2px solid {{ ink }};">
+      <div style="display:flex; flex-direction:column; gap:5px; min-width:0;">
+        <div style="font-size:11px; line-height:1; letter-spacing:0.26em; text-transform:uppercase; color:{{ accent }}; font-weight:900;">{{ screen_label }}</div>
+        <div style="font-size:46px; line-height:0.9; letter-spacing:-0.07em; font-weight:900; color:{{ ink }};">{{ headline_value }}</div>
       </div>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; padding-top:4px;">
+        <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ muted }}; font-weight:900;">Updated</div>
+        <div style="font-size:14px; line-height:1; letter-spacing:0.08em; text-transform:uppercase; color:{{ ink }}; font-weight:900;">{{ updated_at }}</div>
+      </div>
+    </div>
 
-      <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px 12px;">
-        <div style="display:flex; flex-direction:column; gap:4px; padding:14px 16px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }};">
-          <div style="font-size:12px; line-height:1; text-transform:uppercase; letter-spacing:0.14em; color:{{ soft }}; font-weight:800;">Route</div>
-          <div style="font-size:20px; line-height:1; letter-spacing:-0.02em; font-weight:900; color:{{ fg }};">{{ route_label | default: 'Direct' }}</div>
-          <div style="font-size:11px; line-height:1.2; color:{{ soft }}; font-weight:800;">
-            {% if distance_km and distance_km != '?' and distance_km != '' %}
-              {{ distance_km }} km
-            {% else %}
-              Distance unavailable
-            {% endif %}
+    <div style="display:grid; grid-template-columns:{% if has_quote_panel %}1.18fr 0.82fr{% else %}1fr{% endif %}; gap:0; flex:1; min-height:0;">
+      <div style="display:grid; grid-template-rows:auto auto 1fr; min-width:0;">
+        <div style="display:grid; grid-template-columns:190px minmax(0, 1fr); border-bottom:2px solid {{ ink }}; min-height:174px;">
+          <div style="display:flex; flex-direction:column; justify-content:center; gap:8px; padding:18px 18px 14px; border-right:2px solid {{ ink }};">
+            <div style="font-size:11px; line-height:1; letter-spacing:0.22em; text-transform:uppercase; color:{{ accent }}; font-weight:900;">ETA</div>
+            <div style="font-size:74px; line-height:0.82; letter-spacing:-0.08em; font-weight:900; color:{{ ink }};">{{ eta_whole }}</div>
+            <div style="font-size:14px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ muted }}; font-weight:900;">Minutes</div>
+          </div>
+          <div style="display:flex; flex-direction:column; justify-content:space-between; gap:16px; padding:18px 18px 14px; min-width:0;">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="font-size:11px; line-height:1; letter-spacing:0.22em; text-transform:uppercase; color:{{ accent }}; font-weight:900;">Today's Route</div>
+              <div style="font-size:34px; line-height:0.95; letter-spacing:-0.05em; font-weight:900; color:{{ ink }}; max-width:100%;">{{ route_value }}</div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+              {% if has_distance %}
+              <div style="display:inline-flex; align-items:center; padding:8px 12px 7px; border:2px solid {{ ink }}; background:{{ accent }}; color:#111111; font-size:15px; line-height:1; letter-spacing:0.08em; text-transform:uppercase; font-weight:900;">
+                {{ distance_value }} km
+              </div>
+              {% endif %}
+              <div style="display:inline-flex; align-items:center; padding:8px 12px 7px; border:2px solid {{ ink }}; color:{{ ink }}; font-size:13px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; font-weight:900;">
+                Morning Window
+              </div>
+            </div>
           </div>
         </div>
-        <div style="display:flex; flex-direction:column; gap:4px; padding:14px 16px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }};">
-          <div style="font-size:12px; line-height:1; text-transform:uppercase; letter-spacing:0.14em; color:{{ soft }}; font-weight:800;">Status</div>
-          <div style="font-size:20px; line-height:1; letter-spacing:-0.02em; font-weight:900; color:{{ fg }};">{{ commute_state_display }}</div>
-          <div style="font-size:11px; line-height:1.2; color:{{ soft }}; font-weight:800;">Heading home: {{ heading_home_display }}</div>
+
+        <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); border-bottom:2px solid {{ ink }};">
+          <div style="padding:12px 14px 13px; border-right:2px solid {{ ink }}; display:flex; flex-direction:column; gap:5px;">
+            <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ muted }}; font-weight:900;">Status</div>
+            <div style="font-size:22px; line-height:0.95; letter-spacing:-0.03em; font-weight:900; color:{{ ink }};">Morning Brief</div>
+          </div>
+          <div style="padding:12px 14px 13px; border-right:2px solid {{ ink }}; display:flex; flex-direction:column; gap:5px;">
+            <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ muted }}; font-weight:900;">Focus</div>
+            <div style="font-size:22px; line-height:0.95; letter-spacing:-0.03em; font-weight:900; color:{{ ink }};">Leave Calm</div>
+          </div>
+          <div style="padding:12px 14px 13px; display:flex; flex-direction:column; gap:5px;">
+            <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ muted }}; font-weight:900;">Signal</div>
+            <div style="font-size:22px; line-height:0.95; letter-spacing:-0.03em; font-weight:900; color:{{ ink }};">Route Live</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:flex-end; padding:16px 18px 14px; min-height:0;">
+          <div style="font-size:13px; line-height:1.4; letter-spacing:0.04em; text-transform:uppercase; color:{{ muted }}; font-weight:800;">
+            Commute estimate and route are pushed from Home Assistant. The quote panel stays separate so the morning screen reads as a brief, not a dashboard.
+          </div>
         </div>
       </div>
-    </div>
 
-    <div style="display:flex; flex-direction:column; gap:12px; min-width:0;">
       {% if has_quote_panel %}
-      <div style="padding:16px 18px; border:1px solid {{ border }}; border-radius:22px; background:{{ panel }}; display:flex; flex-direction:column; gap:8px; min-height:190px; justify-content:space-between;">
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">{{ quote_panel_label }}</div>
-          <div style="font-size:24px; line-height:1.18; letter-spacing:-0.02em; font-weight:800; color:{{ fg }};">{{ quote_text_value }}</div>
+      <div style="display:grid; grid-template-rows:auto 1fr; border-left:2px solid {{ ink }}; min-width:0;">
+        <div style="padding:16px 18px 14px; border-bottom:2px solid {{ ink }}; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="font-size:11px; line-height:1; letter-spacing:0.22em; text-transform:uppercase; color:{{ accent }}; font-weight:900;">{{ quote_panel_label }}</div>
+          <div style="width:42px; height:2px; background:{{ ink }};"></div>
         </div>
-        {% if quote_source_value != blank %}
-        <div style="font-size:12px; line-height:1.2; color:{{ soft }}; font-weight:800;">{{ quote_source_value }}</div>
-        {% endif %}
-      </div>
-      {% endif %}
-
-      {% if show_home_prep == true or show_home_prep == 'true' %}
-      <div style="padding:14px 16px; border:1px solid {{ border }}; border-radius:20px; background:{{ panel }}; display:flex; flex-direction:column; gap:5px;">
-        <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Home Prep</div>
-        <div style="font-size:22px; line-height:1; letter-spacing:-0.02em; font-weight:900; color:{{ fg }};">{{ home_prep_status }}</div>
-        {% if prep_note %}
-        <div style="font-size:12px; line-height:1.25; color:{{ soft }}; font-weight:700;">{{ prep_note }}</div>
-        {% endif %}
-      </div>
-      {% endif %}
-
-      {% assign map_enabled = false %}
-      {% if show_map_link == true or show_map_link == 'true' %}
-        {% assign map_enabled = true %}
-      {% endif %}
-      {% if map_enabled and map_url %}
-      <div style="padding:14px 16px; border:1px solid {{ border }}; border-radius:20px; background:{{ panel }}; display:flex; flex-direction:column; gap:5px;">
-        <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">Route Link</div>
-        <div style="font-size:13px; line-height:1.25; color:{{ fg }}; font-weight:800;">Google Maps ready in HA/mobile notification flow</div>
+        <div style="display:flex; flex-direction:column; justify-content:space-between; gap:18px; padding:18px 18px 16px; min-height:0;">
+          <div style="font-size:33px; line-height:1.04; letter-spacing:-0.05em; font-weight:900; color:{{ ink }};">{{ quote_text_value }}</div>
+          {% if quote_source_value != blank %}
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="width:64px; height:2px; background:{{ accent }};"></div>
+            <div style="font-size:14px; line-height:1.2; letter-spacing:0.08em; text-transform:uppercase; color:{{ muted }}; font-weight:900;">{{ quote_source_value }}</div>
+          </div>
+          {% endif %}
+        </div>
       </div>
       {% endif %}
     </div>
