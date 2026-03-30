@@ -1,5 +1,11 @@
 {% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
 {% assign screen_label = trmnl.plugin_settings.custom_fields_values.screen_label | default: 'Jen Morning' %}
+{% assign headline_fallback = trmnl.plugin_settings.custom_fields_values.headline_fallback | default: 'Time To Work' %}
+{% assign eta_label = trmnl.plugin_settings.custom_fields_values.eta_label | default: 'ETA' %}
+{% assign eta_unit_label = trmnl.plugin_settings.custom_fields_values.eta_unit_label | default: 'Minutes' %}
+{% assign route_section_label = trmnl.plugin_settings.custom_fields_values.route_label | default: 'Route' %}
+{% assign show_distance = trmnl.plugin_settings.custom_fields_values.show_distance | default: true %}
+{% assign distance_unit_label = trmnl.plugin_settings.custom_fields_values.distance_unit_label | default: 'km' %}
 {% assign eta_value = eta_minutes | default: '?' %}
 {% assign route_value = route_label | default: 'Direct route' %}
 {% assign distance_value = distance_km | default: '' %}
@@ -26,27 +32,31 @@
   <div style="display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:10px; align-items:start; margin-bottom:16px;">
     <div style="display:flex; flex-direction:column; gap:7px; min-width:0;">
       <div style="display:inline-flex; align-self:flex-start; padding:4px 10px; border-radius:999px; background:{{ accent }}; color:{{ accent_text }}; font-size:9px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; font-weight:900;">{{ screen_label }}</div>
-      <div style="font-size:30px; line-height:0.88; letter-spacing:-0.08em; font-weight:900; color:{{ fg }};">{{ headline | default: 'Time To Work' }}</div>
+      <div style="font-size:30px; line-height:0.88; letter-spacing:-0.08em; font-weight:900; color:{{ fg }};">{{ headline | default: headline_fallback }}</div>
     </div>
     <div style="padding-top:2px; font-size:8px; line-height:1.15; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:900; text-align:right;">{{ updated_at }}</div>
   </div>
 
   <div style="display:flex; flex-direction:column; gap:16px; flex:1; min-height:0;">
     <div style="display:flex; flex-direction:column; gap:10px; min-height:196px;">
-      <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">ETA</div>
+      <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">{{ eta_label }}</div>
       <div style="display:flex; align-items:flex-start; gap:10px; min-width:0;">
         <div style="width:10px; height:108px; background:{{ accent }}; flex:0 0 auto;"></div>
         <div style="display:flex; flex-direction:column; gap:8px; min-width:0;">
           <div style="display:flex; align-items:flex-end; gap:8px; min-width:0;">
             <div style="font-size:92px; line-height:0.78; letter-spacing:-0.12em; font-weight:900; color:{{ fg }};">{{ eta_value }}</div>
-            <div style="padding-bottom:15px; font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft_2 }}; font-weight:900;">minutes</div>
+            <div style="padding-bottom:15px; font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft_2 }}; font-weight:900;">{{ eta_unit_label }}</div>
           </div>
           <div style="width:100%; height:2px; background:{{ border }};"></div>
           <div style="display:flex; flex-direction:column; gap:5px; min-width:0;">
-            <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">Route</div>
+            <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:{{ soft }}; font-weight:900;">{{ route_section_label }}</div>
             <div style="font-size:29px; line-height:0.9; letter-spacing:-0.07em; font-weight:900; color:{{ fg }};">{{ route_value }}</div>
-            {% if distance_value != '' and distance_value != '?' %}
-            <div style="font-size:10px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; color:{{ soft_2 }}; font-weight:900;">{{ distance_value }} km</div>
+            {% assign distance_enabled = false %}
+            {% if show_distance == true or show_distance == 'true' %}
+              {% assign distance_enabled = true %}
+            {% endif %}
+            {% if distance_enabled and distance_value != '' and distance_value != '?' %}
+            <div style="font-size:10px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; color:{{ soft_2 }}; font-weight:900;">{{ distance_value }} {{ distance_unit_label }}</div>
             {% endif %}
           </div>
         </div>
