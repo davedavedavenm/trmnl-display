@@ -18,6 +18,7 @@ plugin_name_for_mode() {
     idle) echo "${TRMNL_MODE_PLUGIN_IDLE:-Multi-Calendar}" ;;
     sonos) echo "${TRMNL_MODE_PLUGIN_SONOS:-Sonos Local}" ;;
     jen_commute) echo "${TRMNL_MODE_PLUGIN_JEN_COMMUTE:-Jen Commute}" ;;
+    jen_morning) echo "${TRMNL_MODE_PLUGIN_JEN_MORNING:-Jen Morning}" ;;
     dave_commute) echo "${TRMNL_MODE_PLUGIN_DAVE_COMMUTE:-}" ;;
     alert) echo "${TRMNL_MODE_PLUGIN_ALERT:-Alert}" ;;
     *) return 1 ;;
