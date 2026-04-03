@@ -1,0 +1,108 @@
+<div style="width:800px; height:480px; background:#000; color:#fff; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; padding:22px 26px 16px; display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #fff; padding-bottom:10px;">
+    <div style="display:flex; flex-direction:column; gap:2px;">
+      <div style="font-size:34px; line-height:0.9; font-weight:900; letter-spacing:-0.04em;">HOME</div>
+      <div style="font-size:10px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; color:#ff8800; font-weight:800;">Dashboard</div>
+    </div>
+    <div style="font-size:11px; line-height:1; letter-spacing:0.1em; text-transform:uppercase; color:#ff8800; font-weight:800; text-align:right;">{{ updated_at }}</div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; flex:1;">
+
+    {% comment %} FAMILY CARD {% endcomment %}
+    <div style="border:2px solid #00ff00; border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
+      <div style="font-size:10px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:#00ff00; font-weight:900;">Family</div>
+      {% for person in people %}
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:19px; font-weight:800; letter-spacing:-0.01em;">{{ person.name }}</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="width:11px; height:11px; border-radius:50%; background:{% if person.state == 'home' %}#00ff00{% else %}#ff0000{% endif %};"></div>
+          <div style="font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em;">{{ person.state }}</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% unless people.size > 0 %}
+      <div style="font-size:14px; color:#666;">No presence data</div>
+      {% endunless %}
+    </div>
+
+    {% comment %} WEATHER CARD {% endcomment %}
+    <div style="border:2px solid #0000ff; border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:6px;">
+      <div style="font-size:10px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:#0000ff; font-weight:900;">Weather</div>
+      {% if weather %}
+      <div style="font-size:21px; font-weight:900; text-transform:capitalize; letter-spacing:-0.01em;">{{ weather.condition }}</div>
+      <div style="display:flex; align-items:flex-end; gap:20px; margin-top:2px;">
+        <div style="font-size:44px; line-height:0.85; font-weight:900; letter-spacing:-0.04em;">{{ weather.temperature }}<span style="font-size:22px;">°C</span></div>
+        <div style="display:flex; flex-direction:column; gap:5px; padding-bottom:4px;">
+          {% if weather.humidity %}
+          <div style="font-size:11px; letter-spacing:0.02em;">Humidity <span style="font-weight:900;">{{ weather.humidity }}%</span></div>
+          {% endif %}
+          {% if weather.wind_speed %}
+          <div style="font-size:11px; letter-spacing:0.02em;">Wind <span style="font-weight:900;">{{ weather.wind_speed }} km/h</span></div>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <div style="font-size:14px; color:#666;">No weather data</div>
+      {% endif %}
+    </div>
+
+    {% comment %} MUSIC CARD {% endcomment %}
+    <div style="border:2px solid #ff8800; border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:10px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:#ff8800; font-weight:900;">Now Playing</div>
+      {% for player in sonos %}
+      <div>
+        <div style="font-size:12px; font-weight:800; color:#ff8800; letter-spacing:0.02em;">{{ player.room }}</div>
+        {% if player.state == 'playing' %}
+        <div style="font-size:16px; font-weight:900; letter-spacing:-0.01em; margin-top:2px;">{{ player.title }}</div>
+        {% if player.artist %}
+        <div style="font-size:11px; color:#ccc; letter-spacing:0.01em;">{{ player.artist }}</div>
+        {% endif %}
+        {% else %}
+        <div style="font-size:13px; color:#555; margin-top:1px;">Idle</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% unless sonos.size > 0 %}
+      <div style="font-size:14px; color:#666;">No speakers available</div>
+      {% endunless %}
+    </div>
+
+    {% comment %} HOME STATUS CARD {% endcomment %}
+    <div style="border:2px solid #ffff00; border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:9px;">
+      <div style="font-size:10px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; color:#ffff00; font-weight:900;">Home Status</div>
+      {% if home %}
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:15px; font-weight:800;">Front Door</div>
+        <div style="display:flex; align-items:center; gap:7px;">
+          <div style="width:10px; height:10px; border-radius:50%; background:{% if home.door_locked %}#00ff00{% else %}#ff0000{% endif %};"></div>
+          <div style="font-size:13px; font-weight:800;">{% if home.door_locked %}Locked{% else %}Unlocked{% endif %}</div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:15px; font-weight:800;">Washer / Dryer</div>
+        <div style="display:flex; align-items:center; gap:7px;">
+          <div style="width:10px; height:10px; border-radius:50%; background:{% if home.washer_running %}#ffff00{% else %}#00ff00{% endif %};"></div>
+          <div style="font-size:13px; font-weight:800;">{% if home.washer_running %}Running{% else %}Idle{% endif %}</div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:15px; font-weight:800;">Bedroom Blind</div>
+        <div style="font-size:13px; font-weight:800;">Open {{ home.blind_position }}%</div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:15px; font-weight:800;">Thermostat</div>
+        {% if home.thermostat_temp %}
+        <div style="font-size:13px; font-weight:800;">{{ home.thermostat_temp }}°C</div>
+        {% else %}
+        <div style="font-size:13px; color:#555;">Unavailable</div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div style="font-size:14px; color:#666;">No home data</div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
