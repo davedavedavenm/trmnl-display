@@ -38,9 +38,9 @@
 - [x] Remove old InkyPi BYOS server + systemd service from Pi Zero
 - [x] E2E validate full pipeline after cleanup
 - [x] Remove legacy InkyPi systemd service from Pi Zero
-- [ ] Fix Home Assistant recipe URL (raspberrypi.local not resolvable from khpi5)
-- [ ] Configure World Clock timezones
-- [ ] Fix bus departures Liquid template variable binding
+- [x] Fix Home Assistant recipe URL (raspberrypi.local not resolvable from khpi5)
+- [x] Configure World Clock timezones
+- [ ] Fix bus departures Liquid template variable binding (workaround: hardcoded polling URL)
 
 ## Phase 7: Multi-Calendar Productization [IN PROGRESS]
 - [x] Build working webhook-driven multi-calendar proof of concept
@@ -90,7 +90,7 @@
 - [x] Add initial HA orchestration package with helpers and a proof automation
 - [x] Introduce a HA-side display mode helper (for example `input_select.trmnl_display_mode`)
 - [x] Define screen modes such as `calendar`, `jen_commute`, `dave_commute`, `sonos`, `alert`, `idle`
-- [ ] Define priority/override order for screen modes so alerts and live context can supersede background screens
+- [x] Define priority/override order for screen modes so alerts and live context can supersede background screens
 - [x] Add HA `rest_command` pattern(s) for posting directly to LaraPaper custom plugin webhooks
 - [x] Add a HA -> `khpi5` bridge for invoking local LaraPaper playlist switching logic
 - [x] Build Jen commute recipe package in repo
@@ -98,7 +98,7 @@
 - [x] Build HA-driven Sonos mode switching as the second orchestration path
 - [x] Build the first helper-driven central resolver for `calendar` / `sonos` / `jen_commute` / `alert`
 - [x] Build alert override path as the third orchestration path
-- [ ] Add example HA automations for webhook payload pushes and playlist/mode switching
+- [x] Add example HA automations for webhook payload pushes and playlist/mode switching
 
 ## Immediate Working Focus
 - [x] Reposition repository docs around the Home Assistant Edition direction without changing the working Sonos page layout
