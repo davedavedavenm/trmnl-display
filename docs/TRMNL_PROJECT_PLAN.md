@@ -116,6 +116,12 @@
 - [ ] Define secure local token storage and backup strategy for homelab use
 
 ## Phase 12: Optimization & Advanced Features [PLANNED]
+- [ ] Redesign HA Dashboard plugin (`trmnl-ha-dashboard`) to a "Bento-box" layout optimized for 7-color ACeP e-ink.
+  - [ ] Use solid color blocks instead of thin borders to prevent pigment bleeding.
+  - [ ] Hide Sonos card entirely when idle to maximize space for other data.
+  - [ ] Fetch and display large Sonos album art (`entity_picture`) when playing.
+  - [ ] Replace text-based weather states with strong, scannable SVG iconography.
+  - [ ] Enforce official TRMNL plugin schema compatibility in `settings.yml` to maintain community shareability.
 - [ ] Tune refresh interval per-plugin (currently LaraPaper serves 120s; ACeP target is still 600s)
 - [ ] Add sleep mode scheduling
 - [ ] Explore custom ACeP-optimized recipes

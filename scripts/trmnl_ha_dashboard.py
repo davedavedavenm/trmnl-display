@@ -43,7 +43,8 @@ def fetch_people() -> list:
                 "name": e["attributes"].get("friendly_name", eid).split("'s")[0].split("'")[0],
                 "state": e["state"],
             })
-        except Exception:
+        except Exception as err:
+            print(f"Error fetching {eid}: {err}")
             people.append({"name": eid, "state": "unknown"})
     return people
 
@@ -58,7 +59,8 @@ def fetch_weather() -> dict:
             "humidity": attrs.get("humidity"),
             "wind_speed": attrs.get("wind_speed"),
         }
-    except Exception:
+    except Exception as err:
+        print(f"Error fetching weather: {err}")
         return {}
 
 
@@ -69,11 +71,17 @@ def fetch_sonos() -> list:
             e = fetch_entity(eid)
             if e["state"] in ("unavailable", "unknown"):
                 continue
+            
+            picture = e["attributes"].get("entity_picture", "")
+            if picture and picture.startswith("/"):
+                picture = f"{HA_URL}{picture}"
+
             rooms.append({
                 "room": e["attributes"].get("friendly_name", eid),
                 "state": e["state"],
                 "title": e["attributes"].get("media_title", ""),
                 "artist": e["attributes"].get("media_artist", ""),
+                "picture": picture,
             })
         except Exception:
             continue

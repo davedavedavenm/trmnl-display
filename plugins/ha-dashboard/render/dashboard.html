@@ -1,12 +1,14 @@
+{% extends "plugin.html" %}
+
+{% block content %}
 <div style="width:800px; height:470px; background:#000; color:#fff; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; padding:8px; display:flex; box-sizing:border-box; position:relative;">
 
   <div style="position:absolute; top:8px; right:16px; background:#000; color:#fff; font-size:12px; font-weight:900; letter-spacing:0.15em; text-transform:uppercase; z-index:10;">
-    {{ updated_at }}
+    {{ plugin_settings.updated_at }}
   </div>
 
-  {% assign active_sonos = sonos | where: "state", "playing" %}
-  {% assign is_playing = false %}
-  {% if active_sonos.size > 0 %}{% assign is_playing = true %}{% endif %}
+  {% set active_sonos = plugin_settings.sonos | selectattr("state", "equalto", "playing") | list %}
+  {% set is_playing = active_sonos | length > 0 %}
 
   <div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:minmax(0, 1fr) minmax(0, 1fr); gap:8px; width:100%; height:100%;">
 
@@ -14,10 +16,10 @@
     <div style="background:#fff; color:#000; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between;">
       <div style="font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900; color:#888;">Family</div>
       <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:2px;">
-        {% for person in people %}
+        {% for person in plugin_settings.people %}
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div style="font-size:24px; font-weight:900; letter-spacing:-0.02em;">{{ person.name }}</div>
-          <div style="display:flex; align-items:center; gap:8px; background:{% if person.state == 'home' %}#00ff00{% else %}#ff0000{% endif %}; padding:4px 10px; border-radius:16px; border:2px solid #000; box-shadow:2px 2px 0 #000;">
+          <div style="display:flex; align-items:center; gap:8px; background:{{ '#00ff00' if person.state == 'home' else '#ff0000' }}; padding:4px 10px; border-radius:16px; border:2px solid #000; box-shadow:2px 2px 0 #000;">
             <div style="font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:0.06em; color:#000;">{{ person.state }}</div>
           </div>
         </div>
@@ -26,7 +28,7 @@
     </div>
 
     {% comment %} WEATHER CARD {% endcomment %}
-    <div style="background:#0000ff; color:#fff; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between; {% unless is_playing %}grid-row: span 2;{% endunless %} position:relative; overflow:hidden;">
+    <div style="background:#0000ff; color:#fff; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between; {% if not is_playing %}grid-row: span 2;{% endif %} position:relative; overflow:hidden;">
       <div style="font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900; opacity:0.9;">Weather</div>
       
       <div style="position:absolute; top:-10px; right:-10px; opacity:0.15; pointer-events:none;">
@@ -36,19 +38,15 @@
       </div>
 
       <div style="display:flex; flex-direction:column; justify-content:flex-end; flex:1; padding-bottom:2px; z-index:2;">
-        {% if weather and weather.temperature != blank %}
+        {% if plugin_settings.weather and plugin_settings.weather.temperature %}
         <div style="display:flex; justify-content:space-between; align-items:flex-end;">
             <div style="display:flex; flex-direction:column;">
-                <div style="font-size: {% unless is_playing %}90px{% else %}60px{% endunless %}; line-height:0.85; font-weight:900; letter-spacing:-0.05em; text-shadow:3px 3px 0 #000;">{{ weather.temperature | round }}<span style="font-size:{% unless is_playing %}40px{% else %}30px{% endunless %};">°</span></div>
-                <div style="font-size:{% unless is_playing %}30px{% else %}22px{% endunless %}; font-weight:900; text-transform:capitalize; letter-spacing:-0.02em; margin-top:4px;">{{ weather.condition | replace: "-", " " }}</div>
+                <div style="font-size: {{ '90px' if not is_playing else '60px' }}; line-height:0.85; font-weight:900; letter-spacing:-0.05em; text-shadow:3px 3px 0 #000;">{{ plugin_settings.weather.temperature | round }}<span style="font-size:{{ '40px' if not is_playing else '30px' }};">°</span></div>
+                <div style="font-size:{{ '30px' if not is_playing else '22px' }}; font-weight:900; text-transform:capitalize; letter-spacing:-0.02em; margin-top:4px;">{{ plugin_settings.weather.condition | replace("-", " ") }}</div>
             </div>
             <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end; padding-bottom:4px;">
-                {% if weather.humidity %}
-                <div style="font-size:14px; font-weight:800; letter-spacing:0.02em; background:#000; color:#fff; padding:2px 6px; border-radius:4px;">Hum <span style="color:#00ff00;">{{ weather.humidity }}%</span></div>
-                {% endif %}
-                {% if weather.wind_speed %}
-                <div style="font-size:14px; font-weight:800; letter-spacing:0.02em; background:#000; color:#fff; padding:2px 6px; border-radius:4px;">Wind <span style="color:#00ff00;">{{ weather.wind_speed | round }} km/h</span></div>
-                {% endif %}
+                <div style="font-size:14px; font-weight:800; letter-spacing:0.02em; background:#000; color:#fff; padding:2px 6px; border-radius:4px;">Hum <span style="color:#00ff00;">{{ plugin_settings.weather.humidity }}%</span></div>
+                <div style="font-size:14px; font-weight:800; letter-spacing:0.02em; background:#000; color:#fff; padding:2px 6px; border-radius:4px;">Wind <span style="color:#00ff00;">{{ plugin_settings.weather.wind_speed | round }} km/h</span></div>
             </div>
         </div>
         {% endif %}
@@ -58,16 +56,16 @@
     {% comment %} MUSIC CARD {% endcomment %}
     {% if is_playing %}
     <div style="background:#ff0000; color:#fff; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; position:relative;">
-      <div style="font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900; opacity:0.8; position:relative; z-index:2;">Now Playing &middot; <span style="color:#000;">{{ active_sonos.first.room }}</span></div>
+      <div style="font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900; opacity:0.8; position:relative; z-index:2;">Now Playing &middot; <span style="color:#fff;">{{ active_sonos[0].room }}</span></div>
       
       <div style="display:flex; justify-content:space-between; align-items:flex-end; position:relative; z-index:2; margin-bottom:0px;">
         <div style="display:flex; flex-direction:column; max-width:66%;">
-            <div style="font-size:24px; font-weight:900; letter-spacing:-0.02em; line-height:1.05; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">{{ active_sonos.first.title }}</div>
-            <div style="font-size:16px; font-weight:800; opacity:0.8; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ active_sonos.first.artist }}</div>
+            <div style="font-size:24px; font-weight:900; letter-spacing:-0.02em; line-height:1.05; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">{{ active_sonos[0].title }}</div>
+            <div style="font-size:16px; font-weight:800; opacity:0.8; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ active_sonos[0].artist }}</div>
         </div>
-        {% if active_sonos.first.picture %}
+        {% if active_sonos[0].picture %}
         <div style="width:70px; height:70px; border-radius:10px; overflow:hidden; border:3px solid #000; flex-shrink:0; background:#000; box-shadow:3px 3px 0 #000;">
-            <img src="{{ active_sonos.first.picture }}" style="width:100%; height:100%; object-fit:cover;" />
+            <img src="{{ active_sonos[0].picture }}" style="width:100%; height:100%; object-fit:cover;" />
         </div>
         {% else %}
         <div style="width:70px; height:70px; border-radius:10px; overflow:hidden; border:3px solid #000; flex-shrink:0; background:#fff; box-shadow:3px 3px 0 #000; display:flex; align-items:center; justify-content:center;">
@@ -79,12 +77,12 @@
     {% endif %}
 
     {% comment %} HOME STATUS CARD {% endcomment %}
-    <div style="background:#ffff00; color:#000; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between; {% unless is_playing %}grid-column: span 1;{% endunless %}">
+    <div style="background:#ffff00; color:#000; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between; {% if not is_playing %}grid-column: span 1;{% endif %}">
       <div style="font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900; opacity:0.7;">Home Status</div>
-      <div style="display:flex; flex-direction:column; gap:{% unless is_playing %}10px{% else %}6px{% endunless %}; margin-bottom:2px;">
-        {% if home and home.door_locked != blank %}
+      <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:2px;">
+        {% if plugin_settings.home and plugin_settings.home.door_locked != None %}
         
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:{% unless is_playing %}6px{% else %}2px{% endunless %};">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:2px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C9.24 2 7 4.24 7 7V10H6C4.9 10 4 12V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V12C20 10.9 19.1 10 18 10H17V7C17 4.24 14.76 2 12 2ZM12 4C13.66 4 15 5.34 15 7V10H9V7C9 5.34 10.34 4 12 4ZM12 14C13.1 14 14 14.9 14 16C14 17.1 13.1 18 12 18C10.9 18 10 17.1 10 16C10 14.9 10.9 14 12 14Z"/>
@@ -92,12 +90,12 @@
             <div style="font-size:18px; font-weight:900; letter-spacing:-0.01em;">Front Door</div>
           </div>
           <div style="display:flex; align-items:center; gap:6px;">
-            <div style="font-size:14px; font-weight:900;">{% if home.door_locked %}Locked{% else %}Unlocked{% endif %}</div>
-            <div style="width:14px; height:14px; border-radius:50%; background:{% if home.door_locked %}#00ff00{% else %}#ff0000{% endif %}; border: 2px solid #000;"></div>
+            <div style="font-size:14px; font-weight:900;">{{ 'Locked' if plugin_settings.home.door_locked else 'Unlocked' }}</div>
+            <div style="width:14px; height:14px; border-radius:50%; background:{{ '#00ff00' if plugin_settings.home.door_locked else '#ff0000' }}; border: 2px solid #000;"></div>
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:{% unless is_playing %}6px{% else %}2px{% endunless %};">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:2px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 4H5C3.9 4 3 4.9 3 6V18C3 19.1 3.9 20 5 20H19C20.1 20 21 19.1 21 18V6C21 4.9 20.1 4 19 4ZM12 17C9.79 17 8 15.21 8 13C8 10.79 9.79 9 12 9C14.21 9 16 10.79 16 13C16 15.21 14.21 17 12 17ZM7 7H5V5H7V7Z"/>
@@ -105,19 +103,19 @@
             <div style="font-size:18px; font-weight:900; letter-spacing:-0.01em;">Laundry</div>
           </div>
           <div style="display:flex; align-items:center; gap:6px;">
-            <div style="font-size:14px; font-weight:900;">{% if home.washer_running %}Running{% else %}Idle{% endif %}</div>
-            <div style="width:14px; height:14px; border-radius:50%; background:{% if home.washer_running %}#ff8800{% else %}#00ff00{% endif %}; border: 2px solid #000;"></div>
+            <div style="font-size:14px; font-weight:900;">{{ 'Running' if plugin_settings.home.washer_running else 'Idle' }}</div>
+            <div style="width:14px; height:14px; border-radius:50%; background:{{ '#ff8800' if plugin_settings.home.washer_running else '#00ff00' }}; border: 2px solid #000;"></div>
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:{% unless is_playing %}6px{% else %}2px{% endunless %};">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:2px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20 19V3H4V19H2V21H22V19H20ZM14 9H10V11H14V9ZM14 13H10V15H14V13Z"/>
             </svg>
             <div style="font-size:18px; font-weight:900; letter-spacing:-0.01em;">Blinds</div>
           </div>
-          <div style="font-size:14px; font-weight:900; background:#000; color:#ffff00; padding:2px 6px; border-radius:4px;">{% if home.blind_position == "0" %}Closed{% else %}Open {{ home.blind_position }}%{% endif %}</div>
+          <div style="font-size:14px; font-weight:900; background:#000; color:#ffff00; padding:2px 6px; border-radius:4px;">{{ 'Closed' if plugin_settings.home.blind_position == "0" else 'Open ' ~ plugin_settings.home.blind_position ~ '%' }}</div>
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -127,7 +125,7 @@
             </svg>
             <div style="font-size:18px; font-weight:900; letter-spacing:-0.01em;">Thermostat</div>
           </div>
-          <div style="font-size:14px; font-weight:900; background:#000; color:#ffff00; padding:2px 6px; border-radius:4px;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}°C{% else %}--{% endif %}</div>
+          <div style="font-size:14px; font-weight:900; background:#000; color:#ffff00; padding:2px 6px; border-radius:4px;">{{ (plugin_settings.home.thermostat_temp | round(1)) ~ '°C' if plugin_settings.home.thermostat_temp != None else '--' }}</div>
         </div>
 
         {% endif %}
@@ -136,3 +134,4 @@
 
   </div>
 </div>
+{% endblock %}

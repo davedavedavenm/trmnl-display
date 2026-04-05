@@ -1,21 +1,55 @@
 name: HA Dashboard
+description: A 7-color ACeP e-ink optimized dashboard for Home Assistant, featuring a Bento-box layout.
+author: David
+version: 1.1.0
 no_screen_padding: 'no'
 dark_mode: 'yes'
 strategy: webhook
 refresh_interval: 1
 id: trmnl-ha-dashboard
 custom_fields:
-  - keyname: theme
-    name: Theme
-    field_type: select
-    default: dark
-    options:
-      - Dark: dark
-      - Light: light
-    description: Choose a presentation theme for the dashboard.
-  - keyname: show_inactive_sonos
-    name: Show Inactive Sonos
-    field_type: boolean
-    default: false
-    optional: true
-    description: Show Sonos rooms that are idle, not just actively playing.
+  - keyname: ha_url
+    field_type: text
+    name: Home Assistant URL
+    default: "http://192.168.1.89:8123"
+    placeholder: "http://192.168.1.89:8123"
+  - keyname: ha_token
+    field_type: password
+    name: Home Assistant Long-Lived Token
+    default: ""
+    placeholder: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  - keyname: sonos_entities
+    field_type: multi_string
+    name: Sonos Media Players (comma-separated)
+    default: "media_player.living_room, media_player.bedroom, media_player.kitchen, media_player.gym, media_player.sonos_roam"
+    placeholder: "media_player.living_room, media_player.kitchen"
+  - keyname: person_entities
+    field_type: multi_string
+    name: Person Entities (comma-separated)
+    default: "person.david, person.jennifer"
+    placeholder: "person.david, person.jennifer"
+  - keyname: weather_entity
+    field_type: text
+    name: Weather Entity
+    default: "weather.forecast_home"
+    placeholder: "weather.forecast_home"
+  - keyname: door_entity
+    field_type: text
+    name: Door Lock Entity
+    default: "binary_sensor.nuki_flat_door_locked"
+    placeholder: "binary_sensor.nuki_flat_door_locked"
+  - keyname: washer_entity
+    field_type: text
+    name: Washer Status Entity
+    default: "binary_sensor.wash_dryer_status"
+    placeholder: "binary_sensor.wash_dryer_status"
+  - keyname: blind_entity
+    field_type: text
+    name: Blinds Entity
+    default: "cover.blinds_controller_curtain"
+    placeholder: "cover.blinds_controller_curtain"
+  - keyname: thermostat_entity
+    field_type: text
+    name: Thermostat Entity
+    default: "climate.thermostat"
+    placeholder: "climate.thermostat"

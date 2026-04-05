@@ -1,0 +1,24 @@
+# InkyPi & TRMNL Plugin Agent Instructions
+
+Welcome to the InkyPi repo. When working on TRMNL or LaraPaper plugins for this 7-color e-ink panel, adhere strictly to these rules:
+
+## 1. E-Ink Design Rules (The "Bento Box" Method)
+*   **No Thin Lines or Neon on Black:** Thin borders and text colors bleed and look muddy on 7-color ACeP panels. Do not use pure black backgrounds with thin neon lines.
+*   **Solid Blocks & Chunky SVGs:** Always use solid ACeP color blocks (Blue, Yellow, Orange, Green, Red, White) for card backgrounds. Use chunky, filled SVG iconography and heavy font weights (e.g., `900`). The display acts like a printed poster, not an OLED monitor.
+*   **Space Optimization:** Hide elements completely when they have no data (e.g., if Sonos is idle, don't show an "Idle" card; collapse the section so weather or other cards can expand).
+
+## 2. E2E Validation Process
+Never assume a Python script or Webhook push was successful just because the HTTP request returned 200. To truly validate a screen:
+1.  Push the payload to the LaraPaper Webhook.
+2.  Query the LaraPaper SQLite DB (`/var/lib/docker/volumes/larapaper_database/_data/database.sqlite`) to get the `current_image` filename for the plugin UUID.
+3.  Copy the PNG out of the `larapaper_storage` Docker volume and download it locally.
+4.  Visually inspect the rendered PNG to ensure Liquid templates didn't throw an error (like `Liquid error (46)`) and the graphics rendered as expected.
+
+## 3. Defensive Liquid Templates
+When feeding JSON payloads into LaraPaper, remember that an empty dictionary `{}` evaluates to `true` in Liquid `{% if obj %}`. If your backend script fails to fetch data and returns an empty dictionary, the Liquid template will attempt to access missing keys (e.g. `obj.temperature | round`), causing fatal rendering errors.
+*   Always check specific nested keys: `{% if weather.temperature != blank %}` instead of `{% if weather %}`.
+
+## 4. Code & Configuration Standards
+*   Ensure all plugins remain compatible with the official TRMNL format (include `settings.yml`, `version`, `author`, `description`).
+*   Be aware of the deployment topology: the BYOS server runs on `khpi5` (LaraPaper via Docker) and the client is `inky-pi`.
+*   Always use the correct, active Home Assistant token (verify it using a raw `curl` against `http://192.168.1.89:8123/api/states/` before running scripts).
