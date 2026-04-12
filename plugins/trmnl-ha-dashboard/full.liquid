@@ -26,7 +26,7 @@
     </div>
 
     {% comment %} WEATHER CARD {% endcomment %}
-    <div style="background:#0000ff; color:#fff; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between; {% unless is_playing %}grid-row: span 2;{% endunless %} position:relative; overflow:hidden;">
+    <div style="background:#0000ff; color:#fff; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;">
       <div style="font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900; opacity:0.9;">Weather</div>
       
       <div style="position:absolute; top:-10px; right:-10px; opacity:0.15; pointer-events:none;">
@@ -56,18 +56,26 @@
     </div>
 
     {% comment %} MUSIC CARD {% endcomment %}
-    {% if is_playing %}
+    {% assign last_active = sonos | where_exp: "s", "s.state == 'playing' or s.state == 'paused'" | first %}
+    {% assign is_playing = false %}
+    {% if last_active and last_active.state == 'playing' %}{% assign is_playing = true %}{% endif %}
+    
+    {% if last_active %}
     <div style="background:#ff0000; color:#fff; border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; position:relative;">
-      <div style="font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900; opacity:0.8; position:relative; z-index:2;">Now Playing &middot; <span style="color:#000;">{{ active_sonos.first.room }}</span></div>
+      <div style="font-size:12px; line-height:1; letter-spacing:0.16em; text-transform:uppercase; font-weight:900; opacity:0.8; position:relative; z-index:2;">{% if is_playing %}Now Playing{% else %}Last Played{% endif %} &middot; <span style="color:#fff;">{{ last_active.room }}</span></div>
       
       <div style="display:flex; justify-content:space-between; align-items:flex-end; position:relative; z-index:2; margin-bottom:0px;">
         <div style="display:flex; flex-direction:column; max-width:66%;">
-            <div style="font-size:24px; font-weight:900; letter-spacing:-0.02em; line-height:1.05; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">{{ active_sonos.first.title }}</div>
-            <div style="font-size:16px; font-weight:800; opacity:0.8; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ active_sonos.first.artist }}</div>
+            {% if last_active.title and last_active.title != blank %}
+            <div style="font-size:24px; font-weight:900; letter-spacing:-0.02em; line-height:1.05; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">{{ last_active.title }}</div>
+            <div style="font-size:16px; font-weight:800; opacity:0.8; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ last_active.artist }}</div>
+            {% else %}
+            <div style="font-size:24px; font-weight:900; letter-spacing:-0.02em; opacity:0.6;">Idle</div>
+            {% endif %}
         </div>
-        {% if active_sonos.first.picture %}
+        {% if last_active.picture and last_active.picture != blank %}
         <div style="width:70px; height:70px; border-radius:10px; overflow:hidden; border:3px solid #000; flex-shrink:0; background:#000; box-shadow:3px 3px 0 #000;">
-            <img src="{{ active_sonos.first.picture }}" style="width:100%; height:100%; object-fit:cover;" />
+            <img src="{{ last_active.picture }}" style="width:100%; height:100%; object-fit:cover;" />
         </div>
         {% else %}
         <div style="width:70px; height:70px; border-radius:10px; overflow:hidden; border:3px solid #000; flex-shrink:0; background:#fff; box-shadow:3px 3px 0 #000; display:flex; align-items:center; justify-content:center;">

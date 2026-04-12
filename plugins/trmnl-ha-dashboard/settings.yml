@@ -5,7 +5,7 @@ version: 1.1.0
 no_screen_padding: 'no'
 dark_mode: 'yes'
 strategy: webhook
-refresh_interval: 1
+refresh_interval: 10
 id: trmnl-ha-dashboard
 custom_fields:
   - keyname: ha_url
