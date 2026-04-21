@@ -44,7 +44,7 @@ def generate_test_image():
     draw.line([(0, 40), (width, 40)], fill=0, width=2)
 
     draw.rectangle([(10, 10), (30, 30)], fill=0)
-    draw.text((40, 8), "InkyPi BYOS", fill=0)
+    draw.text((40, 8), "TRMNL BYOS", fill=0)
     draw.text((40, 22), "TRMNL Local Server", fill=128)
 
     now = datetime.now()
@@ -80,7 +80,7 @@ def generate_test_image():
     y += 15
     draw.text((30, y), "Status: OK - Ready for plugins", fill=0)
     y += 25
-    draw.text((30, y), "Next: Add InkyPi plugins as recipes", fill=128)
+    draw.text((30, y), "Next: Add TRMNL plugins as recipes", fill=128)
 
     gray_blocks = [(0, 64, 128, 192, 255)]
     bx = 600
@@ -133,9 +133,9 @@ def get_display():
 def get_setup():
     return jsonify({
         "api_key": "byos-inky-pi-local",
-        "friendly_id": "INKYPI",
+        "friendly_id": "TRMNL",
         "image_url": f"http://localhost:{DEFAULT_PORT}/images/setup.bmp",
-        "message": "InkyPi BYOS Server",
+        "message": "TRMNL BYOS Server",
     })
 
 

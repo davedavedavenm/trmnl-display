@@ -3,7 +3,7 @@ no_screen_padding: 'no'
 dark_mode: 'yes'
 strategy: webhook
 refresh_interval: 1
-id: inkypi-alert
+id: trmnl-alert
 custom_fields:
   - keyname: theme
     name: Theme

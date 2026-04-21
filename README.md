@@ -17,4 +17,4 @@ The system architecture uses a "Bring Your Own Server" (BYOS) TRMNL approach:
 - **Scripts**: Contains the BYOS server and update template scripts.
 - **Plugins**: Contains TRMNL plugins/recipes (e.g. `trmnl-multi-calendar`, `trmnl-alert`, `trmnl-sonos-local`).
 
-*(Note: Legacy InkyPi Python codebase has been removed as the project has transitioned entirely to the TRMNL ecosystem.)*
+*(Note: Legacy Inky Impression 7.3 Python codebase has been removed as the project has transitioned entirely to the TRMNL ecosystem.)*
