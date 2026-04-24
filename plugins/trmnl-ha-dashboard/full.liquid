@@ -140,7 +140,7 @@
               </svg>
               <div style="font-size:{% if is_playing %}12px{% else %}15px{% endif %}; font-weight:900; color:#fff;">Blinds</div>
             </div>
-            <div style="font-size:{% if is_playing %}16px{% else %}22px{% endif %}; font-weight:900; color:#00bfff;">{% if home.blind_position == "0" %}Closed{% else %}Open{% endif %}</div>
+            <div style="font-size:{% if is_playing %}16px{% else %}22px{% endif %}; font-weight:900; color:{% if home.blind_position == 'unavailable' %}#ff0000{% else %}#00bfff{% endif %};">{% if home.blind_position == 'unavailable' %}?{% elsif home.blind_position == "0" %}Closed{% else %}Open{% endif %}</div>
           </div>
 
           {% comment %} Thermostat {% endcomment %}

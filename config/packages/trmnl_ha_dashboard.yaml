@@ -1,0 +1,75 @@
+rest_command:
+  trmnl_ha_dashboard_push:
+    url: "http://192.168.1.143:4567/api/custom_plugins/4349fdad-a273-450b-aa00-3d32f2de788d"
+    method: POST
+    content_type: application/json
+    payload: >
+      {
+        "merge_variables": {
+          "updated_at": "{{ now().strftime('%d %b %H:%M') }}",
+          "people": [
+            {
+              "name": "David",
+              "state": "{{ states('person.david') }}"
+            },
+            {
+              "name": "Jennifer",
+              "state": "{{ states('person.jennifer') }}"
+            }
+          ],
+          "weather": {
+            "condition": "{{ states('weather.forecast_home') }}",
+            "temperature": "{{ state_attr('weather.forecast_home', 'temperature') | default('', true) }}",
+            "humidity": "{{ state_attr('weather.forecast_home', 'humidity') | default('', true) }}",
+            "wind_speed": "{{ state_attr('weather.forecast_home', 'wind_speed') | default('', true) }}"
+          },
+          "sonos": [
+            {% set players = expand('media_player.living_room', 'media_player.bedroom', 'media_player.kitchen', 'media_player.gym', 'media_player.sonos_roam') | selectattr('state', 'in', ['playing', 'paused', 'idle']) | list %}
+            {% for player in players %}
+            {
+              "room": "{{ state_attr(player.entity_id, 'friendly_name') }}",
+              "state": "{{ player.state }}",
+              "title": "{{ state_attr(player.entity_id, 'media_title') | default('', true) }}",
+              "artist": "{{ state_attr(player.entity_id, 'media_artist') | default('', true) }}",
+              {% set pic = state_attr(player.entity_id, 'entity_picture') | default('', true) %}
+              "picture": "{% if pic.startswith('/') %}http://192.168.1.89:8123{{ pic }}{% else %}{{ pic }}{% endif %}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+          ],
+          "home": {
+            "door_locked": {{ is_state('binary_sensor.nuki_flat_door_locked', 'off') | tojson }},
+            "washer_running": {{ is_state('binary_sensor.wash_dryer_status', 'on') | tojson }},
+            "blind_position": "{{ state_attr('cover.blinds_controller_curtain', 'current_position') | default('unavailable', true) }}",
+            "thermostat_temp": "{{ state_attr('climate.thermostat', 'current_temperature') | default('', true) }}"
+          }
+        }
+      }
+
+automation:
+  - id: trmnl_ha_dashboard_push_v1
+    alias: TRMNL HA Dashboard Push
+    description: Pushes dashboard data to LaraPaper on state changes or time interval.
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: "/10"
+      - platform: state
+        entity_id:
+          - person.david
+          - person.jennifer
+          - weather.forecast_home
+          - binary_sensor.nuki_flat_door_locked
+          - binary_sensor.wash_dryer_status
+          - cover.blinds_controller_curtain
+          - climate.thermostat
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+    action:
+      - service: rest_command.trmnl_ha_dashboard_push
+      - service: system_log.write
+        data:
+          level: info
+          message: "TRMNL HA Dashboard pushed to LaraPaper."
