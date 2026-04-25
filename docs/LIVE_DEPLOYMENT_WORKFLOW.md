@@ -15,7 +15,7 @@ For this stack, the LaraPaper web UI preview and the generated PNG file are the 
 
 Use them before concluding anything about the physical panel:
 - if LaraPaper preview is grayscale, the problem is still in the server render path
-- if LaraPaper preview is colour but the panel is grayscale, the problem is in the final device path on `inky-pi`
+- if LaraPaper preview is colour but the panel is grayscale, the problem is in the final device path on `trmnl-pi`
 
 ## Deployment Rule
 For any change that affects a TRMNL plugin, LaraPaper webhook flow, companion script, or Home Assistant orchestration path, follow this sequence:
