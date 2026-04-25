@@ -260,6 +260,24 @@
 - **Sonos polish:** the local Sonos plugin is functional and respectable, but still has room for layout polish and broader settings/runtime wiring.
 - **Operational memory:** first inspect LaraPaper preview/current PNG when debugging display appearance. Only treat the panel as the differentiator after the server render is known.
 
+### 21. ACeP Color Pipeline Fix - COMPLETE
+- **Root cause:** LaraPaper container auto-updated to Chromium 144, which renders CSS colors in Display P3 color space instead of sRGB. This causes `#FF0000` (Red) to render as `#FF00FF` (Magenta) and `#00FF00` (Green) to render as `#00FFFF` (Cyan). The `remapImage()` step then maps these shifted colors to wrong palette entries, eliminating Red and Green from the 7-color ACeP output.
+- **Previously working:** an older LaraPaper build (pre-Chromium 144) rendered colors correctly, which is why full color was seen on the screen before.
+- **Fixes applied to LaraPaper on khpi5 (in-container patches, not persistent across docker image pulls):**
+  1. Device model `inky_impression_7_3` palette restored to `color-7a` (id=6), `colors=7`, `bit_depth=4` — was drifted to `bw` (id=1), `colors=2`, `bit_depth=1`.
+  2. Added `fixDisplayP3ColorShifts()` method to `ImageStage.php` — replaces `#FF00FF→#FF0000` and `#00FFFF→#00FF00` before palette remapping.
+  3. Added `transformImageColorspace(COLORSPACE_SRGB)` call before colormap application for color palettes.
+  4. Changed `remapImage()` to always use `DITHERMETHOD_FLOYDSTEINBERG` instead of `DITHERMETHOD_NO` (was defaulting to no dithering).
+  5. Added Chromium flags `--force-color-profile=srgb` and `--force-rendering-color-space=srgb` to Puppeteer args in `ImageGenerationService.php`.
+  6. Added `color-profile: srgb` CSS to the HA dashboard template.
+- **Result:** All 7 ACeP colors now render correctly. Green (#00FF00) has 104,487px (27.2%), Red (#FF0000) has 2,469px (0.6%), matching the intended layout.
+- **HA Dashboard redesign:** Redesigned Presence panel (red background with white/green badges) and Home panel (black background with green accent lines/highlights). Both panels now use ACeP-safe solid color backgrounds instead of thin borders or subtle fills that dither poorly.
+- **Warning:** These patches are in-container changes to the LaraPaper Docker container. They will be lost on `docker compose pull && docker compose up -d`. A persistent solution requires either:
+  - Upstream fix in `trmnl-pipeline-php` (filed as potential PR)
+  - Custom Dockerfile that applies patches on build
+  - Volume-mounted override of the patched PHP files
+- **Template changes:** `plugins/trmnl-ha-dashboard/full.liquid` completely redesigned with 4-panel layout (Weather/blue, Presence/red, Home/black+green, Sonos/orange), all using solid ACeP-safe color fills.
+
 ## Architecture
 
 ```

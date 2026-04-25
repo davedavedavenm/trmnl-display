@@ -361,6 +361,8 @@ def main() -> None:
     max_events_per_day = config_int(plugin_config.get("max_events_per_day"), TRMNL_MAX_EVENTS_PER_DAY)
     number_columns = config_int(plugin_config.get("number_columns"), TRMNL_NUMBER_COLUMNS)
     theme = str(plugin_config.get("theme") or TRMNL_THEME).strip().lower() or TRMNL_THEME
+    layout_style = str(plugin_config.get("layout_style") or "editorial").strip().lower() or "editorial"
+    highlight_today = config_bool(plugin_config.get("highlight_today"), True)
 
     NOW = datetime.datetime.now(pytz.timezone(timezone_override))
     START_DATE = NOW.date()
@@ -390,6 +392,8 @@ def main() -> None:
             "today_in_tz": NOW.isoformat(),
             "source_count": len(sources),
             "theme": theme,
+            "layout_style": layout_style,
+            "highlight_today": highlight_today,
         }
     }
 
