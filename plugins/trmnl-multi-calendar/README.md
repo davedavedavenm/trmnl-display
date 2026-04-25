@@ -109,5 +109,5 @@ After every change:
 1. Run the sync script manually on `khpi5`.
 2. Confirm the webhook returns HTTP 200.
 3. Confirm LaraPaper serves a fresh `/api/display` image.
-4. Refresh `trmnl-display.service` on `inky-pi`.
+4. Refresh `trmnl-display.service` on `trmnl-pi`.
 5. Verify the physical screen updates correctly.

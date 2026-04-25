@@ -252,7 +252,7 @@
 - **Home Assistant:** URL `raspberrypi.local` not resolvable from khpi5 container. Needs correct IP.
 - **World Clock:** No timezone/city data configured.
 - **Duplicate device bug:** LaraPaper auto-assign creates ghost devices when `assign_new_devices=1` and Go client sends empty `ID` header. Fix: disabled auto-assign, set correct config.
-- **Force refresh:** No UI button. Must run `ssh inky-pi 'sudo systemctl restart trmnl-display'`.
+- **Force refresh:** No UI button. Must run `ssh trmnl-pi 'sudo systemctl restart trmnl-display'`.
 - **Calendar UX:** current multi-calendar layout works but needs a proper polished design pass and richer configuration options.
 - **Calendar settings:** key settings are now wired through, but not every field from the schema is implemented in the runtime yet.
 - **Calendar crispness:** render-side sharpness tuning has not yet been tested; current improvements are mostly contrast and styling based.
@@ -285,7 +285,7 @@
 
 ## File Locations
 
-### Pi Zero (inky-pi) - Display Client
+### Pi Zero (trmnl-pi) - Display Client
 | Component | Path |
 |---|---|
 | Go Client | `/home/dave/trmnl-display/trmnl-display` |
@@ -316,7 +316,7 @@
 ## Validation Baseline (Current)
 - **Data fetch:** `python main.py` on khpi5 successfully fetched both configured ICS feeds and posted to LaraPaper.
 - **Server render:** `/api/display` returned a fresh generated image URL for the device.
-- **Client service:** `trmnl-display.service` on inky-pi is active and polling LaraPaper successfully.
+- **Client service:** `trmnl-display.service` on trmnl-pi is active and polling LaraPaper successfully.
 - **Physical display:** calendar data is visible on screen, confirming the end-to-end pipeline works at baseline.
 
 ## Validation Stage: 6-Calendar Runtime Migration
