@@ -132,7 +132,7 @@ def get_display():
 @app.route("/api/setup", methods=["GET"])
 def get_setup():
     return jsonify({
-        "api_key": "byos-inky-pi-local",
+        "api_key": "byos-trmnl-pi-local",
         "friendly_id": "TRMNL",
         "image_url": f"http://localhost:{DEFAULT_PORT}/images/setup.bmp",
         "message": "TRMNL BYOS Server",
