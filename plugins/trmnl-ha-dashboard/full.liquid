@@ -2,82 +2,218 @@
 {% if active_sonos == nil %}
   {% assign active_sonos = sonos | where: "state", "paused" | first %}
 {% endif %}
+{% assign idle_count = sonos | where: "state", "idle" | size %}
+{% assign weather_icon = weather.condition | downcase %}
+{% if weather_icon contains "sun" or weather_icon contains "clear" %}
+  {% assign w_icon = "☀" %}
+{% elsif weather_icon contains "cloud" or weather_icon contains "overcast" %}
+  {% assign w_icon = "☁" %}
+{% elsif weather_icon contains "rain" or weather_icon contains "drizzle" or weather_icon contains "shower" %}
+  {% assign w_icon = "🌧" %}
+{% elsif weather_icon contains "snow" or weather_icon contains "sleet" or weather_icon contains "ice" %}
+  {% assign w_icon = "❄" %}
+{% elsif weather_icon contains "fog" or weather_icon contains "mist" or weather_icon contains "haze" %}
+  {% assign w_icon = "🌫" %}
+{% elsif weather_icon contains "thunder" or weather_icon contains "lightning" %}
+  {% assign w_icon = "⛈" %}
+{% else %}
+  {% assign w_icon = "🌤" %}
+{% endif %}
 
 <style>
-  * { color-profile: srgb; }
-  img { color-profile: srgb; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+  .dash { width: 800px; height: 480px; background: #0e0e0e; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { height: 42px; background: #161616; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+  .topbar-brand { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #ffcc00; }
+  .topbar-time { font-size: 12px; font-weight: 500; color: #888; }
+  .grid { flex: 1; display: flex; flex-direction: column; gap: 1px; background: #1a1a1a; padding: 0; }
+  .row { display: flex; gap: 1px; flex: 1; }
+  .col { flex: 1; background: #151515; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .card-label { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #555; }
+  .weather-temp { font-size: 64px; font-weight: 700; color: #fff; line-height: 1; }
+  .weather-temp-sym { font-size: 28px; vertical-align: super; }
+  .weather-condition { font-size: 13px; font-weight: 600; color: #aaa; text-transform: capitalize; }
+  .weather-meta { font-size: 11px; color: #777; margin-top: 2px; }
+  .presence-name { font-size: 18px; font-weight: 700; color: #fff; }
+  .presence-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; padding: 3px 10px; border-radius: 3px; text-transform: uppercase; }
+  .badge-home { background: rgba(220, 140, 0, 0.15); color: #dd8800; border: 1px solid rgba(220, 140, 0, 0.3); }
+  .badge-away { background: rgba(200, 0, 0, 0.12); color: #cc3333; border: 1px solid rgba(200, 0, 0, 0.25); }
+  .stat-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-icon { font-size: 14px; width: 24px; text-align: center; }
+  .stat-label { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-size: 14px; font-weight: 700; }
+  .stat-val-ok { color: #dd8800; }
+  .stat-val-alert { color: #cc3333; }
+  .stat-val-neutral { color: #fff; }
+  .sonos-header { display: flex; align-items: center; gap: 8px; }
+  .sonos-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+  .sonos-dot-active { background: #dd8800; }
+  .sonos-dot-idle { background: #333; }
+  .sonos-room-name { font-size: 11px; font-weight: 600; color: #999; }
+  .sonos-room-status { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+  .divider { height: 1px; background: #2a2a2a; margin: 0; }
+  .accent-blue { border-top: 2px solid #3366cc; }
+  .accent-orange { border-top: 2px solid #dd8800; }
+  .accent-red { border-top: 2px solid #cc3333; }
+  .accent-yellow { border-top: 2px solid #998800; }
 </style>
-<div class="layout layout--col h--full w--full" style="padding: 0; gap: 0; background: #000000; font-family: 'Courier New', monospace;">
 
-  <!-- WEATHER — Blue panel, top-left -->
-  <div style="flex: 1; display: flex; width: 100%;">
-    <div style="width: 42%; background: #0000FF; padding: 20px 22px; display: flex; flex-direction: column; justify-content: center; gap: 12px;">
-      <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; color: #FFFF00;">Weather</div>
-      <div style="font-size: 120px; font-weight: 900; line-height: 0.8; color: #FFFFFF; letter-spacing: -0.04em;">{{ weather.temperature | round }}<span style="font-size: 48px; vertical-align: super;">°</span></div>
-      <div style="font-size: 26px; font-weight: 900; text-transform: uppercase; color: #FFFF00; letter-spacing: -0.02em;">{{ weather.condition | replace: "-", " " }}</div>
-      <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.04em; margin-top: 4px;">{{ weather.humidity }}% HUM &middot; {{ weather.wind_speed | round }} KM/H</div>
-    </div>
-
-    <!-- FAMILY — Red panel, top-right -->
-    <div style="flex: 1; background: #FF0000; padding: 20px 24px; display: flex; flex-direction: column; justify-content: center;">
-      <div style="font-size: 13px; font-weight: 900; letter-spacing: 0.25em; text-transform: uppercase; color: #FFFF00;">Presence</div>
-      {% for person in people %}
-      <div style="display: flex; align-items: baseline; gap: 14px; margin-top: 18px;">
-        <div style="font-size: 42px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em; line-height: 1;">{{ person.name }}</div>
-        <div style="font-size: 18px; font-weight: 900; text-transform: uppercase; background: #000000; color: {% if person.state == 'home' %}#00FF00{% elsif person.state == 'not_home' %}#FF0000{% else %}#FFFF00{% endif %}; padding: 6px 14px; letter-spacing: 0.1em; vertical-align: middle;">{{ person.state | replace: "not_home", "AWAY" }}</div>
-      </div>
-      {% endfor %}
-    </div>
+<div class="dash">
+  <div class="topbar">
+    <div class="topbar-brand">◉ HA Dashboard</div>
+    <div class="topbar-time">{{ updated_at }}</div>
   </div>
 
-  <!-- Bottom row -->
-  <div style="flex: 1; display: flex; width: 100%;">
-    <!-- HOME — Black panel with green highlights, bottom-left -->
-    <div style="width: 42%; background: #000000; padding: 20px 22px; display: flex; flex-direction: column; justify-content: center;">
-      <div style="font-size: 13px; font-weight: 900; letter-spacing: 0.25em; text-transform: uppercase; color: #00FF00;">Home</div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-bottom: 8px; border-bottom: 2px solid #00FF00;">
-        <span style="font-size: 20px; font-weight: 900; color: #FFFFFF;">DOOR</span>
-        <span style="font-size: 18px; font-weight: 900; text-transform: uppercase; color: {% if home.door_locked %}#00FF00{% else %}#FF0000{% endif %};">{% if home.door_locked %}LOCKED{% else %}OPEN{% endif %}</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-bottom: 8px; border-bottom: 2px solid #00FF00;">
-        <span style="font-size: 20px; font-weight: 900; color: #FFFFFF;">LAUNDRY</span>
-        <span style="font-size: 18px; font-weight: 900; text-transform: uppercase; color: {% if home.washer_running %}#FFFF00{% else %}#FFFFFF{% endif %};">{% if home.washer_running %}ON{% else %}OFF{% endif %}</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-bottom: 8px; border-bottom: 2px solid #00FF00;">
-        <span style="font-size: 20px; font-weight: 900; color: #FFFFFF;">TEMP</span>
-        <span style="font-size: 24px; font-weight: 900; color: #FFFF00;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}°{% else %}--°{% endif %}</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-        <span style="font-size: 20px; font-weight: 900; color: #FFFFFF;">BLINDS</span>
-        <span style="font-size: 18px; font-weight: 900; text-transform: uppercase; color: #FFFFFF;">{% if home.blind_position == "100" %}OPEN{% else %}CLOSED{% endif %}</span>
-      </div>
-    </div>
-
-    <!-- SONOS — Orange panel, bottom-right -->
-    <div style="flex: 1; background: #FFA500; padding: 20px 22px; display: flex; flex-direction: column; justify-content: center; gap: 10px;">
-      <div style="font-size: 15px; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; color: #000000;">Sonos</div>
-      {% if active_sonos %}
-        {% if active_sonos.picture %}
-        <div style="width: 140px; height: 140px; border-radius: 4px; overflow: hidden; border: 3px solid #000000;">
-          <img src="{{ active_sonos.picture }}" style="width: 100%; height: 100%; object-fit: cover;" />
+  <div class="grid">
+    <!-- Row 1: Weather + People + Sonos Now Playing -->
+    <div class="row">
+      <!-- Weather -->
+      <div class="col" style="flex: 0 0 32%; padding: 16px 18px;">
+        <div class="card-label" style="color: #4488ff;">Weather</div>
+        <div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 10px;">
+          <div style="font-size: 40px; line-height: 1;">{{ w_icon }}</div>
+          <div>
+            <div class="weather-temp">{{ weather.temperature | round }}<span class="weather-temp-sym">°</span></div>
+            <div class="weather-condition">{{ weather.condition | replace: "-", " " }}</div>
+            <div class="weather-meta">{{ weather.humidity }}% RH · {{ weather.wind_speed | round }} km/h</div>
+          </div>
         </div>
-        {% endif %}
-        <div style="font-size: 14px; font-weight: 900; text-transform: uppercase; color: #000000; letter-spacing: 0.1em;">{{ active_sonos.room }}</div>
-        <div style="font-size: 24px; font-weight: 900; color: #000000; line-height: 1.1;">{{ active_sonos.title }}</div>
-        <div style="font-size: 18px; font-weight: 900; color: #000000;">{{ active_sonos.artist }}</div>
-      {% else %}
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <div style="font-size: 22px; font-weight: 900; color: #000000; text-transform: uppercase; letter-spacing: 0.06em;">No Music</div>
-          {% assign idle_count = sonos | where: "state", "idle" | size %}
-          {% if idle_count > 0 %}
-          <div style="font-size: 16px; font-weight: 900; color: #000000; text-transform: uppercase; letter-spacing: 0.04em;">{{ idle_count }} ROOM{% if idle_count > 1 %}S{% endif %} IDLE</div>
+      </div>
+
+      <!-- Presence -->
+      <div class="col" style="flex: 0 0 38%; padding: 16px 18px;">
+        <div class="card-label">People</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+          {% for person in people %}
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="presence-name">{{ person.name }}</span>
+            <span class="presence-badge {% if person.state == 'home' %}badge-home{% elsif person.state == 'not_home' %}badge-away{% else %}badge-home{% endif %}">
+              {% if person.state == "home" %}● HOME{% elsif person.state == "not_home" %}○ AWAY{% else %}?{% endif %}
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Sonos Now Playing -->
+      <div class="col" style="flex: 1; padding: 16px 18px;">
+        <div class="card-label" style="color: #dd8800;">Sonos</div>
+        <div style="display: flex; flex-direction: column; margin-top: 10px; flex: 1;">
+          {% if active_sonos %}
+            <div style="font-size: 13px; font-weight: 700; color: #fff;">{{ active_sonos.room }}</div>
+            <div style="font-size: 15px; font-weight: 700; color: #dd8800; margin-top: 4px;">{{ active_sonos.title }}</div>
+            <div style="font-size: 12px; color: #888; margin-top: 2px;">{{ active_sonos.artist }}</div>
+            {% if active_sonos.picture %}
+            <div style="margin-top: 8px; width: 60px; height: 60px; border-radius: 4px; overflow: hidden; border: 1px solid #333;">
+              <img src="{{ active_sonos.picture }}" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+            {% endif %}
+          {% else %}
+            <div style="font-size: 20px; font-weight: 300; color: #444; margin-bottom: 4px;">No Music</div>
+            {% if idle_count > 0 %}
+            <div style="font-size: 11px; color: #666;">{{ idle_count }} room{% if idle_count > 1 %}s{% endif %} idle</div>
+            {% endif %}
+            <div style="margin-top: auto; display: flex; flex-wrap: wrap; gap: 4px;">
+              {% for room in sonos %}
+              <div style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; background: #1e1e1e; border-radius: 3px;">
+                <span class="sonos-dot sonos-dot-idle"></span>
+                <span style="font-size: 9px; color: #777; text-transform: uppercase; letter-spacing: 0.3px;">{{ room.room | truncate: 6, "" }}</span>
+              </div>
+              {% endfor %}
+            </div>
           {% endif %}
         </div>
-      {% endif %}
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Row 2: Home Status -->
+    <div class="row">
+      <div class="col" style="flex: 0 0 55%; padding: 14px 18px;">
+        <div class="card-label">Home</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; margin-top: 8px;">
+          <div class="stat-row" style="border: none; padding: 4px 0;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span class="stat-icon">🔒</span>
+              <span class="stat-label">Door</span>
+            </span>
+            <span class="stat-value {% if home.door_locked %}stat-val-ok{% else %}stat-val-alert{% endif %}">
+              {% if home.door_locked %}LOCKED{% else %}OPEN{% endif %}
+            </span>
+          </div>
+          <div class="stat-row" style="border: none; padding: 4px 0;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span class="stat-icon">👕</span>
+              <span class="stat-label">Washer</span>
+            </span>
+            <span class="stat-value {% if home.washer_running %}stat-val-ok{% else %}stat-val-neutral{% endif %}">
+              {% if home.washer_running %}ON{% else %}OFF{% endif %}
+            </span>
+          </div>
+          <div class="stat-row" style="border: none; padding: 4px 0;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span class="stat-icon">🌡</span>
+              <span class="stat-label">Temp</span>
+            </span>
+            <span class="stat-value stat-val-neutral">
+              {% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}°{% else %}--°{% endif %}
+            </span>
+          </div>
+          <div class="stat-row" style="border: none; padding: 4px 0;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span class="stat-icon">🪟</span>
+              <span class="stat-label">Blinds</span>
+            </span>
+            <span class="stat-value stat-val-neutral">
+              {% if home.blind_position == "unavailable" %}--{% else %}{{ home.blind_position }}%{% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary / Ambient info -->
+      <div class="col" style="flex: 1; padding: 14px 18px; display: flex; flex-direction: column; justify-content: center;">
+        <div style="display: flex; align-items: center; gap: 12px; justify-content: center;">
+          {% assign all_home = true %}
+          {% for person in people %}
+            {% if person.state != "home" %}{% assign all_home = false %}{% endif %}
+          {% endfor %}
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 200; color: {% if all_home %}#4488ff{% else %}#cc3333{% endif %};">{{ people | size }}</div>
+            <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-top: 2px;">Occupants</div>
+          </div>
+          <div style="width: 1px; height: 30px; background: #2a2a2a;"></div>
+          <div style="text-align: center;">
+            <div style="font-size: 28px; font-weight: 200; color: {% if all_home %}#4488ff{% else %}#cc3333{% endif %};">
+              {% if all_home %}✓{% else %}○{% endif %}
+            </div>
+            <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-top: 2px;">
+              {% if all_home %}All Home{% else %}Away{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Row 3: Device Status Bar -->
+    <div class="row" style="flex: 0 0 48px;">
+      <div style="flex: 1; display: flex; align-items: center; padding: 0 18px; gap: 12px; background: #161616; border-top: 1px solid #2a2a2a;">
+        <span style="font-size: 9px; color: #555; letter-spacing: 1px; text-transform: uppercase;">Devices</span>
+        <span class="sonos-dot sonos-dot-idle" style="background: #4488ff;"></span>
+        <span style="font-size: 10px; color: #888;">{{ idle_count }}/{{ sonos | size }} Sonos</span>
+        <span style="width: 1px; height: 12px; background: #2a2a2a;"></span>
+        <span style="font-size: 10px; color: #888;">
+          {% if home.door_locked %}🔒{% else %}🔓{% endif %}
+          {% if home.washer_running %}👕{% endif %}
+        </span>
+        <span style="flex: 1;"></span>
+        <span style="font-size: 8px; color: #444; letter-spacing: 1.5px; text-transform: uppercase;">7-Color ACeP</span>
+      </div>
     </div>
   </div>
-
-  <!-- Timestamp overlay -->
-  <div style="position: absolute; bottom: 8px; right: 14px; font-size: 11px; font-weight: 900; color: #FFFF00; letter-spacing: 0.1em;">{{ updated_at }}</div>
-
 </div>

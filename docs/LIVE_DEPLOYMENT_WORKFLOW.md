@@ -42,6 +42,22 @@ In practice that means:
 - avoid accidentally biasing recipes toward monochrome for convenience
 - treat a regression from colour to grayscale as a bug unless it is an intentional user-selectable mode
 
+### ACeP 7-Color Palette Realities
+
+The Pimoroni Inky Impression 7.3" uses Spectra/ACeP electrophoretic ink with 7 particles. How each CSS color actually renders on the panel:
+
+| CSS Color | ACeP Reality | Design Guidance |
+|---|---|---|
+| `#000000` (Black) | Solid black | Use for backgrounds; reads well |
+| `#FFFFFF` (White) | Solid white/paper | Use for primary text on dark |
+| `#FF0000` (Red) | Vibrant red | Excellent for alerts, badges, emphasis |
+| `#0000FF` (Blue) | Visible blue | Good for weather data, cold accents |
+| `#00FF00` (Green) | Muted, dark olive | Renders very dark; avoid for text, use small indicators only |
+| `#FFFF00` (Yellow) | Amber/gold | Good for labels, highlights on dark |
+| `#FFA500` (Orange) | Visible orange | Good for Sonos, warmth, emphasis |
+
+Design for the panel's actual output, not what your monitor shows. Green in particular is dramatically darker on ACeP than on an LCD.
+
 ## Sonos-Specific Rule
 The Sonos recipe must preserve a colour-capable path.
 
@@ -59,6 +75,76 @@ One confirmed failure mode already occurred in this project:
 - result: all recipes rendered as black/white PNGs even when recipe code expected colour
 
 Treat that configuration drift as a primary diagnostic check whenever colour disappears.
+
+## Pangolin Reverse Proxy Setup
+
+LaraPaper runs on `khpi5` (port 4567) and is served externally through a **Pangolin** reverse proxy at `https://trmnl.magnusfamily.co.uk`.
+
+### Docker Compose Configuration
+
+File: `/home/dave/larapaper/docker-compose.yml`
+
+```yaml
+services:
+    app:
+        image: ghcr.io/usetrmnl/larapaper:latest
+        ports:
+            - "4567:8080"
+        environment:
+            - APP_URL=https://trmnl.magnusfamily.co.uk
+            - APP_TRUSTED_PROXIES=*
+            - APP_TIMEZONE=Europe/London
+            - ...
+        volumes:
+            - database:/var/www/html/database/storage
+            - storage:/var/www/html/storage/app/public/images/generated
+            - ./nginx/proxy_map.conf:/etc/nginx/conf.d/proxy_map.conf:ro
+            - ./nginx/fastcgi_params:/etc/nginx/fastcgi_params:ro
+```
+
+Key environment variables:
+
+| Variable | Value | Purpose |
+|---|---|---|
+| `APP_URL` | `https://trmnl.magnusfamily.co.uk` | Tells Laravel the canonical external URL. Used for route generation, email links, etc. |
+| `APP_TRUSTED_PROXIES` | `*` | Trusts all reverse proxy IPs so Laravel reads `X-Forwarded-*` headers correctly |
+| `ASSET_URL` | *(not set)* | Deliberately omitted — assets resolve relative to the request origin. Set this only if you need a dedicated CDN. |
+
+### Custom Nginx Configs
+
+**`./nginx/proxy_map.conf`** — Maps `X-Forwarded-Proto` header to an nginx `$https_flag` variable, ensuring Laravel detects HTTPS when accessed through the proxy:
+
+```nginx
+map $http_x_forwarded_proto $https_flag {
+    https on;
+    default off;
+}
+```
+
+**`./nginx/fastcgi_params`** — Standard FastCGI params with the HTTPS flag injected:
+
+```nginx
+fastcgi_param  HTTPS $https_flag;
+```
+
+### Access Paths
+
+| URL | Use Case |
+|---|---|
+| `http://192.168.1.143:4567` | Direct LAN access (Pi Zero device fetches from here) |
+| `https://trmnl.magnusfamily.co.uk` | External access via Pangolin proxy (web UI, mobile) |
+
+**Note:** The dashboard at `http://192.168.1.143:4567/dashboard` will render without CSS/JS if accessed via the local IP because `APP_URL` is set to the external domain. This is expected behaviour — always use `https://trmnl.magnusfamily.co.uk/dashboard` for the web UI, or remove `APP_URL` if you need both to work equally.
+
+### Physical Device Fetch Path
+
+The Pi Zero (`trmnl-pi`, `192.168.1.74`) polls the LaraPaper API at the local address:
+```
+GET http://192.168.1.143:4567/api/display
+Headers: ID=88:A2:9E:2B:2B:B9, access-token=<api_key>
+```
+
+It does not use the proxy URL because it runs on the same LAN. The `image_url` returned by LaraPaper uses the proxy domain (via `APP_URL`), but the Pi client only uses the `filename` hash to verify changes and downloads the actual image from the same host it polled.
 
 ## Documentation Rule
 When making decisions about TRMNL recipes, private plugins, palettes, BYOS behavior, or community-supported integrations:
