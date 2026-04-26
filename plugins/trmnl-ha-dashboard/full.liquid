@@ -4,190 +4,117 @@
 {% endif %}
 {% assign idle_count = sonos | where: "state", "idle" | size %}
 
+<!--
+  Spectra: #000000 #FFFFFF #52180A #59683F #28487B #968327
+  All backgrounds inline to avoid LaraPaper CSS conflicts.
+-->
+
 <style>
-  * { color-profile: srgb; margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Helvetica Neue', 'Segoe UI', Arial, sans-serif; background: #000; }
-  .dash { width: 800px; height: 480px; display: flex; flex-direction: column; background: #080808; }
-
-  .topbar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #1a1a1a; }
-  .topbar-l { display: flex; align-items: center; gap: 10px; }
-  .topbar-dot { width: 8px; height: 8px; border-radius: 50%; background: #FFC107; }
-  .topbar-brand { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #666; }
-  .topbar-time { font-size: 10px; font-weight: 500; color: #555; letter-spacing: 0.5px; }
-  .topbar-badge { font-size: 8px; font-weight: 600; letter-spacing: 1px; color: #444; border: 1px solid #222; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; }
-
-  .main { flex: 1; display: flex; flex-direction: column; }
-  .row3 { flex: 1; display: flex; }
-  .card { flex: 1; display: flex; flex-direction: column; position: relative; margin: 10px 6px; border-radius: 6px; overflow: hidden; background: #0f0f0f; border: 1px solid #1c1c1c; }
-
-  .color-bar { width: 100%; height: 4px; flex-shrink: 0; }
-  .card-body { flex: 1; padding: 14px 16px 16px 16px; display: flex; flex-direction: column; }
-
-  .section-label { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; margin-bottom: 10px; }
-
-  /* Weather */
-  .wt-flex { display: flex; align-items: flex-start; gap: 8px; }
-  .wt-icon { font-size: 36px; line-height: 1; margin-top: 2px; }
-  .wt-temp { font-size: 52px; font-weight: 700; color: #fff; line-height: 0.9; letter-spacing: -1px; }
-  .wt-temp-sym { font-size: 22px; vertical-align: super; font-weight: 400; }
-  .wt-cond { font-size: 12px; font-weight: 600; color: #aaa; text-transform: capitalize; margin-top: 4px; }
-  .wt-meta { font-size: 10px; color: #666; margin-top: 3px; letter-spacing: 0.3px; }
-
-  /* Presence */
-  .pp-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
-  .pp-row + .pp-row { border-top: 1px solid #181818; }
-  .pp-name { font-size: 18px; font-weight: 600; color: #fff; letter-spacing: -0.3px; }
-  .pp-badge { font-size: 9px; font-weight: 700; padding: 3px 12px; border-radius: 3px; letter-spacing: 1px; text-transform: uppercase; }
-  .pp-home { background: rgba(255, 193, 7, 0.12); color: #FFC107; border: 1px solid rgba(255, 193, 7, 0.2); }
-  .pp-away { background: rgba(255, 77, 77, 0.1); color: #FF4D4D; border: 1px solid rgba(255, 77, 77, 0.2); }
-  .pp-count { font-size: 9px; color: #555; margin-top: auto; letter-spacing: 0.5px; }
-
-  /* Home */
-  .hm-grid { display: flex; flex-direction: column; gap: 0; flex: 1; }
-  .hm-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #181818; }
-  .hm-item:last-child { border-bottom: none; }
-  .hm-left { display: flex; align-items: center; gap: 8px; }
-  .hm-icon { font-size: 13px; width: 18px; text-align: center; }
-  .hm-label { font-size: 10px; font-weight: 600; color: #777; letter-spacing: 0.8px; text-transform: uppercase; }
-  .hm-val { font-size: 13px; font-weight: 700; letter-spacing: 0.3px; }
-  .hm-good { color: #FFC107; }
-  .hm-alert { color: #FF4D4D; }
-  .hm-neutral { color: #fff; }
-
-  /* Sonos */
-  .sn-row { display: flex; align-items: center; padding: 8px 0; gap: 12px; }
-  .sn-icon { font-size: 18px; }
-  .sn-info { flex: 1; }
-  .sn-title { font-size: 14px; font-weight: 700; color: #fff; }
-  .sn-sub { font-size: 11px; color: #888; margin-top: 1px; }
-  .sn-rooms { display: flex; flex-wrap: wrap; gap: 4px; }
-  .sn-room { display: flex; align-items: center; gap: 4px; padding: 3px 8px; background: #161616; border-radius: 3px; }
-  .sn-dot { width: 6px; height: 6px; border-radius: 50%; }
-  .sn-dot-on { background: #FFC107; }
-  .sn-dot-off { background: #333; }
-  .sn-label { font-size: 8px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  .bottombar { height: 28px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-top: 1px solid #1a1a1a; }
-  .bottombar-item { font-size: 8px; font-weight: 600; color: #444; letter-spacing: 1px; text-transform: uppercase; }
-
-  .col-blue { background: #2979FF; }
-  .col-red { background: #FF1744; }
-  .col-orange { background: #FF9100; }
-  .col-amber { color: #FFC107; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Helvetica Neue','Segoe UI',Arial,sans-serif; }
 </style>
 
-<div class="dash">
-  <div class="topbar">
-    <div class="topbar-l">
-      <span class="topbar-dot"></span>
-      <span class="topbar-brand">Dashboard</span>
-    </div>
-    <div class="topbar-time">{{ updated_at }}</div>
-    <span class="topbar-badge">7-Color ACeP</span>
+<!-- ROOT -->
+<div style="width:800px;height:480px;display:flex;flex-direction:column;background:#f5f0e6;color:#000;">
+
+  <!-- HEADER -->
+  <div style="height:40px;flex-shrink:0;background:#000;display:flex;align-items:center;justify-content:space-between;padding:0 22px;">
+    <span style="font-size:11px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#fff;">Home Dashboard</span>
+    <span style="font-size:11px;font-weight:700;color:#968327;letter-spacing:1px;">{{ updated_at }}</span>
   </div>
 
-  <div class="main">
-    <div class="row3">
+  <!-- CONTENT: full-width padding box -->
+  <div style="flex:1;display:flex;gap:10px;padding:10px;min-height:0;">
 
-      <!-- WEATHER -->
-      <div class="card">
-        <div class="color-bar col-blue"></div>
-        <div class="card-body">
-          <div class="section-label" style="color: #448AFF;">Weather</div>
-          <div class="wt-flex">
-            <div class="wt-icon">
-              {% assign c = weather.condition | downcase %}
-              {% if c contains "clear" or c contains "sun" %}☀{% elsif c contains "cloud" or c contains "overcast" %}☁{% elsif c contains "rain" or c contains "drizzle" or c contains "shower" %}🌧{% elsif c contains "snow" or c contains "sleet" %}❄{% elsif c contains "fog" or c contains "mist" or c contains "haze" %}🌫{% elsif c contains "thunder" %}⛈{% else %}🌤{% endif %}
-            </div>
-            <div>
-              <div class="wt-temp">{{ weather.temperature | round }}<span class="wt-temp-sym">°</span></div>
-              <div class="wt-cond">{{ weather.condition | replace: "-", " " }}</div>
-              <div class="wt-meta">RH {{ weather.humidity }}% · {{ weather.wind_speed | round }} km/h</div>
-            </div>
-          </div>
+    <!-- LEFT: WEATHER — navy card -->
+    <div style="width:195px;flex-shrink:0;background:#28487B;border-radius:10px;display:flex;flex-direction:column;justify-content:space-between;padding:16px 18px;">
+      <div>
+        <div style="font-size:9px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#968327;margin-bottom:10px;">Weather</div>
+        <div style="font-size:90px;font-weight:900;line-height:0.82;letter-spacing:-6px;color:#fff;">{{ weather.temperature | round }}<span style="font-size:38px;font-weight:200;vertical-align:super;letter-spacing:0;">°</span></div>
+        <div style="font-size:28px;margin-top:10px;line-height:1;">
+          {% assign c = weather.condition | downcase %}
+          {% if c contains "clear" or c contains "sun" %}☀️{% elsif c contains "rain" or c contains "drizzle" or c contains "shower" %}🌧️{% elsif c contains "snow" or c contains "sleet" %}❄️{% elsif c contains "thunder" %}⛈️{% elsif c contains "fog" or c contains "mist" %}🌫️{% elsif c contains "cloud" or c contains "overcast" %}☁️{% else %}🌤️{% endif %}
         </div>
+        <div style="font-size:15px;font-weight:800;color:#fff;margin-top:6px;text-transform:capitalize;">{{ weather.condition | replace: "-", " " }}</div>
       </div>
+      <div style="font-size:11px;font-weight:600;color:#968327;line-height:1.5;">
+        {{ weather.humidity }}% humidity<br>{{ weather.wind_speed | round }} km/h
+      </div>
+    </div>
 
-      <!-- PEOPLE -->
-      <div class="card">
-        <div class="color-bar col-red"></div>
-        <div class="card-body">
-          <div class="section-label" style="color: #FF5252;">People</div>
+    <!-- RIGHT STACK -->
+    <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;">
+
+      <!-- TOP ROW: People + Home Status -->
+      <div style="flex:1;display:flex;gap:10px;min-height:0;">
+
+        <!-- PEOPLE — olive card -->
+        <div style="flex:1;background:#59683F;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;">
+          <div style="font-size:9px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#968327;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:7px;margin-bottom:10px;">People</div>
           {% for person in people %}
-          <div class="pp-row">
-            <span class="pp-name">{{ person.name }}</span>
-            <span class="pp-badge {% if person.state == 'home' %}pp-home{% else %}pp-away{% endif %}">
-              {% if person.state == "home" %}●{% else %}○{% endif %} {{ person.state | replace: "not_home", "AWAY" }}
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+            <span style="font-size:26px;font-weight:900;letter-spacing:-1.5px;color:#fff;">{{ person.name }}</span>
+            <span style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:4px;background:{% if person.state == 'home' %}#000000{% else %}#52180A{% endif %};">
+              <span style="width:6px;height:6px;border-radius:50%;background:#968327;flex-shrink:0;display:inline-block;"></span>
+              <span style="font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#fff;">{% if person.state == 'home' %}Home{% else %}Away{% endif %}</span>
             </span>
           </div>
           {% endfor %}
-          <div class="pp-count">
-            {% assign all_home = true %}
-            {% for person in people %}{% if person.state != "home" %}{% assign all_home = false %}{% endif %}{% endfor %}
-            {{ people | size }} occupant{% if people | size != 1 %}s{% endif %} {% if all_home %}· All present{% endif %}
-          </div>
         </div>
+
+        <!-- HOME STATUS — 2×2 card grid -->
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;">
+
+          <!-- DOOR -->
+          <div style="background:#fff;border:3px solid {% if home.door_locked %}#28487B{% else %}#52180A{% endif %};border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
+            <div style="font-size:8px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#aaa;">🔒 Door</div>
+            <div style="font-size:20px;font-weight:900;color:{% if home.door_locked %}#28487B{% else %}#52180A{% endif %};">{% if home.door_locked %}Locked{% else %}OPEN{% endif %}</div>
+          </div>
+
+          <!-- WASHER -->
+          <div style="background:#fff;border:3px solid {% if home.washer_running %}#968327{% else %}#ddd{% endif %};border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
+            <div style="font-size:8px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#aaa;">👕 Washer</div>
+            <div style="font-size:20px;font-weight:900;color:{% if home.washer_running %}#968327{% else %}#000{% endif %};">{% if home.washer_running %}Running{% else %}Off{% endif %}</div>
+          </div>
+
+          <!-- THERMOSTAT -->
+          <div style="background:#fff;border:3px solid #ddd;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
+            <div style="font-size:8px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#aaa;">🌡️ Thermostat</div>
+            <div style="font-size:20px;font-weight:900;color:#000;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}°C{% else %}--{% endif %}</div>
+          </div>
+
+          <!-- BLINDS -->
+          <div style="background:#fff;border:3px solid {% if home.blind_position == 100 %}#59683F{% elsif home.blind_position == 0 %}#52180A{% else %}#ddd{% endif %};border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
+            <div style="font-size:8px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#aaa;">🪟 Blinds</div>
+            <div style="font-size:20px;font-weight:900;color:#000;">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% else %}{{ home.blind_position }}%{% endif %}</div>
+          </div>
+
+        </div>
+
       </div>
 
-      <!-- HOME -->
-      <div class="card">
-        <div class="color-bar col-orange"></div>
-        <div class="card-body">
-          <div class="section-label" style="color: #FFAB40;">Home</div>
-          <div class="hm-grid">
-            <div class="hm-item">
-              <span class="hm-left"><span class="hm-icon">🔒</span><span class="hm-label">Door</span></span>
-              <span class="hm-val {% if home.door_locked %}hm-good{% else %}hm-alert{% endif %}">{% if home.door_locked %}LOCKED{% else %}OPEN{% endif %}</span>
-            </div>
-            <div class="hm-item">
-              <span class="hm-left"><span class="hm-icon">👕</span><span class="hm-label">Washer</span></span>
-              <span class="hm-val {% if home.washer_running %}hm-good{% else %}hm-neutral{% endif %}">{% if home.washer_running %}ON{% else %}OFF{% endif %}</span>
-            </div>
-            <div class="hm-item">
-              <span class="hm-left"><span class="hm-icon">🌡</span><span class="hm-label">Thermostat</span></span>
-              <span class="hm-val hm-neutral">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}°{% else %}--°{% endif %}</span>
-            </div>
-            <div class="hm-item">
-              <span class="hm-left"><span class="hm-icon">🪟</span><span class="hm-label">Blinds</span></span>
-              <span class="hm-val hm-neutral">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% else %}{{ home.blind_position }}%{% endif %}</span>
-            </div>
-          </div>
+      <!-- BOTTOM: SONOS strip -->
+      <div style="height:88px;flex-shrink:0;background:{% if active_sonos %}#968327{% else %}#52180A{% endif %};border-radius:10px;display:flex;align-items:center;gap:18px;padding:0 20px;">
+        <span style="font-size:28px;flex-shrink:0;">{% if active_sonos %}🎵{% else %}🔇{% endif %}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:9px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:3px;">Sonos</div>
+          {% if active_sonos %}
+            <div style="font-size:20px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ active_sonos.title }}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">{{ active_sonos.artist }}{% if active_sonos.room %} &middot; {{ active_sonos.room }}{% endif %}</div>
+          {% else %}
+            <div style="font-size:20px;font-weight:900;color:#fff;">No Music Playing</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">{{ idle_count }} room{% if idle_count != 1 %}s{% endif %} idle</div>
+          {% endif %}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;align-self:center;max-width:185px;justify-content:flex-end;">
+          {% for room in sonos %}
+            <div style="font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:4px;border:2px solid {% if room.state == 'playing' or room.state == 'paused' %}rgba(255,255,255,0.9){% else %}rgba(255,255,255,0.25){% endif %};color:{% if room.state == 'playing' or room.state == 'paused' %}#fff{% else %}rgba(255,255,255,0.35){% endif %};">{{ room.room | truncate: 10, "" }}</div>
+          {% endfor %}
         </div>
       </div>
 
     </div>
 
-    <!-- SONOS -->
-    <div style="margin: 0 6px 10px 6px; border-radius: 6px; overflow: hidden; background: #0f0f0f; border: 1px solid #1c1c1c;">
-      <div class="color-bar col-orange"></div>
-      <div style="padding: 10px 16px 12px 16px;">
-        <div class="section-label" style="color: #FFAB40;">Sonos</div>
-        <div class="sn-row">
-          <span class="sn-icon">🔊</span>
-          <div class="sn-info">
-            {% if active_sonos %}
-            <div class="sn-title">{{ active_sonos.room }} · {{ active_sonos.title }}</div>
-            <div class="sn-sub">{{ active_sonos.artist }}</div>
-            {% else %}
-            <div class="sn-title">No Music Playing</div>
-            <div class="sn-sub">{{ idle_count }} room{% if idle_count > 1 %}s{% endif %} idle</div>
-            {% endif %}
-          </div>
-          <div class="sn-rooms">
-            {% for room in sonos %}
-            <div class="sn-room">
-              <span class="sn-dot {% if room.state == 'playing' or room.state == 'paused' %}sn-dot-on{% else %}sn-dot-off{% endif %}"></span>
-              <span class="sn-label">{{ room.room | truncate: 6, "" }}</span>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
-  <div class="bottombar">
-    <span class="bottombar-item">◉ HA Dashboard</span>
-    <span class="bottombar-item">ACeP · 7 Color</span>
-  </div>
 </div>

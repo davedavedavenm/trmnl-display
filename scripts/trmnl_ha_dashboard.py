@@ -92,7 +92,7 @@ def fetch_home_status() -> dict:
     result = {}
     try:
         door = fetch_entity("binary_sensor.nuki_flat_door_locked")
-        result["door_locked"] = door["state"] == "on"
+        result["door_locked"] = door["state"] == "off"  # device_class:lock — off=locked, on=unlocked
     except Exception:
         result["door_locked"] = None
 
