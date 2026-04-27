@@ -128,7 +128,8 @@ def fetch_home_status() -> dict:
         blind = fetch_entity("cover.blinds_controller_curtain")
         pos = blind["attributes"].get("current_position", None)
         result["blind_position"] = pos
-        result["blinds_open"] = (pos is not None and pos > 0)
+        # This controller uses inverted position: 0 = blind retracted (open), 100 = extended (closed)
+        result["blinds_open"] = (pos is not None and pos == 0)
     except Exception:
         result["blind_position"] = "unavailable"
         result["blinds_open"] = False
