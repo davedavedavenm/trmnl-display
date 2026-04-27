@@ -90,21 +90,21 @@
   <div style="height:88px;flex-shrink:0;background:{% if active_sonos %}#d0be47{% else %}#9c484b{% endif %};display:flex;align-items:center;gap:18px;padding:0 22px;border-top:3px solid #000000;">
     <span style="font-size:28px;flex-shrink:0;">{% if active_sonos %}🎵{% else %}🔇{% endif %}</span>
     <div style="flex:1;min-width:0;">
-      <div style="font-size:8px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:{% if active_sonos %}rgba(0,0,0,0.45){% else %}rgba(255,255,255,0.55){% endif %};margin-bottom:4px;">Sonos</div>
+      <div style="font-size:8px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:{% if active_sonos %}#5c4a00{% else %}#ffffff{% endif %};margin-bottom:4px;">Sonos</div>
       {% if active_sonos %}
         <div style="font-size:22px;font-weight:900;color:#000000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;">{{ active_sonos.title }}</div>
-        <div style="font-size:12px;font-weight:700;color:rgba(0,0,0,0.55);margin-top:2px;">{{ active_sonos.artist }}{% if active_sonos.room %} &middot; {{ active_sonos.room }}{% endif %}</div>
+        <div style="font-size:12px;font-weight:700;color:#3d3200;margin-top:2px;">{{ active_sonos.artist }}{% if active_sonos.room %} &middot; {{ active_sonos.room }}{% endif %}</div>
       {% else %}
         <div style="font-size:22px;font-weight:900;color:#ffffff;line-height:1.1;">No Music Playing</div>
-        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);margin-top:2px;">{{ idle_count }} room{% if idle_count != 1 %}s{% endif %} idle</div>
+        <div style="font-size:12px;font-weight:700;color:#f0dede;margin-top:2px;">{{ idle_count }} room{% if idle_count != 1 %}s{% endif %} idle</div>
       {% endif %}
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:5px;align-self:center;max-width:200px;justify-content:flex-end;">
       {% for room in sonos %}
         {% if active_sonos %}
-          <div style="font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;background:{% if room.state == 'playing' or room.state == 'paused' %}#000000{% else %}rgba(0,0,0,0.15){% endif %};color:{% if room.state == 'playing' or room.state == 'paused' %}#d0be47{% else %}rgba(0,0,0,0.4){% endif %};">{{ room.room | truncate: 10, "" }}</div>
+          <div style="font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;background:{% if room.state == 'playing' or room.state == 'paused' %}#000000{% else %}#b8a030{% endif %};color:{% if room.state == 'playing' or room.state == 'paused' %}#d0be47{% else %}#000000{% endif %};">{{ room.room | truncate: 10, "" }}</div>
         {% else %}
-          <div style="font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;background:{% if room.state == 'playing' or room.state == 'paused' %}#ffffff{% else %}rgba(255,255,255,0.15){% endif %};color:{% if room.state == 'playing' or room.state == 'paused' %}#9c484b{% else %}rgba(255,255,255,0.4){% endif %};">{{ room.room | truncate: 10, "" }}</div>
+          <div style="font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;background:{% if room.state == 'playing' or room.state == 'paused' %}#ffffff{% else %}#7a2e31{% endif %};color:{% if room.state == 'playing' or room.state == 'paused' %}#9c484b{% else %}#ffffff{% endif %};">{{ room.room | truncate: 10, "" }}</div>
         {% endif %}
       {% endfor %}
     </div>
