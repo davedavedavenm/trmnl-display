@@ -104,14 +104,18 @@ def fetch_home_status() -> dict:
 
     try:
         blind = fetch_entity("cover.blinds_controller_curtain")
-        result["blind_position"] = blind["attributes"].get("current_position", "unknown")
+        pos = blind["attributes"].get("current_position", None)
+        result["blind_position"] = pos
+        result["blinds_open"] = (pos is not None and pos > 0)
     except Exception:
-        result["blind_position"] = "unknown"
+        result["blind_position"] = "unavailable"
+        result["blinds_open"] = False
 
     try:
-        thermo = fetch_entity("climate.thermostat")
-        if thermo["state"] not in ("unavailable", "unknown"):
-            result["thermostat_temp"] = thermo["attributes"].get("current_temperature")
+        # Use lounge presence sensor for indoor temperature (thermostat entity unavailable)
+        temp = fetch_entity("sensor.lounge_presence_device_temperature")
+        if temp["state"] not in ("unavailable", "unknown"):
+            result["thermostat_temp"] = float(temp["state"])
         else:
             result["thermostat_temp"] = None
     except Exception:

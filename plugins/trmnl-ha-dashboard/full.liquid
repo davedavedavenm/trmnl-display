@@ -65,24 +65,24 @@
       <!-- STATUS: 4 rows, white bg, coloured values -->
       <div style="flex:1;display:flex;flex-direction:column;padding:0 18px;min-height:0;">
 
-        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8e8e8;">
-          <span style="font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#999999;">🔒 &nbsp;Door</span>
+        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0e0;">
+          <span style="font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#333333;">Door</span>
           <span style="font-size:28px;font-weight:900;color:{% if home.door_locked %}#3d3b5e{% else %}#9c484b{% endif %};">{% if home.door_locked %}Locked{% else %}OPEN{% endif %}</span>
         </div>
 
-        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8e8e8;">
-          <span style="font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#999999;">👕 &nbsp;Washer</span>
+        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0e0;">
+          <span style="font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#333333;">Washer</span>
           <span style="font-size:28px;font-weight:900;color:{% if home.washer_running %}#d0be47{% else %}#000000{% endif %};">{% if home.washer_running %}Running{% else %}Off{% endif %}</span>
         </div>
 
-        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8e8e8;">
-          <span style="font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#999999;">🌡️ &nbsp;Thermostat</span>
+        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0e0;">
+          <span style="font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#333333;">Lounge Temp</span>
           <span style="font-size:28px;font-weight:900;color:#000000;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}°C{% else %}--{% endif %}</span>
         </div>
 
         <div style="flex:1;display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#999999;">🪟 &nbsp;Blinds</span>
-          <span style="font-size:28px;font-weight:900;color:#000000;">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% else %}{{ home.blind_position }}%{% endif %}</span>
+          <span style="font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#333333;">Blinds</span>
+          <span style="font-size:28px;font-weight:900;color:{% if home.blinds_open %}#3a5b46{% else %}#000000{% endif %};">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% elsif home.blinds_open %}Open{% else %}Closed{% endif %}</span>
         </div>
 
       </div>
