@@ -49,12 +49,34 @@ def fetch_people() -> list:
     return people
 
 
+CONDITION_LABELS = {
+    "partlycloudy": "Partly Cloudy",
+    "clear-night": "Clear Night",
+    "sunny": "Sunny",
+    "cloudy": "Cloudy",
+    "fog": "Foggy",
+    "hail": "Hail",
+    "lightning": "Lightning",
+    "lightning-rainy": "Thunderstorm",
+    "pouring": "Pouring Rain",
+    "rainy": "Rainy",
+    "snowy": "Snowy",
+    "snowy-rainy": "Sleet",
+    "windy": "Windy",
+    "windy-variant": "Windy",
+    "exceptional": "Unusual",
+}
+
+
 def fetch_weather() -> dict:
     try:
         e = fetch_entity("weather.forecast_home")
         attrs = e["attributes"]
+        raw = e["state"]
+        label = CONDITION_LABELS.get(raw, raw.replace("-", " ").title())
         return {
-            "condition": e["state"],
+            "condition": raw,
+            "condition_label": label,
             "temperature": attrs.get("temperature"),
             "humidity": attrs.get("humidity"),
             "wind_speed": attrs.get("wind_speed"),
