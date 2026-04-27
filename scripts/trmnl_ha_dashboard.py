@@ -115,13 +115,15 @@ def fetch_home_status() -> dict:
     try:
         door = fetch_entity("binary_sensor.nuki_flat_door_locked")
         result["door_locked"] = door["state"] == "off"  # device_class:lock — off=locked, on=unlocked
-    except Exception:
+    except Exception as e:
+        print(f"ERROR door: {e}")
         result["door_locked"] = None
 
     try:
         washer = fetch_entity("binary_sensor.wash_dryer_status")
         result["washer_running"] = washer["state"] == "on"
-    except Exception:
+    except Exception as e:
+        print(f"ERROR washer: {e}")
         result["washer_running"] = None
 
     try:
@@ -130,7 +132,8 @@ def fetch_home_status() -> dict:
         result["blind_position"] = pos
         # This controller uses inverted position: 0 = blind retracted (open), 100 = extended (closed)
         result["blinds_open"] = (pos is not None and pos == 0)
-    except Exception:
+    except Exception as e:
+        print(f"ERROR blinds: {e}")
         result["blind_position"] = "unavailable"
         result["blinds_open"] = False
 
@@ -140,8 +143,10 @@ def fetch_home_status() -> dict:
         if temp["state"] not in ("unavailable", "unknown"):
             result["thermostat_temp"] = float(temp["state"])
         else:
+            print(f"WARN temp state={temp['state']}")
             result["thermostat_temp"] = None
-    except Exception:
+    except Exception as e:
+        print(f"ERROR temp: {e}")
         result["thermostat_temp"] = None
 
     return result
