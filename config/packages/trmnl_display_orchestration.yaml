@@ -1,0 +1,721 @@
+input_boolean:
+  trmnl_display_automation_enabled:
+    name: TRMNL Display Automation
+    # Why: Make the TRMNL display controller active after HA restarts.
+    initial: true
+    icon: mdi:monitor-dashboard
+
+  trmnl_mode_calendar_enabled:
+    name: TRMNL Mode Calendar Enabled
+    initial: true
+    icon: mdi:calendar
+
+  trmnl_mode_sonos_enabled:
+    name: TRMNL Mode Sonos Enabled
+    initial: true
+    icon: mdi:speaker
+
+  trmnl_mode_jen_commute_enabled:
+    name: TRMNL Mode Jen Commute Enabled
+    initial: true
+    icon: mdi:car
+
+  trmnl_mode_dave_commute_enabled:
+    name: TRMNL Mode Dave Commute Enabled
+    initial: false
+    icon: mdi:car-connected
+
+  trmnl_mode_alert_enabled:
+    name: TRMNL Mode Alert Enabled
+    initial: true
+    icon: mdi:alert
+
+  trmnl_alert_active:
+    name: TRMNL Alert Active
+    initial: false
+    icon: mdi:alarm-light
+
+  trmnl_dave_commute_active:
+    name: TRMNL Dave Commute Active
+    initial: false
+    icon: mdi:car-arrow-right
+
+input_text:
+  trmnl_alert_title:
+    name: TRMNL Alert Title
+    max: 255
+    initial: Attention Required
+
+  trmnl_alert_message:
+    name: TRMNL Alert Message
+    max: 255
+    initial: No alert message set.
+
+  trmnl_alert_footer:
+    name: TRMNL Alert Footer
+    max: 255
+    initial: Home Assistant alert
+
+input_select:
+  trmnl_display_mode:
+    name: TRMNL Display Mode
+    # Why: `ha_dashboard` is the idle/default TRMNL screen backed by
+    # trmnl_ha_dashboard.yaml, so it must be a selectable orchestration mode.
+    options:
+      - idle
+      - calendar
+      - sonos
+      - jen_commute
+      - jen_morning
+      - dave_commute
+      - ha_dashboard
+      - alert
+    initial: idle
+    icon: mdi:tablet-dashboard
+
+  trmnl_display_default_mode:
+    name: TRMNL Display Default Mode
+    options:
+      # Why: Default to the HA dashboard when no higher-priority mode is active.
+      - ha_dashboard
+      - calendar
+      - idle
+    initial: ha_dashboard
+    icon: mdi:page-layout-sidebar-right
+
+  trmnl_display_manual_override:
+    name: TRMNL Display Manual Override
+    # Why: Allow manual testing/forcing of the HA dashboard display mode.
+    options:
+      - auto
+      - idle
+      - calendar
+      - sonos
+      - jen_commute
+      - jen_morning
+      - dave_commute
+      - ha_dashboard
+      - alert
+    initial: auto
+    icon: mdi:hand-back-right
+
+  trmnl_alert_severity:
+    name: TRMNL Alert Severity
+    options:
+      - low
+      - medium
+      - high
+      - critical
+    initial: high
+    icon: mdi:alert-octagon
+
+input_number:
+  trmnl_sonos_hold_minutes:
+    name: TRMNL Sonos Hold Minutes
+    min: 0
+    max: 60
+    step: 1
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    initial: 10
+
+input_datetime:
+  trmnl_sonos_hold_until:
+    name: TRMNL Sonos Hold Until
+    has_date: true
+    has_time: true
+
+rest_command:
+  trmnl_set_display_mode:
+    url: "http://192.168.1.143:8787/mode"
+    method: POST
+    content_type: application/json
+    headers:
+      Authorization: !secret trmnl_mode_bridge_bearer
+    payload: >
+      {
+        "mode": {{ mode | tojson }}
+      }
+  trmnl_sonos_push:
+    url: "http://192.168.1.143:4567/api/custom_plugins/f543f2e5-ba15-44d2-ab16-c4aea3b4f7e9"
+    method: POST
+    content_type: application/json
+    payload: >
+      {
+        "merge_variables": {
+          "updated_at": {{ updated_at | tojson }},
+          "room_name": {{ room_name | tojson }},
+          "state": {{ state | tojson }},
+          "title": {{ title | tojson }},
+          "artist": {{ artist | tojson }},
+          "album": {{ album | tojson }},
+          "album_art_url": "",
+          "source": {{ source | tojson }},
+          "group_rooms": [],
+          "group_size": 1,
+          "multiple_active": false,
+          "other_active_rooms": [],
+          "same_content_rooms": [],
+          "next_tracks": []
+        }
+      }
+  trmnl_jen_commute_push:
+    url: "http://192.168.1.143:4567/api/custom_plugins/0c7061b9-a3ac-4330-a613-16566daee93a"
+    method: POST
+    content_type: application/json
+    payload: >
+      {
+        "merge_variables": {
+          "updated_at": {{ updated_at | tojson }},
+          "headline": {{ headline | tojson }},
+          "eta_minutes": {{ eta_minutes | tojson }},
+          "route_label": {{ route_label | tojson }},
+          "distance_km": {{ distance_km | tojson }},
+          "commute_state": {{ commute_state | tojson }},
+          "heading_home": {{ heading_home | tojson }},
+          "home_prep_status": {{ home_prep_status | tojson }},
+          "prep_note": {{ prep_note | tojson }},
+          "map_url": {{ map_url | tojson }}
+        }
+      }
+  trmnl_alert_push:
+    url: "http://192.168.1.143:4567/api/custom_plugins/c9c3fbde-9542-4bed-8817-85d57c6d0cc0"
+    method: POST
+    content_type: application/json
+    payload: >
+      {
+        "merge_variables": {
+          "updated_at": {{ updated_at | tojson }},
+          "title": {{ title | tojson }},
+          "message": {{ message | tojson }},
+          "severity": {{ severity | tojson }},
+          "footer": {{ footer | tojson }}
+        }
+      }
+
+script:
+  trmnl_set_alert:
+    alias: TRMNL Set Alert
+    description: Set the current TRMNL alert payload and activate the alert mode signal.
+    mode: restart
+    fields:
+      title:
+        description: Alert title
+      message:
+        description: Alert message
+      severity:
+        description: low, medium, high, critical
+      footer:
+        description: Optional footer
+    sequence:
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.trmnl_alert_title
+        data:
+          value: "{{ title | default('Attention Required') }}"
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.trmnl_alert_message
+        data:
+          value: "{{ message | default('No alert message set.') }}"
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.trmnl_alert_severity
+        data:
+          option: "{{ severity | default('high') }}"
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.trmnl_alert_footer
+        data:
+          value: "{{ footer | default('Home Assistant alert') }}"
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.trmnl_alert_active
+
+  trmnl_clear_alert:
+    alias: TRMNL Clear Alert
+    description: Clear the current TRMNL alert-active signal.
+    mode: single
+    sequence:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.trmnl_alert_active
+
+automation:
+  - id: trmnl_update_sonos_hold_v1
+    alias: TRMNL Update Sonos Hold
+    description: >
+      Maintain a small post-playback hold window so Sonos can remain on screen
+      briefly after music stops.
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: "/1"
+      - platform: state
+        entity_id:
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+          - input_number.trmnl_sonos_hold_minutes
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_display_automation_enabled
+        state: "on"
+    variables:
+      player_entities:
+        - media_player.living_room
+        - media_player.bedroom
+        - media_player.kitchen
+        - media_player.gym
+        - media_player.sonos_roam
+      any_playing: >
+        {{ expand(player_entities) | selectattr('state', 'eq', 'playing') | list | count > 0 }}
+      hold_minutes: "{{ states('input_number.trmnl_sonos_hold_minutes') | int(10) }}"
+      hold_until_value: >
+        {{ (as_timestamp(now()) + (hold_minutes * 60)) | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}
+    action:
+      - if:
+          - condition: template
+            value_template: "{{ any_playing }}"
+        then:
+          - service: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.trmnl_sonos_hold_until
+            data:
+              datetime: "{{ hold_until_value }}"
+
+  - id: trmnl_resolve_display_mode_v1
+    alias: TRMNL Resolve Display Mode
+    description: >
+      Central display policy resolver. Computes the final requested mode from
+      helpers and feature signals, then writes a single mode into the HA helper.
+      Priority order: alert > manual_override > sonos > jen_commute > jen_morning
+      > dave_commute > calendar (default) > idle.
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        minutes: "/1"
+      - platform: state
+        entity_id:
+          - input_boolean.trmnl_display_automation_enabled
+          - input_boolean.trmnl_mode_calendar_enabled
+          - input_boolean.trmnl_mode_sonos_enabled
+          - input_boolean.trmnl_mode_jen_commute_enabled
+          - input_boolean.trmnl_mode_dave_commute_enabled
+          - input_boolean.trmnl_mode_alert_enabled
+          - input_boolean.trmnl_alert_active
+          - input_boolean.trmnl_dave_commute_active
+          - input_select.trmnl_display_default_mode
+          - input_select.trmnl_display_manual_override
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+          - input_datetime.trmnl_sonos_hold_until
+          - input_select.commute_state
+          - input_boolean.jen_heading_home
+          - person.jennifer
+          - input_boolean.trmnl_jen_morning_enabled
+          - input_datetime.trmnl_jen_morning_start
+          - input_datetime.trmnl_jen_morning_end
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_display_automation_enabled
+        state: "on"
+    variables:
+      player_entities:
+        - media_player.living_room
+        - media_player.bedroom
+        - media_player.kitchen
+        - media_player.gym
+        - media_player.sonos_roam
+      manual_override: "{{ states('input_select.trmnl_display_manual_override') }}"
+      default_mode: "{{ states('input_select.trmnl_display_default_mode') }}"
+      any_playing: >
+        {{ expand(player_entities) | selectattr('state', 'eq', 'playing') | list | count > 0 }}
+      sonos_hold_until_ts: >
+        {{ as_timestamp(states('input_datetime.trmnl_sonos_hold_until')) | int(0) }}
+      sonos_hold_active: >
+        {{ sonos_hold_until_ts > as_timestamp(now()) }}
+      commute_state_name: >
+        {% set raw = states('input_select.commute_state') %}
+        {{ raw if raw not in ['unknown', 'unavailable', 'none'] else 'idle' }}
+      jen_commute_active: >
+        {{
+          is_state('input_boolean.trmnl_mode_jen_commute_enabled', 'on') and (
+            is_state('input_boolean.jen_heading_home', 'on') or
+            commute_state_name in ['journey_started', 'via_clean_bean', 'near_home']
+          )
+        }}
+      dave_commute_active: >
+        {{
+          is_state('input_boolean.trmnl_mode_dave_commute_enabled', 'on') and
+          is_state('input_boolean.trmnl_dave_commute_active', 'on')
+        }}
+      sonos_mode_active: >
+        {{
+          is_state('input_boolean.trmnl_mode_sonos_enabled', 'on') and (
+            any_playing or sonos_hold_active
+          )
+        }}
+      alert_mode_active: >
+        {{
+          is_state('input_boolean.trmnl_mode_alert_enabled', 'on') and
+          is_state('input_boolean.trmnl_alert_active', 'on')
+        }}
+      jen_morning_window_active: >
+        {% set enabled = is_state('input_boolean.trmnl_jen_morning_enabled', 'on') %}
+        {% set morning_start = states('input_datetime.trmnl_jen_morning_start') %}
+        {% set morning_end = states('input_datetime.trmnl_jen_morning_end') %}
+        {% set weekday = now().isoweekday() in [1, 2, 3, 4, 5] %}
+        {% if morning_start not in ['unknown', 'unavailable', 'none', ''] and morning_end not in ['unknown', 'unavailable', 'none', ''] %}
+          {{ enabled and weekday and now() >= today_at(morning_start) and now() <= today_at(morning_end) }}
+        {% else %}
+          false
+        {% endif %}
+      requested_mode: >
+        {% if alert_mode_active %}
+          alert
+        {% elif manual_override != 'auto' %}
+          {{ manual_override }}
+        {% elif sonos_mode_active %}
+          sonos
+        {% elif jen_commute_active %}
+          jen_commute
+        {% elif jen_morning_window_active %}
+          jen_morning
+        {% elif dave_commute_active %}
+          dave_commute
+        {% elif default_mode == 'calendar' and is_state('input_boolean.trmnl_mode_calendar_enabled', 'on') %}
+          calendar
+        {% elif default_mode == 'ha_dashboard' %}
+          {# Why: The HA dashboard is the normal idle display when enabled as
+             the default mode and no higher-priority mode is active. #}
+          ha_dashboard
+        {% else %}
+          idle
+        {% endif %}
+      current_mode: "{{ states('input_select.trmnl_display_mode') }}"
+    action:
+      - if:
+          - condition: template
+            value_template: "{{ requested_mode != current_mode }}"
+        then:
+          - service: input_select.select_option
+            target:
+              entity_id: input_select.trmnl_display_mode
+            data:
+              option: "{{ requested_mode }}"
+          - service: system_log.write
+            data:
+              level: info
+              message: >
+                TRMNL mode resolved by policy.
+                mode={{ requested_mode }},
+                manual={{ manual_override }},
+                alert={{ alert_mode_active }},
+                sonos={{ sonos_mode_active }},
+                jen={{ jen_commute_active }},
+                jen_morning={{ jen_morning_window_active }},
+                dave={{ dave_commute_active }}
+
+  - id: trmnl_alert_push_from_ha_v1
+    alias: TRMNL Alert Push From HA
+    description: >
+      Push the current alert payload to LaraPaper whenever the alert signal or
+      alert helper fields change while the alert mode is active.
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id:
+          - input_boolean.trmnl_alert_active
+          - input_text.trmnl_alert_title
+          - input_text.trmnl_alert_message
+          - input_text.trmnl_alert_footer
+          - input_select.trmnl_alert_severity
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_display_automation_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.trmnl_alert_active
+        state: "on"
+    variables:
+      updated_at: "{{ now().strftime('%d %b %H:%M') }}"
+      alert_title: "{{ states('input_text.trmnl_alert_title') }}"
+      alert_message: "{{ states('input_text.trmnl_alert_message') }}"
+      alert_footer: "{{ states('input_text.trmnl_alert_footer') }}"
+      alert_severity: "{{ states('input_select.trmnl_alert_severity') }}"
+    action:
+      - service: rest_command.trmnl_alert_push
+        data:
+          updated_at: "{{ updated_at }}"
+          title: "{{ alert_title }}"
+          message: "{{ alert_message }}"
+          severity: "{{ alert_severity }}"
+          footer: "{{ alert_footer }}"
+      - service: system_log.write
+        data:
+          level: info
+          message: >
+            TRMNL alert push sent from HA.
+            severity={{ alert_severity }},
+            title={{ alert_title }}
+
+  - id: trmnl_apply_display_mode_v1
+    alias: TRMNL Apply Display Mode
+    description: >
+      Central mode-switch bridge: Home Assistant owns the mode helper and asks
+      khpi5 to activate the corresponding LaraPaper playlist.
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id: input_select.trmnl_display_mode
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_display_automation_enabled
+        state: "on"
+    variables:
+      requested_mode: "{{ states('input_select.trmnl_display_mode') }}"
+    action:
+      - service: rest_command.trmnl_set_display_mode
+        data:
+          mode: "{{ requested_mode }}"
+      - service: system_log.write
+        data:
+          level: info
+          message: >
+            TRMNL display mode switch requested from HA.
+            mode={{ requested_mode }}
+
+  - id: trmnl_sonos_push_from_ha_v1
+    alias: TRMNL Sonos Push From HA (Disabled for Local Plugin Ownership)
+    description: >
+      Proof-of-concept automation: use existing HA Sonos entities to push now-playing
+      data directly into the LaraPaper Sonos webhook plugin and set the display mode helper.
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: "/1"
+      - platform: state
+        entity_id:
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_display_automation_enabled
+        state: "off"
+    variables:
+      player_entities:
+        - media_player.living_room
+        - media_player.bedroom
+        - media_player.kitchen
+        - media_player.gym
+        - media_player.sonos_roam
+      selected_player: >
+        {% set players = expand(player_entities) %}
+        {% set playing = players | selectattr('state', 'eq', 'playing') | list %}
+        {% if playing | count > 0 %}
+          {{ playing[0].entity_id }}
+        {% else %}
+          {% set with_title = players | selectattr('attributes.media_title', 'defined') | selectattr('attributes.media_title') | list %}
+          {{ with_title[0].entity_id if with_title | count > 0 else '' }}
+        {% endif %}
+      room_name: >
+        {% if selected_player %}
+          {{ state_attr(selected_player, 'friendly_name') or selected_player.split('.')[1].replace('_', ' ') | title }}
+        {% else %}
+          Unknown Room
+        {% endif %}
+      state_name: >
+        {% if selected_player %}
+          {{ states(selected_player) | upper }}
+        {% else %}
+          UNKNOWN
+        {% endif %}
+      title: >
+        {% if selected_player %}
+          {{ state_attr(selected_player, 'media_title') or 'Nothing Playing' }}
+        {% else %}
+          Nothing Playing
+        {% endif %}
+      artist: >
+        {% if selected_player %}
+          {{ state_attr(selected_player, 'media_artist') or 'Unknown Artist' }}
+        {% else %}
+          Unknown Artist
+        {% endif %}
+      album: >
+        {% if selected_player %}
+          {{ state_attr(selected_player, 'media_album_name') or '' }}
+        {% else %}
+
+        {% endif %}
+      source_name: >
+        {% if selected_player %}
+          {{ state_attr(selected_player, 'app_name') or state_attr(selected_player, 'source') or '' }}
+        {% else %}
+
+        {% endif %}
+      updated_at: "{{ now().strftime('%d %b %H:%M') }}"
+    action:
+      - if:
+          - condition: template
+            value_template: "{{ selected_player != '' }}"
+        then:
+          - service: rest_command.trmnl_sonos_push
+            data:
+              updated_at: "{{ updated_at }}"
+              room_name: "{{ room_name }}"
+              state: "{{ state_name }}"
+              title: "{{ title }}"
+              artist: "{{ artist }}"
+              album: "{{ album }}"
+              source: "{{ source_name }}"
+          - service: system_log.write
+            data:
+              level: info
+              message: >
+                TRMNL Sonos push sent from HA for {{ room_name }}.
+                State={{ state_name }}, Title={{ title }}, Artist={{ artist }}
+
+  - id: trmnl_jen_commute_push_from_ha_v1
+    alias: TRMNL Jen Commute Push From HA
+    description: >
+      HA -> LaraPaper webhook path for the Jen Commute recipe.
+      Keeps commute logic in Home Assistant, sends a clean shareable payload to LaraPaper,
+      and only claims the display mode when commute context is actually active.
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: "/5"
+      - platform: state
+        entity_id:
+          - person.jennifer
+          - input_select.commute_state
+          - input_boolean.jen_heading_home
+          - input_boolean.prepare_home_active
+          - sensor.commute_time_estimate
+          - sensor.waze
+          - binary_sensor.clean_bean_route_active
+          - binary_sensor.home_preparation_needed
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_display_automation_enabled
+        state: "on"
+    variables:
+      heading_home_bool: "{{ is_state('input_boolean.jen_heading_home', 'on') }}"
+      heading_home: "{{ 'Yes' if heading_home_bool else 'No' }}"
+      commute_state_name: >
+        {% set raw = states('input_select.commute_state') %}
+        {{ raw if raw not in ['unknown', 'unavailable', 'none'] else 'idle' }}
+      commute_screen_active: >
+        {{
+          heading_home_bool or
+          commute_state_name in ['journey_started', 'via_clean_bean', 'near_home']
+        }}
+      eta_minutes_value: >
+        {% set waze = states('sensor.waze') %}
+        {% set estimate = states('sensor.commute_time_estimate') %}
+        {% if waze not in ['unknown', 'unavailable', 'none', ''] %}
+          {{ waze }}
+        {% elif estimate not in ['unknown', 'unavailable', 'none', ''] %}
+          {{ estimate }}
+        {% else %}
+          ?
+        {% endif %}
+      distance_km_value: >
+        {% set d = state_attr('sensor.waze', 'distance') %}
+        {% if d is not none %}
+          {{ d | float(0) | round(1) }}
+        {% else %}
+          ?
+        {% endif %}
+      route_label_value: >
+        {% set route = state_attr('sensor.waze', 'route') %}
+        {% if route %}
+          {{ route }}
+        {% elif is_state('binary_sensor.clean_bean_route_active', 'on') %}
+          Clean Bean
+        {% else %}
+          Direct
+        {% endif %}
+      home_prep_status_value: >
+        {% if is_state('input_boolean.prepare_home_active', 'on') %}
+          Active
+        {% elif is_state('binary_sensor.home_preparation_needed', 'on') %}
+          Needed
+        {% else %}
+          Not Needed
+        {% endif %}
+      prep_note_value: >
+        {% if is_state('input_boolean.prepare_home_active', 'on') %}
+          Home preparation is currently running.
+        {% elif is_state('binary_sensor.home_preparation_needed', 'on') %}
+          Heating or home prep would help before arrival.
+        {% else %}
+          No home preparation action is currently required.
+        {% endif %}
+      headline_value: >
+        {% if heading_home_bool %}
+          Heading Home
+        {% elif states('person.jennifer') == "Jen's Work" %}
+          At Work
+        {% else %}
+          Commute Standby
+        {% endif %}
+      map_url_value: >
+        {% set origin = state_attr('sensor.waze', 'origin') %}
+        {% set destination = state_attr('sensor.waze', 'destination') %}
+        {% if origin and destination %}
+          https://www.google.com/maps/dir/?api=1&origin={{ origin | urlencode }}&destination={{ destination | urlencode }}&travelmode=driving
+        {% else %}
+
+        {% endif %}
+      updated_at: "{{ now().strftime('%d %b %H:%M') }}"
+    action:
+      - if:
+          - condition: template
+            value_template: "{{ commute_screen_active }}"
+        then:
+          - service: rest_command.trmnl_jen_commute_push
+            data:
+              updated_at: "{{ updated_at }}"
+              headline: "{{ headline_value }}"
+              eta_minutes: "{{ eta_minutes_value }}"
+              route_label: "{{ route_label_value }}"
+              distance_km: "{{ distance_km_value }}"
+              commute_state: "{{ commute_state_name }}"
+              heading_home: "{{ heading_home }}"
+              home_prep_status: "{{ home_prep_status_value }}"
+              prep_note: "{{ prep_note_value }}"
+              map_url: "{{ map_url_value }}"
+          - service: system_log.write
+            data:
+              level: info
+              message: >
+                TRMNL Jen commute push sent from HA.
+                headline={{ headline_value }},
+                eta={{ eta_minutes_value }},
+                route={{ route_label_value }},
+                state={{ commute_state_name }}
+        else:
+          - service: system_log.write
+            data:
+              level: info
+              message: >
+                TRMNL Jen commute skipped because commute context is idle.
+                heading_home={{ heading_home }},
+                state={{ commute_state_name }}

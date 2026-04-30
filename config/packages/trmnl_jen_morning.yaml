@@ -1,0 +1,206 @@
+# Dedicated TRMNL morning screen package.
+# This is intentionally separate from the main Jen commute state machine.
+# Quote content for the current shared layout should come from a separate
+# LaraPaper mashup plugin such as Potter Quotes, not from this package.
+#
+# Portability notes:
+# - Update the `rest_command.trmnl_jen_morning_push` URL for your LaraPaper host
+#   and custom plugin UUID.
+# - Replace the commute source entities below if your installation does not use:
+#   - sensor.waze_duration_rounded
+#   - sensor.waze
+#   - sensor.commute_time_estimate
+#   - binary_sensor.clean_bean_route_active
+# - This package assumes your wider TRMNL orchestration already supports:
+#   - input_boolean.trmnl_display_automation_enabled
+#   - input_select.trmnl_display_manual_override
+#   - the manual override option `jen_morning`
+
+input_boolean:
+  trmnl_jen_morning_enabled:
+    name: TRMNL Jen Morning Enabled
+    initial: true
+    icon: mdi:weather-sunset-up
+
+input_text:
+  trmnl_jen_morning_headline:
+    name: TRMNL Jen Morning Headline
+    max: 255
+    initial: Time To Work
+
+  trmnl_jen_morning_route_fallback:
+    name: TRMNL Jen Morning Route Fallback
+    max: 255
+    initial: Direct
+
+input_datetime:
+  trmnl_jen_morning_start:
+    name: TRMNL Jen Morning Start
+    has_date: false
+    has_time: true
+
+  trmnl_jen_morning_end:
+    name: TRMNL Jen Morning End
+    has_date: false
+    has_time: true
+
+rest_command:
+  trmnl_jen_morning_push:
+    # Environment-specific: replace host/IP and plugin UUID for another LaraPaper instance.
+    url: "http://192.168.1.143:4567/api/custom_plugins/a62c7b16-bbaa-43f3-b8b4-228d547476a5"
+    method: POST
+    content_type: application/json
+    payload: >
+      {
+        "merge_variables": {
+          "updated_at": {{ updated_at | tojson }},
+          "headline": {{ headline | tojson }},
+          "eta_minutes": {{ eta_minutes | tojson }},
+          "route_label": {{ route_label | tojson }},
+          "distance_km": {{ distance_km | tojson }}
+        }
+      }
+
+automation:
+  - id: trmnl_jen_morning_defaults_v1
+    alias: TRMNL Jen Morning Default Window
+    description: >
+      Seed the dedicated morning-screen window with the intended default
+      values on first load, without overwriting later UI adjustments.
+    mode: single
+    trigger:
+      - platform: homeassistant
+        event: start
+    variables:
+      start_value: "{{ states('input_datetime.trmnl_jen_morning_start') }}"
+      end_value: "{{ states('input_datetime.trmnl_jen_morning_end') }}"
+    action:
+      - if:
+          - condition: template
+            value_template: "{{ start_value in ['00:00:00', 'unknown', 'unavailable', 'none', ''] }}"
+        then:
+          - service: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.trmnl_jen_morning_start
+            data:
+              # Why: Jen's morning commute screen should begin before the
+              # previous 07:00 default so it is ready during the early window.
+              time: "06:45:00"
+      - if:
+          - condition: template
+            value_template: "{{ end_value in ['00:00:00', 'unknown', 'unavailable', 'none', ''] }}"
+        then:
+          - service: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.trmnl_jen_morning_end
+            data:
+              # Why: Keep the morning commute screen available through the
+              # later part of Jen's usual departure window.
+              time: "07:45:00"
+
+  - id: trmnl_jen_morning_push_v1
+    alias: TRMNL Jen Morning Push
+    description: >
+      Push the morning commute summary to the dedicated Jen Morning plugin.
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: "/5"
+      - platform: state
+        entity_id:
+          # Local helpers for this package:
+          - input_boolean.trmnl_jen_morning_enabled
+          - input_text.trmnl_jen_morning_headline
+          - input_text.trmnl_jen_morning_route_fallback
+          # Environment-specific commute data sources:
+          - sensor.commute_time_estimate
+          - sensor.waze
+          - binary_sensor.clean_bean_route_active
+      - platform: homeassistant
+        event: start
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_jen_morning_enabled
+        state: "on"
+    variables:
+      eta_minutes_value: >
+        {% set waze_rounded = states('sensor.waze_duration_rounded') %}
+        {% set waze = states('sensor.waze') %}
+        {% set estimate = states('sensor.commute_time_estimate') %}
+        {% if waze_rounded not in ['unknown', 'unavailable', 'none', ''] %}
+          {{ waze_rounded | int(0) }}
+        {% elif waze not in ['unknown', 'unavailable', 'none', ''] %}
+          {{ waze | float(0) | round(0) | int(0) }}
+        {% elif estimate not in ['unknown', 'unavailable', 'none', ''] %}
+          {{ estimate | float(0) | round(0) | int(0) }}
+        {% else %}
+          ?
+        {% endif %}
+      distance_km_value: >
+        {% set d = state_attr('sensor.waze', 'distance') %}
+        {% if d is not none %}
+          {{ d | float(0) | round(1) }}
+        {% else %}
+          ?
+        {% endif %}
+      route_label_value: >
+        {% set route = state_attr('sensor.waze', 'route') %}
+        {% if route %}
+          {{ route }}
+        {% elif is_state('binary_sensor.clean_bean_route_active', 'on') %}
+          {# Optional site-specific route label when a binary sensor marks a preferred route. #}
+          Clean Bean
+        {% else %}
+          {{ states('input_text.trmnl_jen_morning_route_fallback') }}
+        {% endif %}
+      updated_at: "{{ now().strftime('%d %b %H:%M') }}"
+    action:
+      - service: rest_command.trmnl_jen_morning_push
+        data:
+          updated_at: "{{ updated_at }}"
+          headline: "{{ states('input_text.trmnl_jen_morning_headline') }}"
+          eta_minutes: "{{ eta_minutes_value }}"
+          route_label: "{{ route_label_value }}"
+          distance_km: "{{ distance_km_value }}"
+
+  - id: trmnl_jen_morning_override_v1
+    alias: TRMNL Jen Morning Window Logger
+    description: >
+      Logs the morning window state. The central resolver in
+      trmnl_display_orchestration.yaml now owns the priority decision for
+      jen_morning so the manual override hack is no longer needed.
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: "/1"
+      - platform: state
+        entity_id:
+          - input_boolean.trmnl_display_automation_enabled
+          - input_boolean.trmnl_jen_morning_enabled
+          - input_datetime.trmnl_jen_morning_start
+          - input_datetime.trmnl_jen_morning_end
+      - platform: homeassistant
+        event: start
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_display_automation_enabled
+        state: "on"
+    variables:
+      morning_weekday: "{{ now().isoweekday() in [1, 2, 3, 4, 5] }}"
+      morning_start: "{{ states('input_datetime.trmnl_jen_morning_start') }}"
+      morning_end: "{{ states('input_datetime.trmnl_jen_morning_end') }}"
+      morning_window_active: >
+        {% set enabled = is_state('input_boolean.trmnl_jen_morning_enabled', 'on') %}
+        {% set start = today_at(morning_start) %}
+        {% set end = today_at(morning_end) %}
+        {{ enabled and morning_weekday and now() >= start and now() <= end }}
+    action:
+      - service: system_log.write
+        data:
+          level: info
+          message: >
+            TRMNL jen morning window check.
+            active={{ morning_window_active }},
+            weekday={{ morning_weekday }},
+            start={{ morning_start }},
+            end={{ morning_end }}

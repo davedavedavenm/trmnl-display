@@ -1,0 +1,23 @@
+services:
+    app:
+        image: ghcr.io/usetrmnl/larapaper:latest
+        ports:
+            - "4567:8080"
+        environment:
+            - APP_KEY=${LARAPAPER_APP_KEY:?set LARAPAPER_APP_KEY in the deployment environment}
+            - PHP_OPCACHE_ENABLE=1
+            - TRMNL_PROXY_REFRESH_MINUTES=10
+            - DB_DATABASE=database/storage/database.sqlite
+            - REGISTRATION_ENABLED=1
+            - APP_TIMEZONE=Europe/London
+            - APP_URL=https://trmnl.magnusfamily.co.uk
+            - APP_TRUSTED_PROXIES=*
+        volumes:
+            - database:/var/www/html/database/storage
+            - storage:/var/www/html/storage/app/public/images/generated
+            - ./nginx/proxy_map.conf:/etc/nginx/conf.d/proxy_map.conf:ro
+            - ./nginx/fastcgi_params:/etc/nginx/fastcgi_params:ro
+        restart: unless-stopped
+volumes:
+    database:
+    storage:

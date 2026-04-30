@@ -1,0 +1,14 @@
+# TRMNL/LaraPaper jobs from khpi5 dave crontab.
+# Keep non-TRMNL host maintenance jobs out of this repo.
+
+# Keep LaraPaper current; this intentionally tracks ghcr.io/usetrmnl/larapaper:latest.
+0 4 * * * cd /home/dave/larapaper && docker compose pull 2>&1 | logger -t larapaper-update && docker compose up -d 2>&1 | logger -t larapaper-update
+
+# Push calendar payloads into the Multi-Calendar LaraPaper plugin.
+*/5 * * * * cd /home/dave/trmnl-calendar && /home/dave/trmnl-calendar/.venv/bin/python main.py 2>&1 | logger -t trmnl-calendar
+
+# Push Sonos now-playing payloads into the Sonos Local LaraPaper plugin.
+* * * * * /home/dave/run_trmnl_sonos.sh 2>&1 | logger -t trmnl-sonos-local
+
+# Push Home Assistant dashboard state into LaraPaper.
+*/10 * * * * cd /home/dave && python3 /home/dave/trmnl_ha_dashboard.py 2>&1 | logger -t trmnl-ha-dashboard
