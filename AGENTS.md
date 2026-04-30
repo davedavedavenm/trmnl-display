@@ -26,7 +26,8 @@ Maintain a Home Assistant-orchestrated e-paper display system that uses:
 3. Home Assistant orchestrates. It chooses modes and pushes payloads, but should not contain display layout logic.
 4. GitHub is source of truth. Any live edit must be copied back, reviewed, committed, and pushed.
 5. Secrets stay out of git. Use examples and placeholders only.
-6. ACeP colour output is required. Treat accidental grayscale output as a regression.
+6. ACeP colour output is required. Treat accidental grayscale or 1-bit output as a regression.
+7. The physical screen is a Pimoroni Inky Impression 7.3 / Spectra-class colour panel driven as `EP73_SPECTRA_800x480`, not a standard black-and-white TRMNL panel.
 
 ## Managed Surfaces
 
@@ -112,11 +113,23 @@ The display client uses the TRMNL BYOS polling pattern:
 
 The repo must preserve compatibility with LaraPaper's implementation of that contract.
 
+## Hardware Contract
+
+The live hardware identity is documented in `docs/HARDWARE.md`. Key facts agents must preserve:
+
+- Pi host: `trmnl-pi` / `192.168.1.74`
+- Board: Raspberry Pi Zero 2 W Rev 1.0
+- Display config: `adapter=pimoroni`, `panel_1bit=EP73_SPECTRA_800x480`
+- LaraPaper model: `inky_impression_7_3`, `800x480`, palette ID `10`, bit depth `3`
+- Expected Pi logs: `800 x 480, 4-bpp`, then `Refresh complete`
+
+Do not "fix" this stack toward the common monochrome TRMNL assumptions. The live device is colour-capable and must remain treated that way.
+
 ## Documentation Expectations
 
 Any non-trivial change should update the relevant docs:
 
-- architecture or workflow: `README.md`, `docs/SOURCE_OF_TRUTH.md`, `docs/ROBUST_BYOS_FLOW.md`
+- architecture, hardware, or workflow: `README.md`, `docs/HARDWARE.md`, `docs/SOURCE_OF_TRUTH.md`, `docs/ROBUST_BYOS_FLOW.md`
 - deployment paths or commands: `docs/DEPLOYMENT.md`
 - live operations or incident response: `docs/OPERATIONS.md`
 - historical/project notes: `docs/TRMNL_PROGRESS_REPORT.md` or `docs/TRMNL_PROJECT_PLAN.md`

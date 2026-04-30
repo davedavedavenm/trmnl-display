@@ -23,6 +23,7 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | `/etc/systemd/system/trmnl-display.service` | `deploy/systemd/trmnl-display.service` |
 | `/config/packages/trmnl_*.yaml` | `config/packages/` |
 | TRMNL-specific `khpi5` cron entries | `deploy/khpi5/trmnl-crontab.txt` |
+| Live hardware identity and scan results | `docs/HARDWARE.md` |
 
 ## Change Workflow
 
@@ -83,3 +84,14 @@ fix: support ha_dashboard display mode
 ```
 
 Large live-sync commits are acceptable after an audit, but normal changes should be small and traceable.
+
+## Hardware Identity
+
+The live display hardware is part of the source-of-truth contract. `docs/HARDWARE.md` records the latest scan and should be updated when the Pi, panel, driver, LaraPaper model, or display config changes.
+
+Current hardware identity:
+
+- Raspberry Pi Zero 2 W Rev 1.0 at `trmnl-pi` / `192.168.1.74`
+- Pimoroni Inky Impression 7.3 / Spectra-class colour panel
+- Pi `show_img` panel config: `EP73_SPECTRA_800x480`
+- LaraPaper model: `inky_impression_7_3`, `800x480`, palette ID `10`

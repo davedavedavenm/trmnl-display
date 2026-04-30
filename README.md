@@ -2,7 +2,7 @@
 
 This repository is the source of truth for a Home Assistant-orchestrated TRMNL/LaraPaper e-paper display stack.
 
-The live system uses LaraPaper as a local BYOS TRMNL server, a Pi Zero as a thin display client for a Pimoroni Inky Impression 7.3 panel, and Home Assistant as the mode-selection and automation layer.
+The live system uses LaraPaper as a local BYOS TRMNL server, a Pi Zero as a thin display client for a Pimoroni Inky Impression 7.3 / Spectra-class colour panel, and Home Assistant as the mode-selection and automation layer.
 
 ## Architecture
 
@@ -60,6 +60,8 @@ See [Source Of Truth](docs/SOURCE_OF_TRUTH.md) for the workflow.
 
 See [Robust BYOS Flow](docs/ROBUST_BYOS_FLOW.md) for the target operating model and boundaries between Home Assistant, LaraPaper, companion scripts, and the Pi display client.
 
+See [Hardware Inventory](docs/HARDWARE.md) for the live hardware scan and colour panel identification.
+
 ## Deployment
 
 Use the repo files as the desired state:
@@ -98,7 +100,7 @@ A TRMNL-facing change is done only when the repo is updated, the live host is up
 
 ## Colour Policy
 
-The target panel is a Pimoroni Inky Impression 7.3 ACeP colour display. Colour regressions are bugs unless explicitly requested. The known good LaraPaper model is `inky_impression_7_3` at `800x480`, 4-bit generated PNG output, and the Pi `show_img` panel config is `EP73_SPECTRA_800x480`.
+The target panel is a Pimoroni Inky Impression 7.3 / Spectra-class ACeP colour display. Colour regressions are bugs unless explicitly requested. The known good LaraPaper model is `inky_impression_7_3` at `800x480`, palette ID `10`, model bit depth `3`, live `4-bpp` prepared output, and the Pi `show_img` panel config is `EP73_SPECTRA_800x480`.
 
 See [Live Deployment Workflow](docs/LIVE_DEPLOYMENT_WORKFLOW.md) for the colour and physical verification rules.
 

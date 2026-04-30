@@ -5,7 +5,8 @@ This document is the working contract for the current TRMNL/LaraPaper-based stac
 ## Current Architecture
 - Local repo: source of truth for templates, scripts, docs, and Home Assistant packages
 - `khpi5`: live LaraPaper server and companion-script host
-- Pi Zero / Inky device: thin display client only
+- `trmnl-pi`: Pi Zero 2 W thin display client only
+- physical panel: Pimoroni Inky Impression 7.3 / Spectra-class colour e-paper, driven as `EP73_SPECTRA_800x480`
 - Home Assistant: orchestration and mode selection layer
 
 Do not treat a local render or local code change as "done" for TRMNL work. The change is only complete once it has been deployed to `khpi5` and verified on the physical panel.
@@ -42,6 +43,8 @@ In practice that means:
 - avoid accidentally biasing recipes toward monochrome for convenience
 - treat a regression from colour to grayscale as a bug unless it is an intentional user-selectable mode
 
+The physical hardware scan is recorded in `docs/HARDWARE.md`. The important operational point is that this is not a normal black-and-white TRMNL screen. Design and validation must preserve the colour path through LaraPaper and the Pi client.
+
 ### ACeP 7-Color Palette Realities
 
 The Pimoroni Inky Impression 7.3" uses Spectra/ACeP electrophoretic ink with 7 particles. How each CSS color actually renders on the panel:
@@ -67,6 +70,7 @@ When Sonos appears grayscale:
 - check the live Sonos payload first to see whether album art is present
 - inspect the live LaraPaper preview/PNG
 - verify the `inky_impression_7_3` device model on `khpi5` is still using the 7-colour palette and not a 1-bit black/white model
+- verify `trmnl-pi` still logs `EP73_SPECTRA_800x480` and `800 x 480, 4-bpp`
 - only then adjust recipe styling or artwork preprocessing
 
 ## Known Root Cause
