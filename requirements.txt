@@ -1,0 +1,8 @@
+Flask
+Pillow
+icalendar
+python-dotenv
+pytz
+recurring-ical-events
+requests
+soco

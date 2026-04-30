@@ -34,7 +34,7 @@
 - **Built custom Flask BYOS server** (`scripts/trmnl_byos_server.py`) - lightweight, ~30MB RAM.
 - **Deployed LaraPaper** on khpi5 via Docker (ghcr.io/usetrmnl/larapaper:latest).
 - LaraPaper runs on port 4567 with Docker volumes for database and storage persistence.
-- Device registered: MAC `88:A2:9E:2B:2B:B9`, API key `VAtHzgSkFcV6dtvbGSYxrE`.
+- Device registered: MAC `88:A2:9E:2B:2B:B9`; the API key is stored only in the live Pi config and must not be committed.
 
 ### 6. Color E-Ink Configuration - COMPLETE
 - Updated LaraPaper `inky_impression_7_3` device model: 7 colors, 3-bit, palette `color-7a`.
