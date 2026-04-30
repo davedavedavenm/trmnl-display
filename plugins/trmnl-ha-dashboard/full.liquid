@@ -3,109 +3,107 @@
   {% assign active_sonos = sonos | where: "state", "paused" | first %}
 {% endif %}
 {% assign idle_count = sonos | where: "state", "idle" | size %}
+{% assign c = weather.condition | downcase %}
+{% assign weather_icon = "SUN" %}
+{% if c contains "rain" or c contains "drizzle" or c contains "shower" %}
+  {% assign weather_icon = "RAIN" %}
+{% elsif c contains "snow" or c contains "sleet" %}
+  {% assign weather_icon = "SNOW" %}
+{% elsif c contains "thunder" %}
+  {% assign weather_icon = "STORM" %}
+{% elsif c contains "fog" or c contains "mist" %}
+  {% assign weather_icon = "FOG" %}
+{% elsif c contains "cloud" or c contains "overcast" %}
+  {% assign weather_icon = "CLOUD" %}
+{% endif %}
 
 <!--
-  Spectra 6 hardware palette (pimoroni/inky saturated):
-    Black  #000000 | White #a1a4a5 | Ochre #d0be47
-    Red    #9c484b | Navy  #3d3b5e | Olive #3a5b46
-
-  Design principle: WHITE base + coloured solid blocks.
-  Dark gradients dither to mud on e-ink. White = zero dithering = crisp.
-  Colour blocks (solid navy, olive, terracotta) render cleanly and pop.
+  Colour-first layout for the live Inky Impression 7.3 / Spectra panel.
+  Use saturated ACeP-safe blocks: black, white, red, yellow, blue, orange.
+  Avoid subtle gradients and gray-heavy sections; they collapse badly on the panel.
 -->
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Helvetica Neue','Segoe UI',Arial,sans-serif; }
+  body { font-family:'Helvetica Neue','Segoe UI',Arial,sans-serif; background:#ffffff; }
 </style>
 
-<div style="width:800px;height:480px;display:flex;flex-direction:column;background:#ffffff;">
+<div style="width:800px;height:480px;background:#ffffff;color:#000000;display:flex;flex-direction:column;overflow:hidden;">
 
-  <!-- HEADER: black bar, ochre timestamp -->
-  <div style="height:44px;flex-shrink:0;background:#000000;display:flex;align-items:center;justify-content:space-between;padding:0 22px;">
-    <span style="font-size:10px;font-weight:900;letter-spacing:6px;text-transform:uppercase;color:#ffffff;">Home Dashboard</span>
-    <span style="font-size:11px;font-weight:700;color:#d0be47;letter-spacing:1px;">{{ updated_at }}</span>
+  <div style="height:48px;background:#000000;color:#ffffff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:4px solid #FFFF00;">
+    <div style="font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:1px;">Home Dashboard</div>
+    <div style="font-size:13px;font-weight:900;color:#FFFF00;text-transform:uppercase;">{{ updated_at }}</div>
   </div>
 
-  <!-- BODY -->
-  <div style="flex:1;display:flex;min-height:0;">
+  <div style="height:300px;display:grid;grid-template-columns:250px 1fr;border-bottom:4px solid #000000;">
 
-    <!-- WEATHER: solid navy block — white text on navy = great contrast -->
-    <div style="width:220px;flex-shrink:0;background:#3d3b5e;display:flex;flex-direction:column;justify-content:space-between;padding:20px 22px;">
+    <div style="background:#0000FF;color:#ffffff;padding:18px 20px;display:flex;flex-direction:column;justify-content:space-between;border-right:4px solid #000000;">
       <div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#d0be47;margin-bottom:14px;">Weather</div>
-        <div style="font-size:104px;font-weight:900;line-height:0.8;color:#ffffff;letter-spacing:-6px;">{{ weather.temperature | round }}<span style="font-size:38px;font-weight:200;vertical-align:super;letter-spacing:0;opacity:0.8;">°</span></div>
-        <div style="font-size:30px;margin-top:18px;line-height:1;">{% assign c = weather.condition | downcase %}{% if c contains "clear" or c contains "sun" %}☀️{% elsif c contains "rain" or c contains "drizzle" or c contains "shower" %}🌧️{% elsif c contains "snow" or c contains "sleet" %}❄️{% elsif c contains "thunder" %}⛈️{% elsif c contains "fog" or c contains "mist" %}🌫️{% elsif c contains "cloud" or c contains "overcast" %}☁️{% else %}🌤️{% endif %}</div>
-        <div style="font-size:16px;font-weight:700;color:#ffffff;margin-top:8px;opacity:0.9;">{{ weather.condition_label }}</div>
+        <div style="display:inline-block;background:#FFFF00;color:#000000;padding:5px 10px;font-size:12px;font-weight:900;text-transform:uppercase;">Weather</div>
+        <div style="font-size:34px;font-weight:900;margin-top:14px;line-height:1;">{{ weather_icon }}</div>
+        <div style="font-size:88px;font-weight:900;line-height:0.9;margin-top:8px;">{{ weather.temperature | round }}<span style="font-size:34px;vertical-align:top;">deg</span></div>
+        <div style="font-size:18px;font-weight:900;line-height:1.1;margin-top:8px;">{{ weather.condition_label }}</div>
       </div>
-      <div style="border-top:1px solid rgba(208,190,71,0.35);padding-top:12px;">
-        <div style="font-size:12px;font-weight:600;color:#d0be47;line-height:2.1;">{{ weather.humidity }}% humidity<br>{{ weather.wind_speed | round }} km/h wind</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#ffffff;color:#000000;padding:8px;">
+          <div style="font-size:10px;font-weight:900;text-transform:uppercase;">Humidity</div>
+          <div style="font-size:22px;font-weight:900;">{{ weather.humidity }}%</div>
+        </div>
+        <div style="background:#ffffff;color:#000000;padding:8px;">
+          <div style="font-size:10px;font-weight:900;text-transform:uppercase;">Wind</div>
+          <div style="font-size:22px;font-weight:900;">{{ weather.wind_speed | round }}</div>
+        </div>
       </div>
     </div>
 
-    <!-- RIGHT: white content area -->
-    <div style="flex:1;display:flex;flex-direction:column;background:#ffffff;min-width:0;">
-
-      <!-- PEOPLE: white background, coloured cards -->
-      <div style="padding:14px 18px 12px;border-bottom:2px solid #000000;flex-shrink:0;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#3a5b46;margin-bottom:10px;">People</div>
-        <div style="display:flex;gap:10px;">
-          {% for person in people %}
-          <div style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-radius:4px;background:{% if person.state == 'home' %}#3a5b46{% else %}#9c484b{% endif %};">
-            <span style="font-size:22px;font-weight:900;color:#ffffff;">{{ person.name }}</span>
-            <span style="font-size:14px;font-weight:900;color:#ffffff;opacity:0.9;">{% if person.state == 'home' %}Home{% else %}Away{% endif %}</span>
+    <div style="display:flex;flex-direction:column;background:#ffffff;">
+      <div style="height:88px;display:grid;grid-template-columns:1fr 1fr;border-bottom:4px solid #000000;">
+        {% for person in people %}
+          <div style="padding:14px 18px;background:{% if person.state == 'home' %}#FFFF00{% else %}#FF0000{% endif %};color:{% if person.state == 'home' %}#000000{% else %}#ffffff{% endif %};{% unless forloop.last %}border-right:4px solid #000000;{% endunless %}">
+            <div style="font-size:12px;font-weight:900;text-transform:uppercase;">{{ person.name }}</div>
+            <div style="font-size:34px;font-weight:900;line-height:1;margin-top:8px;">{% if person.state == 'home' %}Home{% else %}Away{% endif %}</div>
           </div>
-          {% endfor %}
-        </div>
+        {% endfor %}
       </div>
 
-      <!-- STATUS: 4 rows, white bg, coloured values -->
-      <div style="flex:1;display:flex;flex-direction:column;padding:0 18px;min-height:0;">
-
-        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0e0;">
-          <span style="font-size:15px;font-weight:700;color:#000000;">Door</span>
-          <span style="font-size:30px;font-weight:900;color:{% if home.door_locked %}#3d3b5e{% else %}#9c484b{% endif %};">{% if home.door_locked %}Locked{% else %}OPEN{% endif %}</span>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;">
+        <div style="padding:16px 18px;border-right:2px solid #000000;border-bottom:2px solid #000000;background:{% if home.door_locked %}#ffffff{% else %}#FF0000{% endif %};color:{% if home.door_locked %}#000000{% else %}#ffffff{% endif %};">
+          <div style="font-size:12px;font-weight:900;text-transform:uppercase;">Door</div>
+          <div style="font-size:34px;font-weight:900;line-height:1;margin-top:10px;">{% if home.door_locked %}Locked{% else %}Open{% endif %}</div>
         </div>
-
-        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0e0;">
-          <span style="font-size:15px;font-weight:700;color:#000000;">Washer</span>
-          <span style="font-size:30px;font-weight:900;color:{% if home.washer_running %}#9c484b{% else %}#000000{% endif %};">{% if home.washer_running %}Running{% else %}Off{% endif %}</span>
+        <div style="padding:16px 18px;border-bottom:2px solid #000000;background:{% if home.washer_running %}#FFA500{% else %}#ffffff{% endif %};color:#000000;">
+          <div style="font-size:12px;font-weight:900;text-transform:uppercase;">Washer</div>
+          <div style="font-size:34px;font-weight:900;line-height:1;margin-top:10px;">{% if home.washer_running %}Running{% else %}Off{% endif %}</div>
         </div>
-
-        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e0e0e0;">
-          <span style="font-size:15px;font-weight:700;color:#000000;">Lounge Temp</span>
-          <span style="font-size:30px;font-weight:900;color:#000000;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}°C{% else %}--{% endif %}</span>
+        <div style="padding:16px 18px;border-right:2px solid #000000;background:#000000;color:#ffffff;">
+          <div style="font-size:12px;font-weight:900;text-transform:uppercase;color:#FFFF00;">Lounge</div>
+          <div style="font-size:34px;font-weight:900;line-height:1;margin-top:10px;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}C{% else %}--{% endif %}</div>
         </div>
-
-        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:15px;font-weight:700;color:#000000;">Blinds</span>
-          <span style="font-size:30px;font-weight:900;color:{% if home.blinds_open %}#3a5b46{% else %}#000000{% endif %};">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% elsif home.blinds_open %}Open{% else %}Closed{% endif %}</span>
+        <div style="padding:16px 18px;background:{% if home.blinds_open %}#FFFF00{% else %}#000000{% endif %};color:{% if home.blinds_open %}#000000{% else %}#ffffff{% endif %};">
+          <div style="font-size:12px;font-weight:900;text-transform:uppercase;">Blinds</div>
+          <div style="font-size:34px;font-weight:900;line-height:1;margin-top:10px;">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% elsif home.blinds_open %}Open{% else %}Closed{% endif %}</div>
         </div>
-
       </div>
     </div>
   </div>
 
-  <!-- SONOS: solid ochre (playing) or solid terracotta (idle) — full contrast -->
-  <div style="height:88px;flex-shrink:0;background:{% if active_sonos %}#d0be47{% else %}#9c484b{% endif %};display:flex;align-items:center;gap:18px;padding:0 22px;border-top:3px solid #000000;">
-    <span style="font-size:28px;flex-shrink:0;">{% if active_sonos %}🎵{% else %}🔇{% endif %}</span>
-    <div style="flex:1;min-width:0;">
-      <div style="font-size:8px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:{% if active_sonos %}#5c4a00{% else %}#ffffff{% endif %};margin-bottom:4px;">Sonos</div>
+  <div style="height:132px;display:grid;grid-template-columns:150px 1fr 210px;background:{% if active_sonos %}#FFA500{% else %}#FF0000{% endif %};color:{% if active_sonos %}#000000{% else %}#ffffff{% endif %};">
+    <div style="display:flex;align-items:center;justify-content:center;border-right:4px solid #000000;background:#FFFF00;color:#000000;">
+      <div style="font-size:28px;font-weight:900;text-transform:uppercase;line-height:1;text-align:center;">{% if active_sonos %}Music{% else %}Quiet{% endif %}</div>
+    </div>
+    <div style="padding:16px 20px;min-width:0;">
+      <div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;">Sonos</div>
       {% if active_sonos %}
-        <div style="font-size:22px;font-weight:900;color:#000000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;">{{ active_sonos.title }}</div>
-        <div style="font-size:12px;font-weight:700;color:#3d3200;margin-top:2px;">{{ active_sonos.artist }}{% if active_sonos.room %} &middot; {{ active_sonos.room }}{% endif %}</div>
+        <div style="font-size:30px;font-weight:900;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:8px;">{{ active_sonos.title }}</div>
+        <div style="font-size:16px;font-weight:900;line-height:1.1;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ active_sonos.artist }}{% if active_sonos.room %} - {{ active_sonos.room }}{% endif %}</div>
       {% else %}
-        <div style="font-size:22px;font-weight:900;color:#ffffff;line-height:1.1;">No Music Playing</div>
-        <div style="font-size:12px;font-weight:700;color:#f0dede;margin-top:2px;">{{ idle_count }} room{% if idle_count != 1 %}s{% endif %} idle</div>
+        <div style="font-size:30px;font-weight:900;line-height:1.05;margin-top:8px;">No Music Playing</div>
+        <div style="font-size:16px;font-weight:900;line-height:1.1;margin-top:7px;">{{ idle_count }} rooms idle</div>
       {% endif %}
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:5px;align-self:center;max-width:200px;justify-content:flex-end;">
+    <div style="padding:14px 14px;border-left:4px solid #000000;display:flex;flex-wrap:wrap;align-content:center;justify-content:flex-end;gap:6px;">
       {% for room in sonos %}
-        {% if active_sonos %}
-          <div style="font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;background:{% if room.state == 'playing' or room.state == 'paused' %}#000000{% else %}#b8a030{% endif %};color:{% if room.state == 'playing' or room.state == 'paused' %}#d0be47{% else %}#000000{% endif %};">{{ room.room | truncate: 10, "" }}</div>
-        {% else %}
-          <div style="font-size:8px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;background:{% if room.state == 'playing' or room.state == 'paused' %}#ffffff{% else %}#7a2e31{% endif %};color:{% if room.state == 'playing' or room.state == 'paused' %}#9c484b{% else %}#ffffff{% endif %};">{{ room.room | truncate: 10, "" }}</div>
-        {% endif %}
+        <div style="font-size:10px;font-weight:900;text-transform:uppercase;padding:6px 8px;background:{% if room.state == 'playing' or room.state == 'paused' %}#000000{% else %}#ffffff{% endif %};color:{% if room.state == 'playing' or room.state == 'paused' %}#FFFF00{% else %}#000000{% endif %};border:2px solid #000000;">{{ room.room | truncate: 9, "" }}</div>
       {% endfor %}
     </div>
   </div>
