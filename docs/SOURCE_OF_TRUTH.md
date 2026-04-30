@@ -18,6 +18,7 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | `/home/dave/run_trmnl_sonos.sh` | `scripts/run_trmnl_sonos.sh` |
 | `/home/dave/bin/trmnl-display-shell.sh` on `trmnl-pi` | `scripts/trmnl-display-shell.sh` |
 | `/home/dave/.config/trmnl/show_img.json` on `trmnl-pi` | `config/trmnl/show_img.json` |
+| `/etc/environment` on `trmnl-pi` | `deploy/trmnl-pi/environment` |
 | `/etc/systemd/system/trmnl-mode-bridge.service` | `deploy/systemd/trmnl-mode-bridge.service` |
 | `/etc/systemd/system/trmnl-display.service` | `deploy/systemd/trmnl-display.service` |
 | `/config/packages/trmnl_*.yaml` | `config/packages/` |

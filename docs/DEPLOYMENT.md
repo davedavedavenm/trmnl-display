@@ -62,6 +62,7 @@ Repo files:
 - `scripts/trmnl-display-shell.sh`
 - `config/trmnl/show_img.json`
 - `config/trmnl/config.example.json`
+- `deploy/trmnl-pi/environment`
 - `deploy/systemd/trmnl-display.service`
 
 Deploy:
@@ -69,7 +70,9 @@ Deploy:
 ```bash
 scp scripts/trmnl-display-shell.sh trmnl-pi:/home/dave/bin/trmnl-display-shell.sh
 scp config/trmnl/show_img.json trmnl-pi:/home/dave/.config/trmnl/show_img.json
+scp deploy/trmnl-pi/environment trmnl-pi:/tmp/trmnl-pi-environment
 scp deploy/systemd/trmnl-display.service trmnl-pi:/tmp/trmnl-display.service
+ssh trmnl-pi "sudo mv /tmp/trmnl-pi-environment /etc/environment"
 ssh trmnl-pi "sudo mv /tmp/trmnl-display.service /etc/systemd/system/trmnl-display.service && sudo systemctl daemon-reload && sudo systemctl restart trmnl-display.service"
 ```
 

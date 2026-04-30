@@ -58,6 +58,8 @@ GitHub `main` is authoritative for checked-in configuration, scripts, plugins, a
 
 See [Source Of Truth](docs/SOURCE_OF_TRUTH.md) for the workflow.
 
+See [Robust BYOS Flow](docs/ROBUST_BYOS_FLOW.md) for the target operating model and boundaries between Home Assistant, LaraPaper, companion scripts, and the Pi display client.
+
 ## Deployment
 
 Use the repo files as the desired state:
@@ -68,6 +70,7 @@ Use the repo files as the desired state:
 - `scripts/trmnl_set_display_mode.sh` -> `/home/dave/bin/trmnl-set-display-mode` on `khpi5`
 - `scripts/trmnl-display-shell.sh` -> `/home/dave/bin/trmnl-display-shell.sh` on `trmnl-pi`
 - `deploy/systemd/*.service` -> `/etc/systemd/system/` on the relevant hosts
+- `deploy/trmnl-pi/environment` -> `/etc/environment` on `trmnl-pi`
 - `config/packages/*.yaml` -> `/config/packages/` on Home Assistant
 
 Do not commit live secrets. Use:

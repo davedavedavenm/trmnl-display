@@ -128,6 +128,14 @@ After changing the Pi display shell:
 ssh trmnl-pi "sudo systemctl daemon-reload && sudo systemctl restart trmnl-display.service"
 ```
 
+After changing `deploy/trmnl-pi/environment`, copy it to `/etc/environment` and open a fresh SSH session before validating locale-sensitive commands:
+
+```bash
+scp deploy/trmnl-pi/environment trmnl-pi:/tmp/trmnl-pi-environment
+ssh trmnl-pi "sudo mv /tmp/trmnl-pi-environment /etc/environment"
+ssh trmnl-pi "locale && apt list --upgradable >/tmp/apt-check.out 2>/tmp/apt-check.err; cat /tmp/apt-check.err"
+```
+
 After changing LaraPaper compose files:
 
 ```bash

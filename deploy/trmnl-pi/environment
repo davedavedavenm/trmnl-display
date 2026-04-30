@@ -1,0 +1,17 @@
+# /etc/environment on trmnl-pi
+# System-wide environment for the Pi display client host.
+
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+
+EDITOR="nano"
+VISUAL="nano"
+
+DOCKER_BUILDKIT=1
+COMPOSE_DOCKER_CLI_BUILD=1
+
+HISTCONTROL=ignoredups:erasedups
+HISTSIZE=10000
+HISTFILESIZE=20000
+
+LANG=en_GB.UTF-8
+LC_ALL=en_GB.UTF-8
