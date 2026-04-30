@@ -10,7 +10,7 @@ HOST = os.getenv("TRMNL_MODE_BRIDGE_HOST", "0.0.0.0")
 PORT = int(os.getenv("TRMNL_MODE_BRIDGE_PORT", "8787"))
 TOKEN = os.getenv("TRMNL_MODE_BRIDGE_TOKEN", "")
 MODE_SCRIPT = os.getenv("TRMNL_MODE_SCRIPT", "/home/dave/bin/trmnl-set-display-mode")
-ALLOWED_MODES = {"idle", "calendar", "sonos", "jen_commute", "jen_morning", "dave_commute", "alert", "status"}
+ALLOWED_MODES = {"idle", "calendar", "sonos", "jen_commute", "jen_morning", "dave_commute", "ha_dashboard", "alert", "status"}
 
 
 class Handler(BaseHTTPRequestHandler):

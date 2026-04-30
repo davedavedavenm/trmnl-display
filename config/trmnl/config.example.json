@@ -1,0 +1,5 @@
+{
+  "api_key": "REPLACE_WITH_DEVICE_API_KEY",
+  "base_url": "http://192.168.1.143:4567",
+  "device_id": "88:a2:9e:2b:2b:b9"
+}

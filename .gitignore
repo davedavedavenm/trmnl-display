@@ -183,5 +183,13 @@ temp_*.sh
 youtube-to-docs-artifacts/
 nul
 
+# Local TRMNL audit/scratch artifacts
+.gemini/
+disable_ha.py
+trigger_ha.py
+ha_dash_new.png
+multi_cal_new.png
+/scripts/tmp/
+
 # Agent cross-session memory (not committed)
 .agent-memory/

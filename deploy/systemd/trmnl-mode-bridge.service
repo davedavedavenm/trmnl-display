@@ -1,3 +1,4 @@
+# /etc/systemd/system/trmnl-mode-bridge.service
 [Unit]
 Description=TRMNL mode bridge
 After=network-online.target

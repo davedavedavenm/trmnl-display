@@ -1,0 +1,5 @@
+{
+  "adapter": "pimoroni",
+  "stretch": "aspectfill",
+  "panel_1bit": "EP73_SPECTRA_800x480"
+}
