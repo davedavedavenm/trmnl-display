@@ -1,7 +1,7 @@
 name: HA Dashboard
-description: A Pimoroni Inky Impression Spectra 7.3" colour e-ink dashboard for Home Assistant. Uses high-chroma ACeP-safe blocks: black, white, red, yellow, blue, and orange.
+description: A Pimoroni Inky Impression Spectra 7.3" colour e-ink dashboard for Home Assistant. Compact card grid with soft Home Assistant-style colour surfaces for the Spectra e-paper panel.
 author: David
-version: 2.3.0
+version: 2.5.0
 no_screen_padding: 'yes'
 dark_mode: 'no'
 strategy: webhook
