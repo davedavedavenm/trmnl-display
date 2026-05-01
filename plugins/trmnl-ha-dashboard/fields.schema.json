@@ -1,0 +1,107 @@
+{
+  "plugin_id": "trmnl-ha-dashboard",
+  "name": "HA Dashboard",
+  "version": "2.9.0",
+  "fields": [
+    {
+      "key": "dashboard_title",
+      "type": "text",
+      "required": false,
+      "default": "Home Assistant",
+      "description": "Title displayed in the dashboard header."
+    },
+    {
+      "key": "instance_label",
+      "type": "text",
+      "required": false,
+      "default": "Home",
+      "description": "Short label for the installed dashboard instance."
+    },
+    {
+      "key": "layout_variant",
+      "type": "text",
+      "required": false,
+      "default": "compact_grid",
+      "allowed_values": ["compact_grid", "status_focused", "room_grid"],
+      "description": "Preferred layout family. Sidecar support may land before Liquid support for every variant."
+    },
+    {
+      "key": "colour_profile",
+      "type": "text",
+      "required": false,
+      "default": "inky_spectra_7",
+      "allowed_values": ["inky_spectra_7", "trmnl_mono", "trmnl_gray"],
+      "description": "Renderer colour profile. Use inky_spectra_7 for the Pimoroni Inky Impression 7.3 colour panel."
+    },
+    {
+      "key": "ha_url",
+      "type": "text",
+      "required": true,
+      "default": "http://homeassistant.local:8123",
+      "description": "Home Assistant base URL."
+    },
+    {
+      "key": "ha_token",
+      "type": "password",
+      "required": true,
+      "default": "",
+      "description": "Home Assistant long-lived access token. Do not commit live values."
+    },
+    {
+      "key": "weather_entity",
+      "type": "text",
+      "required": false,
+      "default": "weather.forecast_home",
+      "description": "Home Assistant weather entity."
+    },
+    {
+      "key": "person_entities",
+      "type": "multi_string",
+      "required": false,
+      "default": "person.example",
+      "description": "Comma-separated Home Assistant person entities."
+    },
+    {
+      "key": "sonos_entities",
+      "type": "multi_string",
+      "required": false,
+      "default": "",
+      "description": "Comma-separated media_player entities."
+    },
+    {
+      "key": "door_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Door or lock sensor entity."
+    },
+    {
+      "key": "washer_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Laundry appliance status entity."
+    },
+    {
+      "key": "blind_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Cover or blind entity."
+    },
+    {
+      "key": "thermostat_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Climate or temperature entity."
+    }
+  ],
+  "sidecar": {
+    "supported": true,
+    "renderer": "scripts/render_colour_dashboard.py",
+    "output": "scripts/tmp/sidecar_colour_dashboard.png",
+    "notes": "The sidecar must honor this field contract as it evolves from proof to live renderer."
+  }
+}
+

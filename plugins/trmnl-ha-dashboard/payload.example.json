@@ -1,0 +1,41 @@
+{
+  "merge_variables": {
+    "dashboard_title": "Home Assistant",
+    "instance_label": "Home",
+    "updated_at": "01 May 08:30",
+    "weather": {
+      "condition": "partlycloudy",
+      "condition_label": "Partly cloudy",
+      "temperature": 24.5,
+      "humidity": 48,
+      "wind_speed": 9
+    },
+    "home": {
+      "door_locked": true,
+      "washer_running": false,
+      "blind_position": 0,
+      "blinds_open": true,
+      "thermostat_temp": 22.0
+    },
+    "people": [
+      {
+        "name": "Alex",
+        "state": "home"
+      },
+      {
+        "name": "Sam",
+        "state": "away"
+      }
+    ],
+    "sonos": [
+      {
+        "room": "Living Room",
+        "state": "paused",
+        "title": "",
+        "artist": "",
+        "picture": ""
+      }
+    ]
+  }
+}
+

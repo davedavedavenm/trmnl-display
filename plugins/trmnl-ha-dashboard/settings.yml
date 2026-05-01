@@ -1,18 +1,38 @@
 name: HA Dashboard
-description: A Pimoroni Inky Impression Spectra 7.3" colour e-ink dashboard for Home Assistant. Icon-led compact card grid with broad semantic colour surfaces across the Spectra e-paper palette.
+description: A shareable TRMNL/LaraPaper Home Assistant dashboard with a Liquid compatibility template and optional indexed-colour sidecar renderer for Pimoroni Inky Impression Spectra panels.
 author: David
-version: 2.8.0
+version: 2.9.0
 no_screen_padding: 'yes'
 dark_mode: 'no'
 strategy: webhook
 refresh_interval: 10
 id: trmnl-ha-dashboard
 custom_fields:
+  - keyname: dashboard_title
+    field_type: text
+    name: Dashboard Title
+    default: "Home Assistant"
+    placeholder: "Home Assistant"
+  - keyname: instance_label
+    field_type: text
+    name: Instance Label
+    default: "Home"
+    placeholder: "Home"
+  - keyname: layout_variant
+    field_type: text
+    name: Layout Variant
+    default: "compact_grid"
+    placeholder: "compact_grid"
+  - keyname: colour_profile
+    field_type: text
+    name: Colour Profile
+    default: "inky_spectra_7"
+    placeholder: "inky_spectra_7"
   - keyname: ha_url
     field_type: text
     name: Home Assistant URL
-    default: "http://192.168.1.89:8123"
-    placeholder: "http://192.168.1.89:8123"
+    default: "http://homeassistant.local:8123"
+    placeholder: "http://homeassistant.local:8123"
   - keyname: ha_token
     field_type: password
     name: Home Assistant Long-Lived Token
@@ -21,13 +41,13 @@ custom_fields:
   - keyname: sonos_entities
     field_type: multi_string
     name: Sonos Media Players (comma-separated)
-    default: "media_player.living_room, media_player.bedroom, media_player.kitchen, media_player.gym, media_player.sonos_roam"
+    default: ""
     placeholder: "media_player.living_room, media_player.kitchen"
   - keyname: person_entities
     field_type: multi_string
     name: Person Entities (comma-separated)
-    default: "person.david, person.jennifer"
-    placeholder: "person.david, person.jennifer"
+    default: "person.example"
+    placeholder: "person.alex, person.sam"
   - keyname: weather_entity
     field_type: text
     name: Weather Entity
@@ -36,20 +56,20 @@ custom_fields:
   - keyname: door_entity
     field_type: text
     name: Door Lock Entity
-    default: "binary_sensor.nuki_flat_door_locked"
-    placeholder: "binary_sensor.nuki_flat_door_locked"
+    default: ""
+    placeholder: "binary_sensor.front_door_locked"
   - keyname: washer_entity
     field_type: text
     name: Washer Status Entity
-    default: "binary_sensor.wash_dryer_status"
-    placeholder: "binary_sensor.wash_dryer_status"
+    default: ""
+    placeholder: "binary_sensor.washer_running"
   - keyname: blind_entity
     field_type: text
     name: Blinds Entity
-    default: "cover.blinds_controller_curtain"
-    placeholder: "cover.blinds_controller_curtain"
+    default: ""
+    placeholder: "cover.living_room_blinds"
   - keyname: thermostat_entity
     field_type: text
     name: Thermostat Entity
-    default: "climate.thermostat"
+    default: ""
     placeholder: "climate.thermostat"
