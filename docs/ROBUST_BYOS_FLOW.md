@@ -4,7 +4,7 @@ This plan defines the target operating flow for a robust TRMNL/LaraPaper BYOS de
 
 ## Principles
 
-1. **Use LaraPaper as BYOS server and renderer.** LaraPaper owns plugin rendering, generated images, playlists, and the `/api/display` response.
+1. **Use BYOS boundaries deliberately.** LaraPaper currently owns plugin rendering, generated images, playlists, and the `/api/display` response. If colour quality requires it, a repo-owned colour renderer may generate the image while LaraPaper remains the management server, or Terminus may be piloted as a replacement BYOS server.
 2. **Keep the Pi client thin.** The Pi should not know about Home Assistant, calendar APIs, Sonos APIs, or display modes. It should poll LaraPaper and display the returned image.
 3. **Keep Home Assistant as the orchestrator.** HA should decide which mode is wanted, push payloads, and call the mode bridge. HA should not contain Liquid layout logic.
 4. **Keep recipes shareable.** Plugins in `plugins/` should remain import/export-safe and receive generic payloads.
@@ -47,6 +47,24 @@ Not responsible for:
 
 - choosing the semantic display mode
 - polling Sonos, calendar, or HA directly unless a specific plugin is intentionally configured that way
+- being the only acceptable colour renderer if a BYOS-compatible sidecar produces more faithful Inky/Spectra output
+
+### Colour Renderer Sidecar
+
+Allowed when LaraPaper's renderer cannot preserve the colour range of the live panel.
+
+Responsible for:
+
+- rendering the target dashboard at `800x480`
+- remapping the rendered image to an explicit Inky/Spectra palette
+- comparing generated output against LaraPaper output before physical refresh
+- exposing or handing off a BYOS-compatible image URL
+
+Not responsible for:
+
+- device identity and access-token management
+- playlists and plugin ownership unless it intentionally replaces LaraPaper
+- mode decisions
 
 ### Home Assistant
 
@@ -181,4 +199,5 @@ The robust end state is:
 - LaraPaper is healthy after image updates
 - Pi logs show successful `800 x 480, 4-bpp` panel refreshes
 - generated images remain colour-capable
+- colour-critical screens use an explicit palette/remap pipeline when LaraPaper's default renderer is insufficient
 - no live-only changes exist after a task is complete
