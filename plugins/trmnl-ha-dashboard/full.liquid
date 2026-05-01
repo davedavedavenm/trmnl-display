@@ -4,141 +4,185 @@
 {% endif %}
 {% assign idle_count = sonos | where: "state", "idle" | size %}
 {% assign c = weather.condition | downcase %}
-{% assign weather_icon = "Sun" %}
+{% assign weather_icon = "cloud-sun" %}
 {% if c contains "rain" or c contains "drizzle" or c contains "shower" %}
-  {% assign weather_icon = "Rain" %}
+  {% assign weather_icon = "rain" %}
 {% elsif c contains "snow" or c contains "sleet" %}
-  {% assign weather_icon = "Snow" %}
+  {% assign weather_icon = "snow" %}
 {% elsif c contains "thunder" %}
-  {% assign weather_icon = "Storm" %}
+  {% assign weather_icon = "storm" %}
 {% elsif c contains "fog" or c contains "mist" %}
-  {% assign weather_icon = "Fog" %}
-{% elsif c contains "cloud" or c contains "overcast" %}
-  {% assign weather_icon = "Cloud" %}
+  {% assign weather_icon = "fog" %}
+{% elsif c contains "sun" or c contains "clear" %}
+  {% assign weather_icon = "sun" %}
 {% endif %}
-
-<!-- Home Assistant compact-grid style for the live Inky Impression / Spectra colour panel. -->
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Helvetica Neue','Segoe UI',Arial,sans-serif; background:#f8f5ed; }
+  .screen { width:800px;height:480px;background:#f8f5ed;color:#111;overflow:hidden;padding:16px 18px 14px;display:flex;flex-direction:column; }
+  .card { border:1px solid #6f6f6f;border-radius:6px;background:#fff;overflow:hidden; }
+  .card-pad { padding:10px 12px; }
+  .label { font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.3px;color:#273d31; }
+  .value { font-size:27px;line-height:1;font-weight:850;color:#000; }
+  .sub { font-size:10px;line-height:1.1;font-weight:750;color:#333; }
+  .icon { width:30px;height:30px;display:flex;align-items:center;justify-content:center; }
+  .icon svg { width:28px;height:28px;stroke:#111;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round; }
+  .nav-icon svg { width:20px;height:20px;stroke:#fff;stroke-width:2.3;fill:none;stroke-linecap:round;stroke-linejoin:round; }
 </style>
 
-<div style="width:800px;height:480px;background:#f8f5ed;color:#111111;padding:16px 18px 14px;display:flex;flex-direction:column;overflow:hidden;">
+<div class="screen">
 
-  <div style="height:52px;display:grid;grid-template-columns:1fr auto;align-items:start;border-bottom:1px solid #888888;padding-bottom:10px;">
+  <div style="height:56px;display:grid;grid-template-columns:1fr auto;align-items:start;border-bottom:1px solid #7d8178;padding-bottom:10px;">
     <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:28px;height:28px;background:#2f3d42;color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;border-radius:3px;">H</div>
+      <div style="width:31px;height:31px;border-radius:5px;background:#294a67;display:flex;align-items:center;justify-content:center;">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/></svg>
+      </div>
       <div>
-        <div style="font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;">Home Assistant</div>
-        <div style="font-size:11px;font-weight:700;color:#56666a;margin-top:2px;">TRMNL colour display</div>
+        <div style="font-size:16px;font-weight:900;letter-spacing:.2px;">Home Assistant</div>
+        <div style="font-size:11px;font-weight:800;color:#496D49;margin-top:2px;">TRMNL colour dashboard</div>
       </div>
     </div>
     <div style="text-align:right;">
-      <div style="font-size:34px;line-height:0.9;font-weight:300;">{{ updated_at | slice: -5, 5 }}</div>
-      <div style="font-size:11px;font-weight:700;color:#333333;margin-top:5px;">{{ updated_at }}</div>
+      <div style="font-size:36px;line-height:.85;font-weight:300;color:#000;">{{ updated_at | slice: -5, 5 }}</div>
+      <div style="font-size:11px;font-weight:800;color:#333;margin-top:7px;">{{ updated_at }}</div>
     </div>
   </div>
 
-  <div style="height:82px;display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px;margin-top:10px;">
-    <div style="background:#FFFF00;border:1px solid #777777;border-radius:6px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;">
-      <div style="width:44px;height:44px;border-radius:50%;background:#ffd43b;border:2px solid #111111;"></div>
-      <div>
-        <div style="font-size:24px;font-weight:800;line-height:1;">{{ weather.temperature | round: 1 }}C</div>
-        <div style="font-size:12px;font-weight:700;margin-top:4px;">{{ weather.condition_label }}</div>
+  <div style="height:88px;display:grid;grid-template-columns:1.55fr 1fr 1fr;gap:9px;margin-top:10px;">
+    <div class="card" style="background:#FFFF00;">
+      <div class="card-pad" style="height:100%;display:grid;grid-template-columns:58px 1fr;align-items:center;gap:10px;">
+        <div style="width:52px;height:52px;position:relative;">
+          <div style="position:absolute;left:0;top:14px;width:39px;height:24px;background:#fff;border:2px solid #111;border-radius:18px;"></div>
+          <div style="position:absolute;right:2px;top:2px;width:28px;height:28px;background:#FFA500;border:2px solid #111;border-radius:50%;"></div>
+        </div>
+        <div>
+          <div class="value">{{ weather.temperature | round: 1 }}C</div>
+          <div class="sub" style="margin-top:5px;">{{ weather.condition_label }}</div>
+        </div>
       </div>
     </div>
-    <div style="background:#0000FF;color:#ffffff;border:1px solid #777777;border-radius:6px;padding:12px 14px;">
-      <div style="font-size:11px;font-weight:900;text-transform:uppercase;color:#ffffff;">Humidity</div>
-      <div style="font-size:28px;font-weight:800;line-height:1.1;margin-top:8px;">{{ weather.humidity }}%</div>
+    <div class="card" style="background:#0000FF;color:#fff;">
+      <div class="card-pad">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="1.8"><path d="M12 3C8 8 6 11 6 15a6 6 0 0 0 12 0c0-4-2-7-6-12Z"/></svg>
+          <div style="font-size:10px;font-weight:900;text-transform:uppercase;color:#fff;">Humidity</div>
+        </div>
+        <div style="font-size:30px;font-weight:850;line-height:1;margin-top:12px;color:#fff;">{{ weather.humidity }}%</div>
+      </div>
     </div>
-    <div style="background:#00FF00;border:1px solid #777777;border-radius:6px;padding:12px 14px;">
-      <div style="font-size:11px;font-weight:900;text-transform:uppercase;color:#000000;">Wind</div>
-      <div style="font-size:28px;font-weight:800;line-height:1.1;margin-top:8px;">{{ weather.wind_speed | round }} km/h</div>
+    <div class="card" style="background:#00FF00;">
+      <div class="card-pad">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round"><path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M4 14h15a3 3 0 1 1-3 3"/></svg>
+          <div class="label">Wind</div>
+        </div>
+        <div class="value" style="margin-top:12px;">{{ weather.wind_speed | round }} km/h</div>
+      </div>
     </div>
   </div>
 
-  <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:10px;margin-top:10px;min-height:0;">
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:9px;margin-top:10px;min-height:0;">
     {% for person in people limit:2 %}
-      <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
-        <div style="background:{% if forloop.index == 1 %}#FFFF00{% else %}#00FF00{% endif %};"></div>
-        <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-          <div style="font-size:13px;font-weight:900;">{{ person.name }}</div>
-          <div style="font-size:28px;font-weight:800;line-height:1;">{% if person.state == 'home' %}Home{% else %}Away{% endif %}</div>
-          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Presence</div>
+      <div class="card" style="background:{% if person.state == 'home' %}#FFF7CC{% else %}#FFD9D0{% endif %};">
+        <div style="height:9px;background:{% if person.state == 'home' %}#FFFF00{% else %}#FF0000{% endif %};"></div>
+        <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="label">{{ person.name }}</div>
+            <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>
+          </div>
+          <div class="value">{% if person.state == 'home' %}Home{% else %}Away{% endif %}</div>
+          <div class="sub">Presence</div>
         </div>
       </div>
     {% endfor %}
 
-    <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
-      <div style="background:{% if home.door_locked %}#0000FF{% else %}#FF0000{% endif %};"></div>
-      <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:900;">Front Door</div>
-        <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.door_locked %}Locked{% else %}Open{% endif %}</div>
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Security</div>
+    <div class="card" style="background:{% if home.door_locked %}#E8EEF3{% else %}#FF0000{% endif %};color:{% if home.door_locked %}#111{% else %}#fff{% endif %};">
+      <div style="height:9px;background:#0000FF;"></div>
+      <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="label" style="color:{% if home.door_locked %}#273d31{% else %}#fff{% endif %};">Front Door</div>
+          <div class="icon"><svg viewBox="0 0 24 24" style="stroke:{% if home.door_locked %}#111{% else %}#fff{% endif %};"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+        </div>
+        <div class="value" style="color:{% if home.door_locked %}#000{% else %}#fff{% endif %};">{% if home.door_locked %}Locked{% else %}Open{% endif %}</div>
+        <div class="sub" style="color:{% if home.door_locked %}#333{% else %}#fff{% endif %};">Security</div>
       </div>
     </div>
 
-    <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
-      <div style="background:#FF0000;"></div>
-      <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:900;">Thermostat</div>
-        <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}C{% else %}--{% endif %}</div>
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Lounge temp</div>
+    <div class="card" style="background:#FFD9D0;">
+      <div style="height:9px;background:#FF0000;"></div>
+      <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="label">Thermostat</div>
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 8v8"/></svg></div>
+        </div>
+        <div class="value">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}C{% else %}--{% endif %}</div>
+        <div class="sub">Lounge temp</div>
       </div>
     </div>
 
-    <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
-      <div style="background:#FFA500;"></div>
-      <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:900;">Washer</div>
-        <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.washer_running %}Running{% else %}Off{% endif %}</div>
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Utility</div>
+    <div class="card" style="background:{% if home.washer_running %}#FFA500{% else %}#F1F1EC{% endif %};">
+      <div style="height:9px;background:#FFA500;"></div>
+      <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="label">Washer</div>
+          <div class="icon"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="14" r="4"/><path d="M8 7h.01M11 7h5"/></svg></div>
+        </div>
+        <div class="value">{% if home.washer_running %}Running{% else %}Off{% endif %}</div>
+        <div class="sub">Utility</div>
       </div>
     </div>
 
-    <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
-      <div style="background:#00FF00;"></div>
-      <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:900;">Blinds</div>
-        <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% elsif home.blinds_open %}Open{% else %}Closed{% endif %}</div>
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Position</div>
+    <div class="card" style="background:{% if home.blinds_open %}#DDEAD8{% else %}#F1F1EC{% endif %};">
+      <div style="height:9px;background:#00FF00;"></div>
+      <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="label">Blinds</div>
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M6 8h12M6 11h12M6 14h12"/><path d="M12 5v14"/><path d="m9 17 3 3 3-3"/></svg></div>
+        </div>
+        <div class="value">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% elsif home.blinds_open %}Open{% else %}Closed{% endif %}</div>
+        <div class="sub">Position</div>
       </div>
     </div>
 
-    <div style="grid-column:span 2;background:#ffffff;border:1px solid #777777;border-radius:6px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border-left:38px solid #FFFF00;">
-      <div style="min-width:0;">
-        <div style="font-size:13px;font-weight:900;">Sonos</div>
-        {% if active_sonos %}
-          <div style="font-size:24px;font-weight:800;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:6px;">{{ active_sonos.title }}</div>
-          <div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px;">{{ active_sonos.artist }}{% if active_sonos.room %} - {{ active_sonos.room }}{% endif %}</div>
-        {% else %}
-          <div style="font-size:24px;font-weight:800;line-height:1.05;margin-top:6px;">No Music</div>
-          <div style="font-size:12px;font-weight:700;margin-top:4px;">{{ idle_count }} rooms idle</div>
-        {% endif %}
+    <div class="card" style="grid-column:span 2;background:{% if active_sonos %}#FFF7CC{% else %}#F1F1EC{% endif %};">
+      <div style="height:9px;background:#FFFF00;"></div>
+      <div class="card-pad" style="height:calc(100% - 9px);display:grid;grid-template-columns:1fr 56px;gap:10px;align-items:center;">
+        <div style="min-width:0;">
+          <div class="label">Sonos</div>
+          {% if active_sonos %}
+            <div style="font-size:22px;font-weight:850;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:8px;">{{ active_sonos.title }}</div>
+            <div class="sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:6px;">{{ active_sonos.artist }}{% if active_sonos.room %} - {{ active_sonos.room }}{% endif %}</div>
+          {% else %}
+            <div style="font-size:24px;font-weight:850;line-height:1.05;margin-top:8px;">No Music</div>
+            <div class="sub" style="margin-top:6px;">{{ idle_count }} rooms idle</div>
+          {% endif %}
+        </div>
+        <div style="width:52px;height:52px;border-radius:50%;background:#FFFF00;border:2px solid #111;display:flex;align-items:center;justify-content:center;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+        </div>
       </div>
-      <div style="width:56px;height:56px;border-radius:50%;background:#ffd43b;border:2px solid #111111;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;">♪</div>
     </div>
   </div>
 
-  <div style="height:54px;margin-top:12px;background:#6f837a;color:#ffffff;border-radius:5px;display:grid;grid-template-columns:repeat(6,1fr);align-items:center;border:1px solid #555555;overflow:hidden;">
-    <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#516d74;">
-      <div style="font-size:18px;font-weight:900;">H</div><div style="font-size:10px;font-weight:800;">Home</div>
+  <div style="height:54px;margin-top:12px;background:#496D49;color:#fff;border-radius:5px;border:1px solid #4f4f4f;display:grid;grid-template-columns:repeat(6,1fr);overflow:hidden;">
+    <div style="background:#24496D;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/></svg></div><div style="font-size:10px;font-weight:850;">Home</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-      <div style="font-size:18px;font-weight:900;">L</div><div style="font-size:10px;font-weight:800;">Lights</div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8 14a6 6 0 1 1 8 0c-.8.6-1 1.2-1 2H9c0-.8-.2-1.4-1-2Z"/></svg></div><div style="font-size:10px;font-weight:850;">Lights</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-      <div style="font-size:18px;font-weight:900;">C</div><div style="font-size:10px;font-weight:800;">Climate</div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/></svg></div><div style="font-size:10px;font-weight:850;">Climate</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-      <div style="font-size:18px;font-weight:900;">S</div><div style="font-size:10px;font-weight:800;">Security</div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3 20 7v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4Z"/><path d="M9 12l2 2 4-5"/></svg></div><div style="font-size:10px;font-weight:850;">Security</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-      <div style="font-size:18px;font-weight:900;">M</div><div style="font-size:10px;font-weight:800;">Media</div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></div><div style="font-size:10px;font-weight:850;">Media</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
-      <div style="font-size:18px;font-weight:900;">...</div><div style="font-size:10px;font-weight:800;">More</div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+      <div style="font-size:20px;font-weight:900;line-height:1;">...</div><div style="font-size:10px;font-weight:850;">More</div>
     </div>
   </div>
 
