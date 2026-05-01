@@ -96,3 +96,15 @@ Turn the proof into a live sidecar flow:
 
 The first live version can be intentionally simple. It should prioritize colour fidelity, readable icons, and a stable direct path over full LaraPaper feature parity.
 
+## Plugin Compatibility Requirement
+
+The sidecar must not become a private hardcoded dashboard.
+
+Before it becomes the normal live path, it must honor the HA dashboard plugin contract:
+
+- configuration fields in `plugins/trmnl-ha-dashboard/settings.yml`
+- sidecar field schema in `plugins/trmnl-ha-dashboard/fields.schema.json`
+- payload shape in `plugins/trmnl-ha-dashboard/payload.example.json`
+- install and configuration docs in `plugins/trmnl-ha-dashboard/README.md`
+
+If the sidecar cannot support one of those plugin/recipe expectations, document the blocker and the fallback in the plugin README before shipping it.

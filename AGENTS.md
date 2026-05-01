@@ -29,6 +29,7 @@ Maintain a Home Assistant-orchestrated e-paper display system that uses:
 5. Secrets stay out of git. Use examples and placeholders only.
 6. ACeP colour output is required. Treat accidental grayscale, 1-bit output, or regression back to LaraPaper's limited colour buckets as a bug.
 7. The physical screen is a Pimoroni Inky Impression 7.3 / Spectra-class colour panel driven as `EP73_SPECTRA_800x480`, not a standard black-and-white TRMNL panel.
+8. Plugin/recipe portability is mandatory. Sidecar rendering must not turn a shareable plugin into a private hardcoded screen unless a documented exception explains why.
 
 ## Managed Surfaces
 
@@ -144,11 +145,25 @@ Key rules:
 - test direct hardware refreshes with `show_img.bin` before routing through BYOS
 - do not move state orchestration or mode decisions into the Pi
 
+## Plugin Packaging Contract
+
+The mandatory plugin/recipe portability rules are documented in `docs/PLUGIN_RECIPE_CONTRACT.md`.
+
+Every user-facing screen should include:
+
+- `settings.yml`
+- `README.md`
+- `full.liquid` or a documented equivalent
+- `payload.example.json`
+- `fields.schema.json`
+
+When adding a sidecar-only capability, update the plugin fields and payload docs at the same time. Do not hardcode local entity IDs, labels, URLs, or room names into reusable plugin logic.
+
 ## Documentation Expectations
 
 Any non-trivial change should update the relevant docs:
 
-- architecture, hardware, or workflow: `README.md`, `docs/HARDWARE.md`, `docs/SOURCE_OF_TRUTH.md`, `docs/ROBUST_BYOS_FLOW.md`, `docs/COLOUR_SIDECAR_PATH.md`
+- architecture, hardware, or workflow: `README.md`, `docs/HARDWARE.md`, `docs/SOURCE_OF_TRUTH.md`, `docs/ROBUST_BYOS_FLOW.md`, `docs/COLOUR_SIDECAR_PATH.md`, `docs/PLUGIN_RECIPE_CONTRACT.md`
 - deployment paths or commands: `docs/DEPLOYMENT.md`
 - live operations or incident response: `docs/OPERATIONS.md`
 - historical/project notes: `docs/TRMNL_PROGRESS_REPORT.md` or `docs/TRMNL_PROJECT_PLAN.md`

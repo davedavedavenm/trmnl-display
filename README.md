@@ -64,6 +64,8 @@ See [Robust BYOS Flow](docs/ROBUST_BYOS_FLOW.md) for the target operating model 
 
 See [Colour Sidecar Path](docs/COLOUR_SIDECAR_PATH.md) for the accepted direction for rich colour dashboard rendering.
 
+See [Plugin And Recipe Contract](docs/PLUGIN_RECIPE_CONTRACT.md) for the mandatory rule that sidecar-rendered screens must still expose normal plugin fields, payloads, and shareable recipe structure.
+
 See [Hardware Inventory](docs/HARDWARE.md) for the live hardware scan and colour panel identification.
 
 ## Deployment
