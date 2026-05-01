@@ -86,6 +86,39 @@ If the proof of concept clearly improves colour, the preferred long-term options
 - pilot Terminus as a replacement BYOS server
 - extend LaraPaper's renderer to use an explicit Inky/Spectra palette remap
 
+## Quick Proof
+
+The first proof script is `scripts/render_colour_dashboard.py`.
+
+It generates:
+
+- `scripts/tmp/sidecar_colour_dashboard_source.png` as the RGB source render
+- `scripts/tmp/sidecar_colour_dashboard.png` as the indexed seven-colour panel render
+
+The output uses the full test palette:
+
+- black
+- white
+- red
+- yellow
+- blue
+- green
+- orange
+
+Hardware test command used on `trmnl-pi`:
+
+```sh
+/usr/local/bin/show_img.bin file=/tmp/sidecar_colour_dashboard.png invert=false mode=full
+```
+
+Result:
+
+- `image specs: 800 x 480, 8-bpp`
+- `Preparing image for EPD as 4-bpp`
+- `Refresh complete`
+
+This confirms the physical Pi/panel path can accept a richer indexed colour image than LaraPaper's current generated dashboard output.
+
 ## Acceptance Criteria
 
 A colour pipeline is better than the current LaraPaper path only if:
@@ -95,4 +128,3 @@ A colour pipeline is better than the current LaraPaper path only if:
 - text remains high contrast at e-ink scale
 - the Pi logs still show successful `800 x 480, 4-bpp` refreshes
 - the generated image is stored or reproducible from this repo
-
