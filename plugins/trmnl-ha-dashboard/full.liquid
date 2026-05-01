@@ -97,32 +97,32 @@
       </div>
     {% endfor %}
 
-    <div class="card" style="background:{% if home.door_locked %}#E8EEF3{% else %}#FF0000{% endif %};color:{% if home.door_locked %}#111{% else %}#fff{% endif %};">
+    <div class="card" style="background:{% if home.door_locked %}#0000FF{% else %}#FF0000{% endif %};color:#fff;">
       <div style="height:9px;background:#0000FF;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="label" style="color:{% if home.door_locked %}#273d31{% else %}#fff{% endif %};">Front Door</div>
-          <div class="icon"><svg viewBox="0 0 24 24" style="stroke:{% if home.door_locked %}#111{% else %}#fff{% endif %};"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+          <div class="label" style="color:#fff;">Front Door</div>
+          <div class="icon"><svg viewBox="0 0 24 24" style="stroke:#fff;"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
         </div>
-        <div class="value" style="color:{% if home.door_locked %}#000{% else %}#fff{% endif %};">{% if home.door_locked %}Locked{% else %}Open{% endif %}</div>
-        <div class="sub" style="color:{% if home.door_locked %}#333{% else %}#fff{% endif %};">Security</div>
+        <div class="value" style="color:#fff;">{% if home.door_locked %}Locked{% else %}Open{% endif %}</div>
+        <div class="sub" style="color:#fff;">Security</div>
       </div>
     </div>
 
-    <div class="card" style="background:#FFD9D0;">
-      <div style="height:9px;background:#FF0000;"></div>
+    <div class="card" style="background:#FF0000;color:#fff;">
+      <div style="height:9px;background:#492400;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="label">Thermostat</div>
-          <div class="icon"><svg viewBox="0 0 24 24"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 8v8"/></svg></div>
+          <div class="label" style="color:#fff;">Thermostat</div>
+          <div class="icon"><svg viewBox="0 0 24 24" style="stroke:#fff;"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 8v8"/></svg></div>
         </div>
-        <div class="value">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}C{% else %}--{% endif %}</div>
-        <div class="sub">Lounge temp</div>
+        <div class="value" style="color:#fff;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}C{% else %}--{% endif %}</div>
+        <div class="sub" style="color:#fff;">Lounge temp</div>
       </div>
     </div>
 
-    <div class="card" style="background:{% if home.washer_running %}#FFA500{% else %}#F1F1EC{% endif %};">
-      <div style="height:9px;background:#FFA500;"></div>
+    <div class="card" style="background:#FFA500;">
+      <div style="height:9px;background:#492400;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div class="label">Washer</div>
@@ -133,8 +133,8 @@
       </div>
     </div>
 
-    <div class="card" style="background:{% if home.blinds_open %}#DDEAD8{% else %}#F1F1EC{% endif %};">
-      <div style="height:9px;background:#00FF00;"></div>
+    <div class="card" style="background:#00FF00;">
+      <div style="height:9px;background:#496D49;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div class="label">Blinds</div>
@@ -145,7 +145,7 @@
       </div>
     </div>
 
-    <div class="card" style="grid-column:span 2;background:{% if active_sonos %}#FFF7CC{% else %}#F1F1EC{% endif %};">
+    <div class="card" style="grid-column:span 2;background:#FFFF00;">
       <div style="height:9px;background:#FFFF00;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:grid;grid-template-columns:1fr 56px;gap:10px;align-items:center;">
         <div style="min-width:0;">

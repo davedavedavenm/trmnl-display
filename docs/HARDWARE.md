@@ -129,6 +129,8 @@ LaraPaper live DB record, queried from `khpi5`:
 
 This LaraPaper model is the correct live BYOD profile for the colour screen.
 
+Generated PNGs for this model are quantized by LaraPaper into six panel colour buckets. In live samples those buckets appear as white, black, blue, green/olive, yellow/ochre, and brown/red-orange. CSS colours such as bright red or orange may map into the brown/red-orange bucket rather than staying visually separate.
+
 ## Inconclusive Evidence
 
 The I2C scan found a device at `0x50`, consistent with a HAT EEPROM address, but the EEPROM did not expose a useful text identity during the scan. Hardware identification should therefore rely on the active Pi config, `bb_epaper` panel constant, successful refresh logs, LaraPaper model, and physical visual verification.

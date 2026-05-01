@@ -1,7 +1,7 @@
 name: HA Dashboard
-description: A Pimoroni Inky Impression Spectra 7.3" colour e-ink dashboard for Home Assistant. Icon-led compact card grid with semantic colour surfaces for the Spectra e-paper panel.
+description: A Pimoroni Inky Impression Spectra 7.3" colour e-ink dashboard for Home Assistant. Icon-led compact card grid with broad semantic colour surfaces across the Spectra e-paper palette.
 author: David
-version: 2.7.0
+version: 2.8.0
 no_screen_padding: 'yes'
 dark_mode: 'no'
 strategy: webhook
