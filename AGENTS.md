@@ -149,7 +149,9 @@ Key rules:
 
 The mandatory plugin/recipe portability rules are documented in `docs/PLUGIN_RECIPE_CONTRACT.md`.
 
-Every user-facing screen should include:
+Every user-facing screen must remain installable/configurable like a normal TRMNL/LaraPaper plugin or recipe unless a README section documents why that is technically impossible. The colour sidecar is an implementation detail for better panel output; it must not be the only place where user configuration lives.
+
+Every user-facing screen should include these files:
 
 - `settings.yml`
 - `README.md`
@@ -157,7 +159,28 @@ Every user-facing screen should include:
 - `payload.example.json`
 - `fields.schema.json`
 
-When adding a sidecar-only capability, update the plugin fields and payload docs at the same time. Do not hardcode local entity IDs, labels, URLs, or room names into reusable plugin logic.
+`settings.yml` must expose user-editable fields rather than hardcoding this house. For Home Assistant dashboards, expected fields include:
+
+- dashboard title and instance label
+- layout variant
+- colour profile or renderer profile
+- Home Assistant URL
+- Home Assistant token as a password field only
+- weather, person, media player, door/lock, washer, blind/cover, and thermostat/temperature entity IDs
+- refresh interval when the platform supports it
+
+`payload.example.json` must use TRMNL's `merge_variables` wrapper and show the shape consumed by both Liquid and sidecar renderers. Document required and optional merge variables in the plugin README.
+
+`fields.schema.json` is the sidecar/automation contract. It must stay aligned with `settings.yml`; if a field is added, renamed, or removed in one, update the other in the same change.
+
+When adding a sidecar-only capability, update the plugin fields, payload example, schema, and README at the same time. The sidecar must consume the plugin contract or a direct derivative of it. Do not hardcode local entity IDs, labels, URLs, room names, or private assumptions into reusable plugin logic.
+
+If an official TRMNL/LaraPaper guideline cannot be followed, add an explicit exception section to that plugin README with:
+
+- the guideline or expectation that cannot be met
+- why it cannot be met
+- what compatibility layer remains
+- what would be needed to remove the exception
 
 ## Documentation Expectations
 
