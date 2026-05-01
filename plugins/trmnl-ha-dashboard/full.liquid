@@ -41,57 +41,72 @@
   </div>
 
   <div style="height:82px;display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px;margin-top:10px;">
-    <div style="background:#fff0bf;border:1px solid #777777;border-radius:6px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;">
+    <div style="background:#FFFF00;border:1px solid #777777;border-radius:6px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;">
       <div style="width:44px;height:44px;border-radius:50%;background:#ffd43b;border:2px solid #111111;"></div>
       <div>
         <div style="font-size:24px;font-weight:800;line-height:1;">{{ weather.temperature | round: 1 }}C</div>
         <div style="font-size:12px;font-weight:700;margin-top:4px;">{{ weather.condition_label }}</div>
       </div>
     </div>
-    <div style="background:#dcecf2;border:1px solid #777777;border-radius:6px;padding:12px 14px;">
-      <div style="font-size:11px;font-weight:900;text-transform:uppercase;color:#2d5865;">Humidity</div>
+    <div style="background:#0000FF;color:#ffffff;border:1px solid #777777;border-radius:6px;padding:12px 14px;">
+      <div style="font-size:11px;font-weight:900;text-transform:uppercase;color:#ffffff;">Humidity</div>
       <div style="font-size:28px;font-weight:800;line-height:1.1;margin-top:8px;">{{ weather.humidity }}%</div>
     </div>
-    <div style="background:#e4ead8;border:1px solid #777777;border-radius:6px;padding:12px 14px;">
-      <div style="font-size:11px;font-weight:900;text-transform:uppercase;color:#465b3c;">Wind</div>
+    <div style="background:#00FF00;border:1px solid #777777;border-radius:6px;padding:12px 14px;">
+      <div style="font-size:11px;font-weight:900;text-transform:uppercase;color:#000000;">Wind</div>
       <div style="font-size:28px;font-weight:800;line-height:1.1;margin-top:8px;">{{ weather.wind_speed | round }} km/h</div>
     </div>
   </div>
 
   <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:10px;margin-top:10px;min-height:0;">
     {% for person in people limit:2 %}
-      <div style="background:{% if person.state == 'home' %}#fff0bf{% else %}#f1d1c9{% endif %};border:1px solid #777777;border-radius:6px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:900;">{{ person.name }}</div>
-        <div style="font-size:28px;font-weight:800;line-height:1;">{% if person.state == 'home' %}Home{% else %}Away{% endif %}</div>
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Presence</div>
+      <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
+        <div style="background:{% if forloop.index == 1 %}#FFFF00{% else %}#00FF00{% endif %};"></div>
+        <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:900;">{{ person.name }}</div>
+          <div style="font-size:28px;font-weight:800;line-height:1;">{% if person.state == 'home' %}Home{% else %}Away{% endif %}</div>
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Presence</div>
+        </div>
       </div>
     {% endfor %}
 
-    <div style="background:{% if home.door_locked %}#eeeeee{% else %}#f1d1c9{% endif %};border:1px solid #777777;border-radius:6px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-      <div style="font-size:13px;font-weight:900;">Front Door</div>
-      <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.door_locked %}Locked{% else %}Open{% endif %}</div>
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Security</div>
+    <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
+      <div style="background:{% if home.door_locked %}#0000FF{% else %}#FF0000{% endif %};"></div>
+      <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:900;">Front Door</div>
+        <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.door_locked %}Locked{% else %}Open{% endif %}</div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Security</div>
+      </div>
     </div>
 
-    <div style="background:#f1d1c9;border:1px solid #777777;border-radius:6px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-      <div style="font-size:13px;font-weight:900;">Thermostat</div>
-      <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}C{% else %}--{% endif %}</div>
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Lounge temp</div>
+    <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
+      <div style="background:#FF0000;"></div>
+      <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:900;">Thermostat</div>
+        <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}C{% else %}--{% endif %}</div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Lounge temp</div>
+      </div>
     </div>
 
-    <div style="background:{% if home.washer_running %}#ffd9a3{% else %}#eeeeee{% endif %};border:1px solid #777777;border-radius:6px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-      <div style="font-size:13px;font-weight:900;">Washer</div>
-      <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.washer_running %}Running{% else %}Off{% endif %}</div>
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Utility</div>
+    <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
+      <div style="background:#FFA500;"></div>
+      <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:900;">Washer</div>
+        <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.washer_running %}Running{% else %}Off{% endif %}</div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Utility</div>
+      </div>
     </div>
 
-    <div style="background:{% if home.blinds_open %}#e4ead8{% else %}#eeeeee{% endif %};border:1px solid #777777;border-radius:6px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
-      <div style="font-size:13px;font-weight:900;">Blinds</div>
-      <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% elsif home.blinds_open %}Open{% else %}Closed{% endif %}</div>
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Position</div>
+    <div style="background:#ffffff;border:1px solid #777777;border-radius:6px;display:grid;grid-template-columns:38px 1fr;overflow:hidden;">
+      <div style="background:#00FF00;"></div>
+      <div style="padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="font-size:13px;font-weight:900;">Blinds</div>
+        <div style="font-size:28px;font-weight:800;line-height:1;">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% elsif home.blinds_open %}Open{% else %}Closed{% endif %}</div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:#555555;">Position</div>
+      </div>
     </div>
 
-    <div style="grid-column:span 2;background:{% if active_sonos %}#fff0bf{% else %}#eeeeee{% endif %};border:1px solid #777777;border-radius:6px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;">
+    <div style="grid-column:span 2;background:#ffffff;border:1px solid #777777;border-radius:6px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border-left:38px solid #FFFF00;">
       <div style="min-width:0;">
         <div style="font-size:13px;font-weight:900;">Sonos</div>
         {% if active_sonos %}

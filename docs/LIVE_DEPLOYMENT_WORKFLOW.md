@@ -24,7 +24,7 @@ For any change that affects a TRMNL plugin, LaraPaper webhook flow, companion sc
 1. Make and test the code change locally.
 2. Push or copy the relevant change to `khpi5`.
 3. Run the server-side script or refresh path on `khpi5`.
-4. Confirm LaraPaper generated a fresh image and inspect the preview/PNG visually.
+4. Confirm LaraPaper generated a fresh image, inspect the preview/PNG visually, and check that the generated image uses the intended panel colours.
 5. Confirm the Pi client pulled that image.
 6. Confirm the physical display matches the intended result.
 
@@ -34,6 +34,18 @@ For any change that affects a TRMNL plugin, LaraPaper webhook flow, companion sc
 - Gate C: `trmnl-display` pulls the new image successfully
 - Gate D: the physical panel updates correctly
 - Gate E: unrelated recipes still render cleanly
+
+## Render Review
+
+After a display design change, review the generated PNG before calling the work done:
+
+1. Confirm the generated PNG is `800x480`.
+2. Inspect the generated PNG visually, not only the Liquid/CSS source.
+3. Sample the generated PNG colour buckets and confirm the output did not collapse to black/white or one dominant colour.
+4. Rate the result against the user-facing goal, for example "compact Home Assistant card UI" versus "colour test pattern".
+5. Only then force or wait for the Pi refresh and check the `trmnl-display.service` logs.
+
+The visual review matters because LaraPaper and the e-paper conversion path quantize colours. CSS that looks varied in source can still render as mostly white/green on the actual generated PNG.
 
 ## Colour Rule
 For the current 7.3" panel, the target is full ACeP palette usage, not grayscale fallback.
@@ -138,7 +150,7 @@ fastcgi_param  HTTPS $https_flag;
 | `http://192.168.1.143:4567` | Direct LAN access (Pi Zero device fetches from here) |
 | `https://trmnl.magnusfamily.co.uk` | External access via Pangolin proxy (web UI, mobile) |
 
-**Note:** The dashboard at `http://192.168.1.143:4567/dashboard` will render without CSS/JS if accessed via the local IP because `APP_URL` is set to the external domain. This is expected behaviour — always use `https://trmnl.magnusfamily.co.uk/dashboard` for the web UI, or remove `APP_URL` if you need both to work equally.
+**Note:** The proxied hostname and the LAN IP are separate browser origins. A session cookie for `https://trmnl.magnusfamily.co.uk` does not authenticate `http://192.168.1.143:4567`. If the LAN `/dashboard` appears not to load, first check whether it has redirected to `/login` and sign in separately on the LAN origin. Current live checks show the LAN asset URLs under `/build/assets/` return `200`; the LAN UI is not expected to inherit the proxied session.
 
 ### Physical Device Fetch Path
 

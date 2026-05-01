@@ -55,6 +55,25 @@ Current jobs:
 
 ## Common Incidents
 
+### LaraPaper dashboard works through proxy but not local IP
+
+The proxied UI and LAN UI are different browser origins:
+
+- proxy: `https://trmnl.magnusfamily.co.uk`
+- LAN: `http://192.168.1.143:4567`
+
+If `/dashboard` on the LAN IP redirects to `/login`, that is expected for an unauthenticated LAN session. Sign in separately on the LAN origin, or use the proxied URL for routine web UI work.
+
+Quick checks:
+
+```bash
+curl -I -L http://192.168.1.143:4567/dashboard
+curl -I http://192.168.1.143:4567/build/assets/app-D97lLgKN.css
+ssh khpi5 "cd /home/dave/larapaper && docker compose exec -T app printenv | grep -E '^(APP_URL|ASSET_URL|APP_TRUSTED_PROXIES)='"
+```
+
+The live deployment intentionally keeps `APP_URL=https://trmnl.magnusfamily.co.uk` for canonical external links while the Pi still polls the LAN API.
+
 ### Display does not update
 
 Check the Pi service first:
