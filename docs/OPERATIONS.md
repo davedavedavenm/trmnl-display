@@ -42,6 +42,8 @@ ssh home-assistant "grep -RIn 'trmnl' /config/packages | head -120"
 5. `trmnl-pi` polls `http://192.168.1.143:4567/api/display`.
 6. The Pi downloads the generated PNG and displays it with `show_img.bin`.
 
+For colour-critical dashboard work, use the sidecar path in `docs/COLOUR_SIDECAR_PATH.md`. LaraPaper can remain the BYOS management layer, but the accepted colour-dashboard renderer is repo-owned and must emit an indexed/paletted `800x480` PNG.
+
 ## Cron Jobs
 
 The TRMNL-specific `khpi5` cron entries are recorded in `deploy/khpi5/trmnl-crontab.txt`.
@@ -90,9 +92,32 @@ ssh trmnl-pi "journalctl -u trmnl-display.service --no-pager -n 120"
 Expected success lines include:
 
 - `image specs: 800 x 480, 4-bpp`
+- for indexed sidecar proofs: `image specs: 800 x 480, 8-bpp` followed by `Preparing image for EPD as 4-bpp`
 - `Writing data to EPD...`
 - `Refresh complete`
 - `Cycle complete, sleeping 600s...`
+
+### Direct colour sidecar proof
+
+Use this only while iterating on colour output. It bypasses LaraPaper for one physical refresh and stops the polling service so the test image is not immediately overwritten.
+
+```bash
+python scripts/render_colour_dashboard.py
+scp scripts/tmp/sidecar_colour_dashboard.png trmnl-pi:/tmp/sidecar_colour_dashboard.png
+ssh trmnl-pi "sudo systemctl stop trmnl-display.service && /usr/local/bin/show_img.bin file=/tmp/sidecar_colour_dashboard.png invert=false mode=full"
+```
+
+Expected success lines:
+
+- `image specs: 800 x 480, 8-bpp`
+- `Preparing image for EPD as 4-bpp`
+- `Refresh complete`
+
+Restart the normal polling client when ready to return to LaraPaper/BYOS polling:
+
+```bash
+ssh trmnl-pi "sudo systemctl start trmnl-display.service"
+```
 
 ### LaraPaper is generating black and white images
 

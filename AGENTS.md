@@ -6,7 +6,8 @@ This repo is the source of truth for the live TRMNL/LaraPaper BYOS display stack
 
 Maintain a Home Assistant-orchestrated e-paper display system that uses:
 
-- LaraPaper as the local TRMNL BYOS server and renderer on `khpi5`
+- LaraPaper as the local TRMNL BYOS management server on `khpi5`
+- a repo-owned indexed colour renderer for colour-critical dashboards
 - a Pi Zero as a thin TRMNL display client on `trmnl-pi`
 - Home Assistant as the orchestration layer
 - GitHub `main` as the durable source of truth
@@ -21,12 +22,12 @@ Maintain a Home Assistant-orchestrated e-paper display system that uses:
 
 ## Non-Negotiable Architecture Rules
 
-1. LaraPaper renders. Do not move rendering responsibility to Home Assistant or the Pi.
+1. Colour-critical dashboards use the repo-owned indexed colour renderer path. LaraPaper remains the BYOS management layer unless explicitly replaced.
 2. The Pi is a thin client. It polls `/api/display`, downloads the returned image, and writes it to the panel.
 3. Home Assistant orchestrates. It chooses modes and pushes payloads, but should not contain display layout logic.
 4. GitHub is source of truth. Any live edit must be copied back, reviewed, committed, and pushed.
 5. Secrets stay out of git. Use examples and placeholders only.
-6. ACeP colour output is required. Treat accidental grayscale or 1-bit output as a regression.
+6. ACeP colour output is required. Treat accidental grayscale, 1-bit output, or regression back to LaraPaper's limited colour buckets as a bug.
 7. The physical screen is a Pimoroni Inky Impression 7.3 / Spectra-class colour panel driven as `EP73_SPECTRA_800x480`, not a standard black-and-white TRMNL panel.
 
 ## Managed Surfaces
@@ -39,6 +40,7 @@ Use `docs/SOURCE_OF_TRUTH.md` as the canonical mapping. Common paths:
 - `config/trmnl/` - Pi display config examples
 - `deploy/` - Docker Compose, systemd units, cron entries, host environment examples
 - `docs/` - operating model, deployment workflow, and plans
+- `scripts/render_colour_dashboard.py` - first proven sidecar colour renderer
 
 ## Correct Change Flow
 
@@ -49,7 +51,7 @@ For normal work:
 3. Run local checks.
 4. Deploy the changed files to the relevant host.
 5. Reload/restart only the affected service.
-6. Verify the generated LaraPaper image and Pi display logs.
+6. Verify the generated image and Pi display logs. For colour sidecar work, visually inspect the generated PNG and confirm direct hardware output before wiring into BYOS polling.
 7. Commit and push to GitHub.
 
 For urgent live fixes:
@@ -92,6 +94,7 @@ ssh trmnl-pi "journalctl -u trmnl-display.service --no-pager -n 80"
 Expected successful Pi render signs:
 
 - `image specs: 800 x 480, 4-bpp`
+- or, for indexed sidecar PNG proofs, `image specs: 800 x 480, 8-bpp` followed by `Preparing image for EPD as 4-bpp`
 - `Writing data to EPD...`
 - `Refresh complete`
 - `Cycle complete, sleeping 600s...`
@@ -113,6 +116,8 @@ The display client uses the TRMNL BYOS polling pattern:
 
 The repo must preserve compatibility with LaraPaper's implementation of that contract.
 
+For colour-critical screens, the image pointed to by the BYOS response may come from a sidecar renderer or LaraPaper handoff, as long as the Pi remains a thin BYOS client and the generated image is reproducible from this repo.
+
 ## Hardware Contract
 
 The live hardware identity is documented in `docs/HARDWARE.md`. Key facts agents must preserve:
@@ -122,14 +127,28 @@ The live hardware identity is documented in `docs/HARDWARE.md`. Key facts agents
 - Display config: `adapter=pimoroni`, `panel_1bit=EP73_SPECTRA_800x480`
 - LaraPaper model: `inky_impression_7_3`, `800x480`, palette ID `10`, bit depth `3`
 - Expected Pi logs: `800 x 480, 4-bpp`, then `Refresh complete`
+- Sidecar proof logs: `800 x 480, 8-bpp`, `Preparing image for EPD as 4-bpp`, then `Refresh complete`
 
 Do not "fix" this stack toward the common monochrome TRMNL assumptions. The live device is colour-capable and must remain treated that way.
+
+## Colour Sidecar Contract
+
+The accepted path forward for the Home Assistant dashboard is documented in `docs/COLOUR_SIDECAR_PATH.md`.
+
+Key rules:
+
+- render exactly `800x480`
+- output an indexed/paletted PNG for the panel
+- use a deliberate seven-colour palette instead of incidental CSS quantization
+- keep text and icon outlines black for legibility
+- test direct hardware refreshes with `show_img.bin` before routing through BYOS
+- do not move state orchestration or mode decisions into the Pi
 
 ## Documentation Expectations
 
 Any non-trivial change should update the relevant docs:
 
-- architecture, hardware, or workflow: `README.md`, `docs/HARDWARE.md`, `docs/SOURCE_OF_TRUTH.md`, `docs/ROBUST_BYOS_FLOW.md`
+- architecture, hardware, or workflow: `README.md`, `docs/HARDWARE.md`, `docs/SOURCE_OF_TRUTH.md`, `docs/ROBUST_BYOS_FLOW.md`, `docs/COLOUR_SIDECAR_PATH.md`
 - deployment paths or commands: `docs/DEPLOYMENT.md`
 - live operations or incident response: `docs/OPERATIONS.md`
 - historical/project notes: `docs/TRMNL_PROGRESS_REPORT.md` or `docs/TRMNL_PROJECT_PLAN.md`

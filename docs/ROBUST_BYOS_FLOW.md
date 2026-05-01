@@ -53,6 +53,8 @@ Not responsible for:
 
 Allowed when LaraPaper's renderer cannot preserve the colour range of the live panel.
 
+The accepted path forward for the Home Assistant dashboard is documented in `docs/COLOUR_SIDECAR_PATH.md`.
+
 Responsible for:
 
 - rendering the target dashboard at `800x480`

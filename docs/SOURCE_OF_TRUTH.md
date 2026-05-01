@@ -14,6 +14,8 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | `/home/dave/bin/trmnl-set-display-mode` | `scripts/trmnl_set_display_mode.sh` |
 | `/home/dave/trmnl-calendar/main.py` | `scripts/trmnl_calendar_multi.py` |
 | `/home/dave/trmnl_ha_dashboard.py` | `scripts/trmnl_ha_dashboard.py` |
+| colour dashboard sidecar renderer | `scripts/render_colour_dashboard.py` |
+| generated sidecar proof image on `trmnl-pi` | generated from `scripts/render_colour_dashboard.py`; do not hand-edit |
 | `/home/dave/trmnl-sonos-local.py` | `scripts/trmnl_sonos_local.py` |
 | `/home/dave/run_trmnl_sonos.sh` | `scripts/run_trmnl_sonos.sh` |
 | `/home/dave/bin/trmnl-display-shell.sh` on `trmnl-pi` | `scripts/trmnl-display-shell.sh` |
@@ -95,3 +97,4 @@ Current hardware identity:
 - Pimoroni Inky Impression 7.3 / Spectra-class colour panel
 - Pi `show_img` panel config: `EP73_SPECTRA_800x480`
 - LaraPaper model: `inky_impression_7_3`, `800x480`, palette ID `10`
+- Colour dashboard path: repo-owned indexed seven-colour sidecar renderer, documented in `docs/COLOUR_SIDECAR_PATH.md`
