@@ -2,6 +2,7 @@
 
 ## 2026-05-02
 
+- Added a playlist-safe HA sidecar updater that refreshes the LaraPaper plugin image without activating playlists or overriding the device current image, and documented the dynamic card-slot roadmap.
 - Reworked the HA colour sidecar grid to hide visible light cards, combine climate and humidity into one indoor card, and use the freed space for a wider home-status row.
 - Refined the HA colour sidecar layout to remove the top bar, bottom navigation, and energy card, group people into one presence card, and dedicate the lower-right card to media.
 - Updated the HA dashboard plugin contract, payload example, and docs so navigation and energy are no longer advertised as active fields in the current `compact_grid` sidecar layout.

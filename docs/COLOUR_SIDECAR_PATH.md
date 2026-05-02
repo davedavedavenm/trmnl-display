@@ -80,7 +80,7 @@ This proves the physical Pi and panel can accept richer colour than the current 
 flowchart LR
   HA["Home Assistant\nstate + mode intent"] --> Renderer["Colour renderer\nrepo-owned 800x480 indexed PNG"]
   Renderer --> Image["Panel-ready image\n7-colour indexed PNG"]
-  Image --> Handoff["Sidecar image handoff\nLaraPaper generated-image storage"]
+  Image --> Handoff["Playlist-safe plugin image update\nLaraPaper generated-image storage"]
   Handoff --> LaraPaper["LaraPaper\nplugins + playlists + /api/display"]
   LaraPaper --> Pi["trmnl-pi\nthin display client"]
   Pi --> Panel["Inky Impression 7.3\nEP73_SPECTRA_800x480"]
@@ -114,10 +114,15 @@ Turn the proof into a live sidecar flow:
 - fetch real Home Assistant state
 - render the accepted dashboard layout
 - emit an indexed seven-colour PNG
-- install it into LaraPaper's generated-image storage during `ha_dashboard` mode activation
+- install it into LaraPaper's generated-image storage as the Home Assistant plugin's current image
 - keep the Pi polling LaraPaper's normal BYOS `/api/display` endpoint
 
-The first live version is intentionally simple. `scripts/trmnl_set_display_mode.sh` activates the normal LaraPaper HA dashboard playlist, then hands off the repo-rendered sidecar PNG by copying it into LaraPaper's generated-image storage and updating LaraPaper's current image pointer for that plugin/device. LaraPaper remains the BYOS server and rollback is selecting another mode or disabling the handoff environment.
+The current live path has two separate operations:
+
+- `scripts/trmnl_update_ha_sidecar_image.sh` is the routine playlist-safe update path. It copies the repo-rendered sidecar PNG into LaraPaper's generated-image storage and updates the `Home Assistant` plugin's `current_image`. It does not activate playlists and does not update the device's current image directly.
+- `scripts/trmnl_set_display_mode.sh ha_dashboard` is the manual mode activation path. It activates the HA-only playlist and may update the device image pointer as part of an explicit test or mode switch.
+
+LaraPaper remains the BYOS server. The Pi still only polls `/api/display`; it does not know about Home Assistant, playlists, or sidecar rendering.
 
 Local render command:
 
@@ -140,9 +145,12 @@ If the sidecar cannot support one of those plugin/recipe expectations, document 
 
 Current status: the sidecar renderer consumes the same `merge_variables` payload shape as the plugin and preserves the accepted proof style. `scripts/trmnl_ha_dashboard.py` writes the live sidecar payload via `TRMNL_SIDECAR_PAYLOAD_PATH`, the `khpi5` cron renders the indexed PNG, and `scripts/trmnl_set_display_mode.sh` hands the image to LaraPaper when `ha_dashboard` is active.
 
-Sidecar handoff test command on `khpi5`:
+Playlist-safe sidecar update command on `khpi5`:
 
 ```sh
-/home/dave/bin/trmnl-set-display-mode ha_dashboard
+cd /home/dave
+python3 /home/dave/trmnl_ha_dashboard.py
+python3 /home/dave/render_colour_dashboard.py --payload /home/dave/trmnl-ha-dashboard-payload.json --output /home/dave/sidecar_colour_dashboard_next.png --source-output /home/dave/sidecar_colour_dashboard_source_next.png
+/home/dave/bin/trmnl-update-ha-sidecar-image
 curl -fsS http://127.0.0.1:4567/storage/images/generated/sidecar_colour_dashboard_next.png -o /tmp/ha-dashboard.png
 ```

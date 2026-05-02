@@ -24,7 +24,8 @@ The sidecar exists to preserve the accepted colour proof style on the live Spect
 1. Import the `settings.yml` and `full.liquid` into your TRMNL / LaraPaper instance as a new custom plugin.
 2. Note your newly generated Webhook URL.
 3. Configure the Python sync script (`trmnl_ha_dashboard.py`) with your `HA_URL`, `HA_TOKEN`, and `TRMNL_WEBHOOK_URL`.
-4. Run the script via cron or a Home Assistant automation to push state updates to the display.
+4. Run the script via cron or a Home Assistant automation to push state updates to LaraPaper.
+5. For colour panels, run the sidecar renderer and `trmnl-update-ha-sidecar-image` after payload updates so the plugin image is refreshed without changing LaraPaper playlist state.
 
 ## Configuration Fields
 
@@ -116,6 +117,10 @@ The companion script can also write the exact live webhook payload for sidecar r
 
 The fields `ha_url` and `ha_token` configure the companion sync source. LaraPaper does not fetch Home Assistant directly in this webhook recipe.
 
+The companion flow currently pulls Home Assistant state from the HA REST API, posts the resulting `merge_variables` payload to the LaraPaper webhook, and writes the same payload to disk for sidecar rendering. LaraPaper serves the finished image through its normal playlist and BYOS paths.
+
+Routine sidecar refreshes should use `scripts/trmnl_update_ha_sidecar_image.sh`. That script updates this plugin's `current_image` only; it does not activate playlists. The plugin can therefore be placed in a normal LaraPaper playlist alongside other plugins. Manual testing can still use `trmnl-set-display-mode ha_dashboard` to switch to the HA-only mode playlist.
+
 Current supported renderer values:
 
 - `layout_variant`: `compact_grid` - no top bar, no bottom navigation, no visible lights, combined climate/humidity card, grouped people card, no energy card
@@ -158,3 +163,27 @@ When using `scripts/trmnl_ha_dashboard.py`, plugin fields map to environment var
 The Liquid template is intended to remain broadly TRMNL/LaraPaper compatible.
 
 The sidecar colour path is designed for the Pimoroni Inky Impression 7.3" / Spectra-class `800x480` colour panel. Other panels should use a different `colour_profile`.
+
+## Planned Slot Configuration
+
+The current `compact_grid` layout is configurable by entity and label, but its visible card positions are still fixed in the sidecar renderer. The next portability step is a slot contract that lets a plugin user choose visible cards without editing Python.
+
+Planned slot fields:
+
+- `slot_1_type`, `slot_1_entity`, `slot_1_label`
+- `slot_2_type`, `slot_2_entity`, `slot_2_label`
+- repeat for the supported card positions
+
+Planned card types:
+
+- `weather`
+- `indoor`
+- `person_group`
+- `media`
+- `door_lock`
+- `washer`
+- `cover`
+- `light_group`
+- `generic_entity`
+
+The sidecar renderer should keep today's layout as the default preset and map slots to safe, readable card templates.

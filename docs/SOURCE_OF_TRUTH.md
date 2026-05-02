@@ -12,10 +12,12 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | `/home/dave/larapaper/nginx/*` | `deploy/larapaper/nginx/` |
 | `/home/dave/bin/trmnl-mode-bridge.py` | `scripts/trmnl_mode_bridge.py` |
 | `/home/dave/bin/trmnl-set-display-mode` | `scripts/trmnl_set_display_mode.sh` |
+| `/home/dave/bin/trmnl-update-ha-sidecar-image` | `scripts/trmnl_update_ha_sidecar_image.sh` |
 | `/home/dave/trmnl-calendar/main.py` | `scripts/trmnl_calendar_multi.py` |
 | `/home/dave/trmnl_ha_dashboard.py` | `scripts/trmnl_ha_dashboard.py` |
 | colour dashboard sidecar renderer | `scripts/render_colour_dashboard.py` |
-| LaraPaper HA sidecar handoff logic | `scripts/trmnl_set_display_mode.sh` |
+| manual LaraPaper mode activation | `scripts/trmnl_set_display_mode.sh` |
+| playlist-safe LaraPaper HA sidecar plugin-image update | `scripts/trmnl_update_ha_sidecar_image.sh` |
 | accepted colour dashboard proof reference | `scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png` |
 | accepted colour dashboard source reference | `scripts/tmp/sidecar_colour_dashboard_source_proof_2026-05-01.png` |
 | `/home/dave/.env.trmnl-ha-dashboard` shape | `deploy/khpi5/trmnl-ha-dashboard.env.example` |
@@ -55,6 +57,7 @@ Use these to compare live files against the repo.
 ```bash
 scp khpi5:/home/dave/bin/trmnl-mode-bridge.py scripts/trmnl_mode_bridge.py
 scp khpi5:/home/dave/bin/trmnl-set-display-mode scripts/trmnl_set_display_mode.sh
+scp khpi5:/home/dave/bin/trmnl-update-ha-sidecar-image scripts/trmnl_update_ha_sidecar_image.sh
 scp khpi5:/home/dave/trmnl-calendar/main.py scripts/trmnl_calendar_multi.py
 scp khpi5:/home/dave/trmnl_ha_dashboard.py scripts/trmnl_ha_dashboard.py
 scp khpi5:/home/dave/trmnl-sonos-local.py scripts/trmnl_sonos_local.py

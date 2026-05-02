@@ -42,7 +42,9 @@ ssh home-assistant "grep -RIn 'trmnl' /config/packages | head -120"
 5. `trmnl-pi` polls `http://192.168.1.143:4567/api/display`.
 6. The Pi downloads the generated PNG and displays it with `show_img.bin`.
 
-For colour-critical dashboard work, use the sidecar path in `docs/COLOUR_SIDECAR_PATH.md`. LaraPaper remains the BYOS management layer; the accepted HA colour-dashboard renderer is repo-owned, emits an indexed/paletted `800x480` PNG, and is handed off through LaraPaper's generated-image storage when `ha_dashboard` is active.
+For colour-critical dashboard work, use the sidecar path in `docs/COLOUR_SIDECAR_PATH.md`. LaraPaper remains the BYOS management layer; the accepted HA colour-dashboard renderer is repo-owned, emits an indexed/paletted `800x480` PNG, and is handed off through LaraPaper's generated-image storage.
+
+Routine HA sidecar refreshes must be playlist-safe: update the Home Assistant plugin's `current_image`, but do not activate playlists or update the device's `current_screen_image`. Manual mode activation remains available through `trmnl-set-display-mode ha_dashboard` when testing or intentionally switching to the HA-only playlist.
 
 ## Cron Jobs
 
@@ -129,7 +131,17 @@ ssh trmnl-pi "sudo systemctl start trmnl-display.service"
 
 ### LaraPaper sidecar handoff
 
-The HA dashboard sidecar is served through LaraPaper, not a separate Pi endpoint. The handoff happens when `ha_dashboard` is activated:
+The HA dashboard sidecar is served through LaraPaper, not a separate Pi endpoint.
+
+Routine playlist-safe update:
+
+```bash
+ssh khpi5 "cd /home/dave && python3 /home/dave/trmnl_ha_dashboard.py && python3 /home/dave/render_colour_dashboard.py --payload /home/dave/trmnl-ha-dashboard-payload.json --output /home/dave/sidecar_colour_dashboard_next.png --source-output /home/dave/sidecar_colour_dashboard_source_next.png && /home/dave/bin/trmnl-update-ha-sidecar-image"
+```
+
+That command updates the `Home Assistant` plugin image in LaraPaper and leaves the active playlist untouched. If the plugin is part of any LaraPaper playlist, normal playlist rotation can serve the refreshed image.
+
+Manual HA-only mode activation:
 
 ```bash
 ssh khpi5 "/home/dave/bin/trmnl-set-display-mode ha_dashboard"
@@ -144,7 +156,7 @@ Expected Pi signs for the sidecar handoff:
 - `Preparing image for EPD as 4-bpp`
 - `Refresh complete`
 
-Rollback is mode-based:
+Rollback from manual HA-only mode is mode-based:
 
 ```bash
 ssh khpi5 "/home/dave/bin/trmnl-set-display-mode calendar"
