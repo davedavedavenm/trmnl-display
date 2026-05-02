@@ -1,0 +1,51 @@
+title: TRMNL HA Dashboard
+path: trmnl-ha-dashboard
+type: sections
+sections:
+  - type: grid
+    cards:
+      - type: entities
+        title: TRMNL Dashboard Refresh
+        entities:
+          - entity: input_button.trmnl_ha_dashboard_refresh
+          - entity: input_text.trmnl_ha_dashboard_generic_entities
+          - entity: input_text.trmnl_ha_dashboard_generic_labels
+          - entity: input_text.trmnl_ha_dashboard_generic_icons
+          - entity: input_text.trmnl_ha_dashboard_generic_status_colours
+      - type: entities
+        title: Top Cards
+        entities:
+          - entity: input_select.trmnl_ha_dashboard_top_left_card_type
+          - entity: input_text.trmnl_ha_dashboard_top_left_entity
+          - entity: input_text.trmnl_ha_dashboard_top_left_label
+          - entity: input_text.trmnl_ha_dashboard_top_left_detail_label
+          - entity: input_select.trmnl_ha_dashboard_top_right_card_type
+          - entity: input_text.trmnl_ha_dashboard_top_right_entity
+          - entity: input_text.trmnl_ha_dashboard_top_right_label
+          - entity: input_text.trmnl_ha_dashboard_top_right_detail_label
+      - type: entities
+        title: Status Row
+        entities:
+          - entity: input_select.trmnl_ha_dashboard_status_1_card_type
+          - entity: input_text.trmnl_ha_dashboard_status_1_entity
+          - entity: input_text.trmnl_ha_dashboard_status_1_label
+          - entity: input_text.trmnl_ha_dashboard_status_1_detail_label
+          - entity: input_select.trmnl_ha_dashboard_status_2_card_type
+          - entity: input_text.trmnl_ha_dashboard_status_2_entity
+          - entity: input_text.trmnl_ha_dashboard_status_2_label
+          - entity: input_text.trmnl_ha_dashboard_status_2_detail_label
+          - entity: input_select.trmnl_ha_dashboard_status_3_card_type
+          - entity: input_text.trmnl_ha_dashboard_status_3_entity
+          - entity: input_text.trmnl_ha_dashboard_status_3_label
+          - entity: input_text.trmnl_ha_dashboard_status_3_detail_label
+      - type: entities
+        title: Bottom Cards
+        entities:
+          - entity: input_select.trmnl_ha_dashboard_bottom_left_card_type
+          - entity: input_text.trmnl_ha_dashboard_bottom_left_entity
+          - entity: input_text.trmnl_ha_dashboard_bottom_left_label
+          - entity: input_text.trmnl_ha_dashboard_bottom_left_detail_label
+          - entity: input_select.trmnl_ha_dashboard_bottom_right_card_type
+          - entity: input_text.trmnl_ha_dashboard_bottom_right_entity
+          - entity: input_text.trmnl_ha_dashboard_bottom_right_label
+          - entity: input_text.trmnl_ha_dashboard_bottom_right_detail_label

@@ -1,3 +1,133 @@
+input_select:
+  trmnl_ha_dashboard_top_left_card_type:
+    name: TRMNL HA Top Left Card
+    options: &trmnl_ha_dashboard_card_types
+      - weather
+      - indoor
+      - door_lock
+      - cover
+      - washer
+      - light_group
+      - person_group
+      - media
+      - generic_entity
+      - hidden
+    initial: weather
+  trmnl_ha_dashboard_top_right_card_type:
+    name: TRMNL HA Top Right Card
+    options: *trmnl_ha_dashboard_card_types
+    initial: indoor
+  trmnl_ha_dashboard_status_1_card_type:
+    name: TRMNL HA Status 1 Card
+    options: *trmnl_ha_dashboard_card_types
+    initial: door_lock
+  trmnl_ha_dashboard_status_2_card_type:
+    name: TRMNL HA Status 2 Card
+    options: *trmnl_ha_dashboard_card_types
+    initial: cover
+  trmnl_ha_dashboard_status_3_card_type:
+    name: TRMNL HA Status 3 Card
+    options: *trmnl_ha_dashboard_card_types
+    initial: washer
+  trmnl_ha_dashboard_bottom_left_card_type:
+    name: TRMNL HA Bottom Left Card
+    options: *trmnl_ha_dashboard_card_types
+    initial: person_group
+  trmnl_ha_dashboard_bottom_right_card_type:
+    name: TRMNL HA Bottom Right Card
+    options: *trmnl_ha_dashboard_card_types
+    initial: media
+
+input_text:
+  trmnl_ha_dashboard_generic_entities:
+    name: TRMNL HA Generic Entities
+    max: 255
+  trmnl_ha_dashboard_generic_labels:
+    name: TRMNL HA Generic Labels
+    max: 255
+  trmnl_ha_dashboard_generic_icons:
+    name: TRMNL HA Generic Icons
+    max: 255
+  trmnl_ha_dashboard_generic_status_colours:
+    name: TRMNL HA Generic Status Colours
+    max: 255
+  trmnl_ha_dashboard_top_left_entity:
+    name: TRMNL HA Top Left Entity
+    max: 255
+  trmnl_ha_dashboard_top_left_label:
+    name: TRMNL HA Top Left Label
+    max: 80
+  trmnl_ha_dashboard_top_left_detail_label:
+    name: TRMNL HA Top Left Detail
+    max: 80
+  trmnl_ha_dashboard_top_right_entity:
+    name: TRMNL HA Top Right Entity
+    max: 255
+  trmnl_ha_dashboard_top_right_label:
+    name: TRMNL HA Top Right Label
+    max: 80
+  trmnl_ha_dashboard_top_right_detail_label:
+    name: TRMNL HA Top Right Detail
+    max: 80
+  trmnl_ha_dashboard_status_1_entity:
+    name: TRMNL HA Status 1 Entity
+    max: 255
+  trmnl_ha_dashboard_status_1_label:
+    name: TRMNL HA Status 1 Label
+    initial: Front door
+    max: 80
+  trmnl_ha_dashboard_status_1_detail_label:
+    name: TRMNL HA Status 1 Detail
+    initial: Security
+    max: 80
+  trmnl_ha_dashboard_status_2_entity:
+    name: TRMNL HA Status 2 Entity
+    max: 255
+  trmnl_ha_dashboard_status_2_label:
+    name: TRMNL HA Status 2 Label
+    initial: Blinds
+    max: 80
+  trmnl_ha_dashboard_status_2_detail_label:
+    name: TRMNL HA Status 2 Detail
+    initial: Position
+    max: 80
+  trmnl_ha_dashboard_status_3_entity:
+    name: TRMNL HA Status 3 Entity
+    max: 255
+  trmnl_ha_dashboard_status_3_label:
+    name: TRMNL HA Status 3 Label
+    initial: Washer
+    max: 80
+  trmnl_ha_dashboard_status_3_detail_label:
+    name: TRMNL HA Status 3 Detail
+    initial: Utility
+    max: 80
+  trmnl_ha_dashboard_bottom_left_entity:
+    name: TRMNL HA Bottom Left Entity
+    max: 255
+  trmnl_ha_dashboard_bottom_left_label:
+    name: TRMNL HA Bottom Left Label
+    initial: People
+    max: 80
+  trmnl_ha_dashboard_bottom_left_detail_label:
+    name: TRMNL HA Bottom Left Detail
+    max: 80
+  trmnl_ha_dashboard_bottom_right_entity:
+    name: TRMNL HA Bottom Right Entity
+    max: 255
+  trmnl_ha_dashboard_bottom_right_label:
+    name: TRMNL HA Bottom Right Label
+    initial: Media
+    max: 80
+  trmnl_ha_dashboard_bottom_right_detail_label:
+    name: TRMNL HA Bottom Right Detail
+    initial: Sonos
+    max: 80
+
+input_button:
+  trmnl_ha_dashboard_refresh:
+    name: TRMNL HA Refresh Dashboard
+
 rest_command:
   trmnl_ha_dashboard_refresh_sidecar:
     url: "http://192.168.1.143:8787/ha-dashboard/refresh"
@@ -74,6 +204,18 @@ rest_command:
       }
 
 automation:
+  - id: trmnl_ha_dashboard_refresh_button_v1
+    alias: TRMNL HA Dashboard Refresh Button
+    description: Lets the Home Assistant helper UI request a playlist-safe colour sidecar refresh.
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: input_button.trmnl_ha_dashboard_refresh
+    action:
+      - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
+        data:
+          reason: helper_button
+
   - id: trmnl_ha_dashboard_push_v1
     alias: TRMNL HA Dashboard Sidecar Refresh
     description: Requests the playlist-safe colour sidecar refresh on state changes or time interval.

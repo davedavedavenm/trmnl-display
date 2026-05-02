@@ -166,6 +166,21 @@ When using `scripts/trmnl_ha_dashboard.py`, plugin fields map to environment var
 | `*_label` | `TRMNL_*_LABEL` |
 | `*_detail_label` | `TRMNL_*_DETAIL_LABEL` |
 
+## Optional Home Assistant Control Surface
+
+The LaraPaper/plugin fields above remain the portable contract. For a local installation, `config/packages/trmnl_ha_dashboard.yaml` can also expose matching Home Assistant helpers:
+
+- `input_select.trmnl_ha_dashboard_*_card_type`
+- `input_text.trmnl_ha_dashboard_*_entity`
+- `input_text.trmnl_ha_dashboard_*_label`
+- `input_text.trmnl_ha_dashboard_*_detail_label`
+- `input_text.trmnl_ha_dashboard_generic_*`
+- `input_button.trmnl_ha_dashboard_refresh`
+
+Set `TRMNL_HA_MANAGED_CONFIG=1` in `/home/dave/.env.trmnl-ha-dashboard` to have the companion payload writer read those helper values. Home Assistant then chooses slot intent and labels, while the sidecar still emits the same TRMNL `merge_variables` payload and the renderer still owns fixed pixel placement.
+
+`config/lovelace/trmnl_ha_dashboard_control.yaml` is an optional Lovelace view/card source for exposing those helpers in the HA UI.
+
 ## Compatibility
 
 The Liquid template is intended to remain broadly TRMNL/LaraPaper compatible.
