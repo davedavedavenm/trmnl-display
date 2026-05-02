@@ -267,7 +267,8 @@ def icon_person(draw: ImageDraw.ImageDraw, x: int, y: int, home: bool | None = N
 
 def status_band(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], label: str, fill: tuple[int, int, int]) -> None:
     draw.rounded_rectangle(box, radius=5, fill=fill, outline=BLACK, width=2)
-    centered_text(draw, (box[0] + 6, box[1] + 2, box[2] - 6, box[3] - 2), fit_text(label, 12), 15, bold=True)
+    size = 12 if (box[3] - box[1]) <= 22 else 15
+    centered_text(draw, (box[0] + 6, box[1] + 1, box[2] - 6, box[3] - 1), fit_text(label, 12), size, bold=True)
 
 
 def metric(
@@ -339,7 +340,7 @@ def indoor_card(
 
 
 def person_row(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], person: dict[str, Any]) -> None:
-    name = fit_text(person.get("name"), 14, "Person")
+    name = fit_text(person.get("name"), 16, "Person")
     state = as_text(person.get("state"), "unknown").strip().lower()
     at_home = True if state == "home" else False if state not in {"unknown", "unavailable", "--"} else None
     state_label = "Home" if at_home else "Away" if at_home is False else "Unknown"
@@ -350,8 +351,8 @@ def person_row(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], person
     draw.ellipse((icon_x + 8, icon_y, icon_x + 32, icon_y + 24), fill=WHITE, outline=BLACK, width=2)
     draw.arc((icon_x, icon_y + 24, icon_x + 40, icon_y + 58), 200, 340, fill=BLACK, width=2)
     draw.ellipse((icon_x + 30, icon_y + 26, icon_x + 44, icon_y + 40), fill=accent, outline=BLACK, width=2)
-    text(draw, (box[0] + 74, box[1] + 13), name, 24, bold=True)
-    status_band(draw, (box[2] - 92, box[1] + 12, box[2] - 14, box[1] + 40), state_label, accent)
+    text(draw, (box[0] + 74, box[1] + 5), name, 23, bold=True)
+    status_band(draw, (box[0] + 74, box[1] + 30, box[0] + 158, box[1] + 50), state_label, accent)
 
 
 def first_dict(items: Any, index: int = 0) -> dict[str, Any]:
@@ -459,7 +460,7 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     visible_people = [p for p in people[:2] if isinstance(p, dict)]
     if visible_people:
         for index, person in enumerate(visible_people):
-            person_row(draw, (44, 356 + index * 48, 286, 400 + index * 48), person)
+            person_row(draw, (44, 352 + index * 52, 286, 402 + index * 52), person)
     else:
         icon_person(draw, 54, 366, None)
         text(draw, (126, 370), "No people", 24, bold=True)
