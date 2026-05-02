@@ -40,8 +40,8 @@ The sidecar exists to preserve the accepted colour proof style on the live Spect
 | `person_entities` | No | Comma-separated person entities |
 | `sonos_entities` | No | Comma-separated media players |
 | `sonos_label` | No | Label for the Sonos card |
-| `light_entities` | No | Comma-separated lights for the three room control cards |
-| `light_labels` | No | Optional comma-separated labels for light cards |
+| `light_entities` | No | Optional comma-separated lights for compatible layouts/renderers; the current colour sidecar does not render visible light cards |
+| `light_labels` | No | Optional comma-separated labels for light data |
 | `door_entity` | No | Door or lock entity |
 | `door_label` | No | Label for the door card |
 | `door_detail_label` | No | Detail label for the door card |
@@ -75,7 +75,7 @@ Top-level merge variables:
 - `weather`
 - `home`
 - `people`
-- `lights`
+- `lights` (optional compatibility data; not visible in the current `compact_grid` sidecar)
 - `sonos`
 
 Missing optional values should render as unavailable, blank, or hidden rather than failing the screen.
@@ -86,7 +86,7 @@ Nested merge variables:
 - `home`: `door_locked`, `washer_running`, `blind_position`, `blinds_open`, `thermostat_temp`
 - `labels`: `door`, `door_detail`, `washer`, `washer_detail`, `blinds`, `blinds_detail`, `thermostat`, `thermostat_detail`, `sonos`, `people`, `media`
 - `people[]`: `name`, `state`; rendered together in one grouped presence card, with empty and one-person states handled in place
-- `lights[]`: `label`, `state`, `on`
+- `lights[]`: `label`, `state`, `on`; retained for plugin portability and compatible layouts
 - `sonos[]`: `room`, `state`, `title`, `artist`, `picture`
 
 ## Sidecar Compatibility
@@ -118,7 +118,7 @@ The fields `ha_url` and `ha_token` configure the companion sync source. LaraPape
 
 Current supported renderer values:
 
-- `layout_variant`: `compact_grid` - no top bar, no bottom navigation, grouped people card, no energy card
+- `layout_variant`: `compact_grid` - no top bar, no bottom navigation, no visible lights, combined climate/humidity card, grouped people card, no energy card
 - `colour_profile`: `inky_spectra_7`
 
 ## Companion Environment Mapping

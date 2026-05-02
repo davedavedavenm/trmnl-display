@@ -2,6 +2,7 @@
 
 ## 2026-05-02
 
+- Reworked the HA colour sidecar grid to hide visible light cards, combine climate and humidity into one indoor card, and use the freed space for a wider home-status row.
 - Refined the HA colour sidecar layout to remove the top bar, bottom navigation, and energy card, group people into one presence card, and dedicate the lower-right card to media.
 - Updated the HA dashboard plugin contract, payload example, and docs so navigation and energy are no longer advertised as active fields in the current `compact_grid` sidecar layout.
 - Expanded the HA dashboard plugin contract with configurable labels for sidecar cards, light cards, media/presence summaries, and bottom navigation.

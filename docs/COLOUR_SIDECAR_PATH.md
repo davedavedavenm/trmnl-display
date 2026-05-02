@@ -32,7 +32,7 @@ git show 4d6d640:scripts/render_colour_dashboard.py
 
 This proof defines the visual direction for the colour dashboard: strong seven-colour panel output, icon-led cards, black outlines, readable text, and clear Home Assistant status blocks. Do not regress this screen to the muted LaraPaper-style green/olive render; that path is retained only as compatibility context, not as the target colour dashboard design.
 
-2026-05-02 layout refinement: the proof image remains the canonical colour and iconography reference, but the current dashboard no longer uses the proof's screen chrome. The accepted `compact_grid` sidecar layout has no top bar, no bottom navigation, grouped people/presence, and no energy card unless a future layout variant explicitly adds one.
+2026-05-02 layout refinement: the proof image remains the canonical colour and iconography reference, but the current dashboard no longer uses the proof's screen chrome. The accepted `compact_grid` sidecar layout has no top bar, no bottom navigation, no visible lights, a combined climate/humidity card, grouped people/presence, and no energy card unless a future layout variant explicitly adds one.
 
 The current renderer is:
 

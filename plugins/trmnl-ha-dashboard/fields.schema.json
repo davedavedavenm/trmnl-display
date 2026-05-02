@@ -23,7 +23,7 @@
       "required": false,
       "default": "compact_grid",
       "allowed_values": ["compact_grid"],
-      "description": "Layout family. The current colour sidecar compact_grid has no top bar, no bottom navigation, grouped people, and no energy card."
+      "description": "Layout family. The current colour sidecar compact_grid has no top bar, no bottom navigation, no visible lights, a combined climate/humidity card, grouped people, and no energy card."
     },
     {
       "key": "colour_profile",
@@ -80,7 +80,7 @@
       "type": "multi_string",
       "required": false,
       "default": "",
-      "description": "Comma-separated light entities rendered as the three room control cards in the colour sidecar."
+      "description": "Comma-separated light entities for compatible layouts/renderers. The current compact_grid sidecar does not render visible light cards."
     },
     {
       "key": "light_labels",
