@@ -70,6 +70,8 @@ ssh home-assistant "ha core check"
 
 Create `/home/dave/.env.trmnl-ha-dashboard` on `khpi5` from `deploy/khpi5/trmnl-ha-dashboard.env.example`, filling in the live Home Assistant token, LaraPaper webhook URL, and entity IDs. The companion script loads that file automatically when run from cron.
 
+For the live installation, `TRMNL_HA_MANAGED_CONFIG=1` lets Home Assistant helpers choose sidecar slots and generic entities. For a shared LaraPaper/TRMNL plugin install, leave that disabled and configure the same slot fields through the plugin UI or environment variables.
+
 ## Pi Display Client
 
 Repo files:

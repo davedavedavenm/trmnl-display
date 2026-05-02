@@ -118,10 +118,11 @@ python scripts/render_colour_dashboard.py --payload plugins/trmnl-ha-dashboard/p
 To validate the default render, supported card types, and fixed slot behavior:
 
 ```bash
+python scripts/validate_trmnl_ha_plugin_contract.py
 python scripts/validate_colour_dashboard.py --write-images
 ```
 
-The validator writes optional proof images under `scripts/tmp/colour_dashboard_validation/` and fails if any generated panel PNG is not `800x480`, paletted mode `P`, constrained to the seven panel colours, and using all seven colours.
+The plugin contract validator fails if `settings.yml`, `fields.schema.json`, and `payload.example.json` drift apart. The colour validator writes optional proof images under `scripts/tmp/colour_dashboard_validation/` and fails if any generated panel PNG is not `800x480`, paletted mode `P`, constrained to the seven panel colours, and using all seven colours.
 
 On `khpi5`, set `TRMNL_SIDECAR_PAYLOAD_PATH=/home/dave/trmnl-ha-dashboard-payload.json` in `/home/dave/.env.trmnl-ha-dashboard` to have the HA companion script write the live `merge_variables` payload for sidecar rendering.
 
