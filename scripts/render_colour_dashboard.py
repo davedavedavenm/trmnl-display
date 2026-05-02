@@ -215,9 +215,9 @@ def icon_blinds(draw: ImageDraw.ImageDraw, x: int, y: int, open_: bool | None = 
 
 
 def icon_washer(draw: ImageDraw.ImageDraw, x: int, y: int, running: bool | None = False) -> None:
-    draw.rounded_rectangle((x + 6, y + 4, x + 46, y + 58), radius=4, fill=WHITE, outline=BLACK, width=3)
+    draw.rounded_rectangle((x + 9, y + 2, x + 43, y + 46), radius=4, fill=WHITE, outline=BLACK, width=3)
     if running:
-        draw.ellipse((x + 14, y + 24, x + 38, y + 48), fill=SOFT_BLUE, outline=BLACK, width=2)
+        draw.ellipse((x + 15, y + 20, x + 37, y + 42), fill=SOFT_BLUE, outline=BLACK, width=2)
 
 
 def icon_music(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
@@ -226,6 +226,14 @@ def icon_music(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
     draw.line((x + 58, y + 2, x + 58, y + 42), fill=BLACK, width=4)
     draw.ellipse((x + 10, y + 45, x + 34, y + 66), fill=YELLOW, outline=BLACK, width=2)
     draw.ellipse((x + 38, y + 37, x + 62, y + 58), fill=YELLOW, outline=BLACK, width=2)
+
+
+def icon_music_compact(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
+    draw.line((x + 26, y + 4, x + 26, y + 34), fill=BLACK, width=3)
+    draw.line((x + 26, y + 4, x + 48, y), fill=BLACK, width=3)
+    draw.line((x + 48, y, x + 48, y + 28), fill=BLACK, width=3)
+    draw.ellipse((x + 8, y + 30, x + 28, y + 46), fill=YELLOW, outline=BLACK, width=2)
+    draw.ellipse((x + 34, y + 24, x + 54, y + 40), fill=YELLOW, outline=BLACK, width=2)
 
 
 def metric(
@@ -254,7 +262,7 @@ def control(
 ) -> None:
     card(draw, box, fill=fill)
     centered_text(draw, (box[0], box[1] + 8, box[2], box[1] + 32), fit_text(title, 10), 15, bold=True)
-    icon_fn(draw, (box[0] + box[2]) // 2 - 26, box[1] + 40)
+    icon_fn(draw, (box[0] + box[2]) // 2 - 26, box[1] + 38)
     centered_text(draw, (box[0], box[3] - 30, box[2], box[3] - 8), fit_text(value, 10), 15)
 
 
@@ -373,7 +381,7 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
         ((292, 192, 412, 306), light_cards[2][0], light_cards[2][1], light_cards[2][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[2][3])),
         ((426, 192, 546, 306), blind_label, "Open" if blinds_open else "Closed" if blinds_open is False else "--", SOFT_GREEN if blinds_open else SOFT_GREY, lambda d, x, y: icon_blinds(d, x, y, blinds_open)),
         ((560, 192, 680, 306), washer_label, "Running" if washer_running else "Idle" if washer_running is False else "--", SOFT_BLUE if washer_running else SOFT_GREY, lambda d, x, y: icon_washer(d, x, y, washer_running)),
-        ((694, 192, 776, 306), sonos_label, as_text(active_sonos(sonos).get("state"), "Idle").title(), SOFT_ORANGE, icon_music),
+        ((694, 192, 776, 306), sonos_label, as_text(active_sonos(sonos).get("state"), "Idle").title(), SOFT_ORANGE, icon_music_compact),
     ]
     for args in controls:
         control(draw, *args)
