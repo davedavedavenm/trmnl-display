@@ -15,6 +15,7 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | `/home/dave/trmnl-calendar/main.py` | `scripts/trmnl_calendar_multi.py` |
 | `/home/dave/trmnl_ha_dashboard.py` | `scripts/trmnl_ha_dashboard.py` |
 | colour dashboard sidecar renderer | `scripts/render_colour_dashboard.py` |
+| LaraPaper HA sidecar handoff logic | `scripts/trmnl_set_display_mode.sh` |
 | accepted colour dashboard proof reference | `scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png` |
 | accepted colour dashboard source reference | `scripts/tmp/sidecar_colour_dashboard_source_proof_2026-05-01.png` |
 | `/home/dave/.env.trmnl-ha-dashboard` shape | `deploy/khpi5/trmnl-ha-dashboard.env.example` |

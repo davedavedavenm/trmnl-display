@@ -42,7 +42,7 @@ ssh home-assistant "grep -RIn 'trmnl' /config/packages | head -120"
 5. `trmnl-pi` polls `http://192.168.1.143:4567/api/display`.
 6. The Pi downloads the generated PNG and displays it with `show_img.bin`.
 
-For colour-critical dashboard work, use the sidecar path in `docs/COLOUR_SIDECAR_PATH.md`. LaraPaper can remain the BYOS management layer, but the accepted colour-dashboard renderer is repo-owned and must emit an indexed/paletted `800x480` PNG.
+For colour-critical dashboard work, use the sidecar path in `docs/COLOUR_SIDECAR_PATH.md`. LaraPaper remains the BYOS management layer; the accepted HA colour-dashboard renderer is repo-owned, emits an indexed/paletted `800x480` PNG, and is handed off through LaraPaper's generated-image storage when `ha_dashboard` is active.
 
 ## Cron Jobs
 
@@ -125,6 +125,30 @@ Restart the normal polling client when ready to return to LaraPaper/BYOS polling
 
 ```bash
 ssh trmnl-pi "sudo systemctl start trmnl-display.service"
+```
+
+### LaraPaper sidecar handoff
+
+The HA dashboard sidecar is served through LaraPaper, not a separate Pi endpoint. The handoff happens when `ha_dashboard` is activated:
+
+```bash
+ssh khpi5 "/home/dave/bin/trmnl-set-display-mode ha_dashboard"
+ssh khpi5 "curl -fsS http://127.0.0.1:4567/storage/images/generated/sidecar_colour_dashboard_next.png -o /tmp/sidecar_colour_dashboard_next.png"
+ssh trmnl-pi "sudo systemctl restart trmnl-display.service"
+ssh trmnl-pi "journalctl -u trmnl-display.service --no-pager -n 80"
+```
+
+Expected Pi signs for the sidecar handoff:
+
+- `image specs: 800 x 480, 8-bpp`
+- `Preparing image for EPD as 4-bpp`
+- `Refresh complete`
+
+Rollback is mode-based:
+
+```bash
+ssh khpi5 "/home/dave/bin/trmnl-set-display-mode calendar"
+ssh trmnl-pi "sudo systemctl restart trmnl-display.service"
 ```
 
 ### LaraPaper is generating black and white images

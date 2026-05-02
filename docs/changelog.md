@@ -2,6 +2,9 @@
 
 ## 2026-05-02
 
+- Integrated the accepted HA colour sidecar back into LaraPaper BYOS delivery by handing off `sidecar_colour_dashboard_next.png` through LaraPaper's generated-image storage during `ha_dashboard` mode.
+- Updated the `khpi5` HA dashboard cron so live payload pushes re-render the sidecar and refresh the handoff only when `ha_dashboard` is already active.
+- Fixed the Pi display shell's shutdown trap so service restarts no longer wait for systemd to kill a sleeping process during sidecar verification.
 - Made `scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png` the tracked canonical colour-dashboard visual reference and documented that the muted LaraPaper-style render is not the target design.
 - Restored `scripts/render_colour_dashboard.py` to the accepted proof-style icon/card layout while keeping TRMNL `merge_variables` payload input and writing non-overwriting `*_next.png` iteration files.
 - Extended the HA dashboard plugin contract and companion payload writer with optional light and energy fields for the proof-style card surfaces.
