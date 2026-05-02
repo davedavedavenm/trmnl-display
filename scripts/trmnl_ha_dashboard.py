@@ -17,6 +17,7 @@ DASHBOARD_TITLE = os.getenv("TRMNL_DASHBOARD_TITLE", "Home Assistant").strip()
 INSTANCE_LABEL = os.getenv("TRMNL_INSTANCE_LABEL", "Home").strip()
 LAYOUT_VARIANT = os.getenv("TRMNL_LAYOUT_VARIANT", "compact_grid").strip()
 COLOUR_PROFILE = os.getenv("TRMNL_COLOUR_PROFILE", "inky_spectra_7").strip()
+HA_MANAGED_CONFIG = os.getenv("TRMNL_HA_MANAGED_CONFIG", "0").strip().lower() in {"1", "true", "yes", "on"}
 WEATHER_ENTITY = os.getenv("TRMNL_WEATHER_ENTITY", "weather.forecast_home").strip()
 PERSON_ENTITIES = [e.strip() for e in os.getenv("TRMNL_PERSON_ENTITIES", "person.example").split(",") if e.strip()]
 SONOS_ENTITIES = [e.strip() for e in os.getenv("TRMNL_SONOS_ENTITIES", "").split(",") if e.strip()]
@@ -69,6 +70,19 @@ DEFAULT_SLOT_LABELS = {
     "bottom_left": ("People", ""),
     "bottom_right": ("Media", "Sonos"),
 }
+
+
+def helper_value(entity_id: str, fallback: str = "") -> str:
+    if not HA_MANAGED_CONFIG:
+        return fallback
+    try:
+        state = fetch_entity(entity_id).get("state", "")
+    except Exception as err:
+        print(f"WARN helper {entity_id}: {err}")
+        return fallback
+    if state in ("unknown", "unavailable", None):
+        return fallback
+    return str(state).strip()
 
 
 def load_cache() -> dict:
@@ -194,30 +208,35 @@ def fetch_lights() -> list:
 
 def fetch_generic_entities() -> list:
     entities = []
-    for index, eid in enumerate(GENERIC_ENTITY_IDS):
+    entity_ids = [e.strip() for e in helper_value("input_text.trmnl_ha_dashboard_generic_entities", ",".join(GENERIC_ENTITY_IDS)).split(",") if e.strip()]
+    labels = [e.strip() for e in helper_value("input_text.trmnl_ha_dashboard_generic_labels", ",".join(GENERIC_ENTITY_LABELS)).split(",") if e.strip()]
+    icons = [e.strip() for e in helper_value("input_text.trmnl_ha_dashboard_generic_icons", ",".join(GENERIC_ENTITY_ICONS)).split(",") if e.strip()]
+    colours = [e.strip() for e in helper_value("input_text.trmnl_ha_dashboard_generic_status_colours", ",".join(GENERIC_ENTITY_COLOURS)).split(",") if e.strip()]
+
+    for index, eid in enumerate(entity_ids):
         try:
             e = fetch_entity(eid)
             attrs = e.get("attributes", {})
             unit = attrs.get("unit_of_measurement", "")
             entities.append({
                 "id": eid,
-                "label": GENERIC_ENTITY_LABELS[index] if index < len(GENERIC_ENTITY_LABELS) else attrs.get("friendly_name", eid),
+                "label": labels[index] if index < len(labels) else attrs.get("friendly_name", eid),
                 "state": e.get("state", "unknown"),
                 "detail": unit or attrs.get("device_class", "") or eid,
                 "unit": unit,
-                "icon": GENERIC_ENTITY_ICONS[index] if index < len(GENERIC_ENTITY_ICONS) else attrs.get("device_class", "generic"),
-                "status_colour": GENERIC_ENTITY_COLOURS[index] if index < len(GENERIC_ENTITY_COLOURS) else "white",
+                "icon": icons[index] if index < len(icons) else attrs.get("device_class", "generic"),
+                "status_colour": colours[index] if index < len(colours) else "white",
             })
         except Exception as err:
             print(f"Error fetching generic entity {eid}: {err}")
             entities.append({
                 "id": eid,
-                "label": GENERIC_ENTITY_LABELS[index] if index < len(GENERIC_ENTITY_LABELS) else eid,
+                "label": labels[index] if index < len(labels) else eid,
                 "state": "unknown",
                 "detail": "Unavailable",
                 "unit": "",
-                "icon": GENERIC_ENTITY_ICONS[index] if index < len(GENERIC_ENTITY_ICONS) else "generic",
-                "status_colour": GENERIC_ENTITY_COLOURS[index] if index < len(GENERIC_ENTITY_COLOURS) else "white",
+                "icon": icons[index] if index < len(icons) else "generic",
+                "status_colour": colours[index] if index < len(colours) else "white",
             })
     return entities
 
@@ -226,12 +245,14 @@ def slot_config() -> dict:
     slots = {}
     for name in SLOT_NAMES:
         env_prefix = f"TRMNL_{name.upper()}"
+        helper_prefix = f"input_text.trmnl_ha_dashboard_{name}"
         default_label, default_detail = DEFAULT_SLOT_LABELS.get(name, ("", ""))
+        default_type = os.getenv(f"{env_prefix}_CARD_TYPE", DEFAULT_SLOT_TYPES[name]).strip() or DEFAULT_SLOT_TYPES[name]
         slots[name] = {
-            "type": os.getenv(f"{env_prefix}_CARD_TYPE", DEFAULT_SLOT_TYPES[name]).strip() or DEFAULT_SLOT_TYPES[name],
-            "entity": os.getenv(f"{env_prefix}_ENTITY", "").strip(),
-            "label": os.getenv(f"{env_prefix}_LABEL", default_label).strip(),
-            "detail_label": os.getenv(f"{env_prefix}_DETAIL_LABEL", default_detail).strip(),
+            "type": helper_value(f"input_select.trmnl_ha_dashboard_{name}_card_type", default_type) or default_type,
+            "entity": helper_value(f"{helper_prefix}_entity", os.getenv(f"{env_prefix}_ENTITY", "").strip()),
+            "label": helper_value(f"{helper_prefix}_label", os.getenv(f"{env_prefix}_LABEL", default_label).strip()),
+            "detail_label": helper_value(f"{helper_prefix}_detail_label", os.getenv(f"{env_prefix}_DETAIL_LABEL", default_detail).strip()),
         }
     return slots
 

@@ -22,6 +22,7 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | accepted colour dashboard proof reference | `scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png` |
 | accepted colour dashboard source reference | `scripts/tmp/sidecar_colour_dashboard_source_proof_2026-05-01.png` |
 | `/home/dave/.env.trmnl-ha-dashboard` shape | `deploy/khpi5/trmnl-ha-dashboard.env.example` |
+| optional HA dashboard helper view | `config/lovelace/trmnl_ha_dashboard_control.yaml` |
 | generated sidecar iteration image on `trmnl-pi` | generated from `scripts/render_colour_dashboard.py`; do not hand-edit |
 | `/home/dave/trmnl-sonos-local.py` | `scripts/trmnl_sonos_local.py` |
 | `/home/dave/run_trmnl_sonos.sh` | `scripts/run_trmnl_sonos.sh` |

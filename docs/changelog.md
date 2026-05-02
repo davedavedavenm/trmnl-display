@@ -2,6 +2,7 @@
 
 ## 2026-05-02
 
+- Added an optional Home Assistant managed configuration facade for the HA colour dashboard slots, including helpers, a refresh button, and a Lovelace helper-view YAML source.
 - Increased the HA colour sidecar card fill saturation so card backgrounds read more strongly on the physical Spectra panel while keeping seven-colour indexed output.
 - Implemented configurable fixed card slots for the HA colour dashboard plugin contract, added `generic_entities`, and wired a playlist-safe `/ha-dashboard/refresh` endpoint with a 120-second cooldown for Sonos/media-triggered updates.
 - Added a playlist-safe HA sidecar updater that refreshes the LaraPaper plugin image without activating playlists or overriding the device current image, and documented the dynamic card-slot roadmap.

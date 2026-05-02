@@ -44,6 +44,8 @@ Repo files:
 - `scripts/trmnl_set_display_mode.sh`
 - `scripts/trmnl_refresh_ha_sidecar.sh`
 - `scripts/trmnl_update_ha_sidecar_image.sh`
+- `config/packages/trmnl_ha_dashboard.yaml`
+- `config/lovelace/trmnl_ha_dashboard_control.yaml`
 - `deploy/khpi5/trmnl-ha-dashboard.env.example`
 
 Deploy:
@@ -60,6 +62,10 @@ scp scripts/trmnl_refresh_ha_sidecar.sh khpi5:/home/dave/bin/trmnl-refresh-ha-si
 scp scripts/trmnl_update_ha_sidecar_image.sh khpi5:/home/dave/bin/trmnl-update-ha-sidecar-image
 ssh khpi5 "chmod +x /home/dave/run_trmnl_sonos.sh /home/dave/bin/trmnl-mode-bridge.py /home/dave/bin/trmnl-set-display-mode /home/dave/bin/trmnl-refresh-ha-sidecar /home/dave/bin/trmnl-update-ha-sidecar-image"
 ssh khpi5 "sudo systemctl restart trmnl-mode-bridge.service"
+scp config/packages/trmnl_ha_dashboard.yaml home-assistant:/config/packages/trmnl_ha_dashboard.yaml
+ssh home-assistant "mkdir -p /config/lovelace"
+scp config/lovelace/trmnl_ha_dashboard_control.yaml home-assistant:/config/lovelace/trmnl_ha_dashboard_control.yaml
+ssh home-assistant "ha core check"
 ```
 
 Create `/home/dave/.env.trmnl-ha-dashboard` on `khpi5` from `deploy/khpi5/trmnl-ha-dashboard.env.example`, filling in the live Home Assistant token, LaraPaper webhook URL, and entity IDs. The companion script loads that file automatically when run from cron.

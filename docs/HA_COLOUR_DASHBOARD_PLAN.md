@@ -76,6 +76,20 @@ Implemented card types:
 
 Default slots preserve the current visual design: weather, indoor climate/humidity, door, blinds, washer, people, and media.
 
+## Optional Home Assistant Managed Configuration
+
+The shareable LaraPaper/plugin contract remains canonical. Home Assistant may provide a local management facade for the same contract, but it must not become the only place where slot definitions exist.
+
+Implemented local facade:
+
+- `config/packages/trmnl_ha_dashboard.yaml` defines `input_select` helpers for slot card types.
+- The same package defines `input_text` helpers for slot entity, label, and detail label values.
+- Generic homelab state can be selected through `input_text.trmnl_ha_dashboard_generic_*` helpers.
+- `input_button.trmnl_ha_dashboard_refresh` requests the playlist-safe refresh endpoint.
+- `config/lovelace/trmnl_ha_dashboard_control.yaml` provides an optional HA dashboard view/card source for those helpers.
+
+The facade is opt-in for the live payload writer with `TRMNL_HA_MANAGED_CONFIG=1`. When disabled, `/home/dave/.env.trmnl-ha-dashboard` remains the source for slot settings. In both cases, `scripts/trmnl_ha_dashboard.py` emits the same plugin `merge_variables` payload consumed by LaraPaper and the sidecar.
+
 ## Generic Entity Contract
 
 To support useful non-HA or homelab data, the payload includes a `generic_entities` array.

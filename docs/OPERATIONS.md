@@ -149,6 +149,24 @@ ssh khpi5 "curl -fsS -X POST http://127.0.0.1:8787/ha-dashboard/refresh -H 'Auth
 
 The endpoint runs the same wrapper and rate-limits successful refreshes with a default 120-second cooldown unless `force` is set.
 
+### Home Assistant managed slot controls
+
+The HA dashboard package can expose local helper entities for choosing sidecar slot intent without editing Python or the LaraPaper recipe:
+
+- `input_select.trmnl_ha_dashboard_*_card_type`
+- `input_text.trmnl_ha_dashboard_*_entity`
+- `input_text.trmnl_ha_dashboard_*_label`
+- `input_text.trmnl_ha_dashboard_generic_*`
+- `input_button.trmnl_ha_dashboard_refresh`
+
+Enable helper-driven payload settings on `khpi5` with:
+
+```bash
+TRMNL_HA_MANAGED_CONFIG=1
+```
+
+in `/home/dave/.env.trmnl-ha-dashboard`, then run `/home/dave/bin/trmnl-refresh-ha-sidecar`. The optional Lovelace source is `config/lovelace/trmnl_ha_dashboard_control.yaml`; it can be copied into a HA dashboard view to expose the helpers.
+
 Manual HA-only mode activation:
 
 ```bash
