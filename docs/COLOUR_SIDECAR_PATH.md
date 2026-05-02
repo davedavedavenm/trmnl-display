@@ -18,7 +18,7 @@ The proof script is:
 scripts/render_colour_dashboard.py
 ```
 
-It generates:
+It reads the HA dashboard plugin payload contract (`merge_variables`) and generates:
 
 ```text
 scripts/tmp/sidecar_colour_dashboard_source.png
@@ -76,7 +76,7 @@ flowchart LR
 ## Development Flow
 
 1. Update `scripts/render_colour_dashboard.py` or successor renderer code.
-2. Generate the source and indexed output PNGs.
+2. Generate the source and indexed output PNGs from `plugins/trmnl-ha-dashboard/payload.example.json` or a live payload written by `scripts/trmnl_ha_dashboard.py`.
 3. Inspect the generated image visually.
 4. Confirm palette use with Pillow or an equivalent image tool.
 5. Stop `trmnl-display.service` only when doing a direct hardware proof.
@@ -96,6 +96,12 @@ Turn the proof into a live sidecar flow:
 
 The first live version can be intentionally simple. It should prioritize colour fidelity, readable icons, and a stable direct path over full LaraPaper feature parity.
 
+Local render command:
+
+```sh
+python scripts/render_colour_dashboard.py --payload plugins/trmnl-ha-dashboard/payload.example.json
+```
+
 ## Plugin Compatibility Requirement
 
 The sidecar must not become a private hardcoded dashboard.
@@ -108,3 +114,5 @@ Before it becomes the normal live path, it must honor the HA dashboard plugin co
 - install and configuration docs in `plugins/trmnl-ha-dashboard/README.md`
 
 If the sidecar cannot support one of those plugin/recipe expectations, document the blocker and the fallback in the plugin README before shipping it.
+
+Current status: the sidecar renderer consumes the same `merge_variables` payload as `full.liquid`; BYOS image handoff through LaraPaper or a compatible sidecar endpoint remains the next integration step.

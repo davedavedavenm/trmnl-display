@@ -1,7 +1,7 @@
 {
   "plugin_id": "trmnl-ha-dashboard",
   "name": "HA Dashboard",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "fields": [
     {
       "key": "dashboard_title",
@@ -90,6 +90,13 @@
       "description": "Cover or blind entity."
     },
     {
+      "key": "blind_open_position",
+      "type": "text",
+      "required": false,
+      "default": "100",
+      "description": "Position value that means fully open for this cover. Use 0 for inverted controllers."
+    },
+    {
       "key": "thermostat_entity",
       "type": "text",
       "required": false,
@@ -101,7 +108,7 @@
     "supported": true,
     "renderer": "scripts/render_colour_dashboard.py",
     "output": "scripts/tmp/sidecar_colour_dashboard.png",
-    "notes": "The sidecar must honor this field contract as it evolves from proof to live renderer."
+    "payload_input": "TRMNL merge_variables JSON payload, such as plugins/trmnl-ha-dashboard/payload.example.json or a live payload written by scripts/trmnl_ha_dashboard.py.",
+    "notes": "The sidecar honors this field contract and renders from the same merge_variables payload consumed by full.liquid."
   }
 }
-

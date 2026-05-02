@@ -15,6 +15,7 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | `/home/dave/trmnl-calendar/main.py` | `scripts/trmnl_calendar_multi.py` |
 | `/home/dave/trmnl_ha_dashboard.py` | `scripts/trmnl_ha_dashboard.py` |
 | colour dashboard sidecar renderer | `scripts/render_colour_dashboard.py` |
+| `/home/dave/.env.trmnl-ha-dashboard` shape | `deploy/khpi5/trmnl-ha-dashboard.env.example` |
 | generated sidecar proof image on `trmnl-pi` | generated from `scripts/render_colour_dashboard.py`; do not hand-edit |
 | `/home/dave/trmnl-sonos-local.py` | `scripts/trmnl_sonos_local.py` |
 | `/home/dave/run_trmnl_sonos.sh` | `scripts/run_trmnl_sonos.sh` |
