@@ -2,7 +2,24 @@
   "merge_variables": {
     "dashboard_title": "Home Assistant",
     "instance_label": "Home",
+    "layout_variant": "compact_grid",
+    "colour_profile": "inky_spectra_7",
     "updated_at": "01 May 08:30",
+    "labels": {
+      "door": "Front door",
+      "door_detail": "Security",
+      "washer": "Washer",
+      "washer_detail": "Utility",
+      "blinds": "Blinds",
+      "blinds_detail": "Position",
+      "thermostat": "Climate",
+      "thermostat_detail": "Indoor",
+      "sonos": "Sonos",
+      "people": "People",
+      "media": "Media",
+      "energy": "Energy"
+    },
+    "nav": ["Home", "Rooms", "Lights", "Climate", "Security", "More"],
     "weather": {
       "condition": "partlycloudy",
       "condition_label": "Partly cloudy",

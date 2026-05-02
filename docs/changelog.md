@@ -2,6 +2,8 @@
 
 ## 2026-05-02
 
+- Expanded the HA dashboard plugin contract with configurable labels for sidecar cards, light cards, media/presence summaries, and bottom navigation.
+- Improved the proof-style sidecar render so it avoids clipped metric titles, uses higher-contrast navigation labels, and shows honest empty-state text for unconfigured optional cards.
 - Integrated the accepted HA colour sidecar back into LaraPaper BYOS delivery by handing off `sidecar_colour_dashboard_next.png` through LaraPaper's generated-image storage during `ha_dashboard` mode.
 - Updated the `khpi5` HA dashboard cron so live payload pushes re-render the sidecar and refresh the handoff only when `ha_dashboard` is already active.
 - Fixed the Pi display shell's shutdown trap so service restarts no longer wait for systemd to kill a sleeping process during sidecar verification.

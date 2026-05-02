@@ -21,12 +21,26 @@ WEATHER_ENTITY = os.getenv("TRMNL_WEATHER_ENTITY", "weather.forecast_home").stri
 PERSON_ENTITIES = [e.strip() for e in os.getenv("TRMNL_PERSON_ENTITIES", "person.example").split(",") if e.strip()]
 SONOS_ENTITIES = [e.strip() for e in os.getenv("TRMNL_SONOS_ENTITIES", "").split(",") if e.strip()]
 LIGHT_ENTITIES = [e.strip() for e in os.getenv("TRMNL_LIGHT_ENTITIES", "").split(",") if e.strip()]
+LIGHT_LABELS = [e.strip() for e in os.getenv("TRMNL_LIGHT_LABELS", "").split(",") if e.strip()]
 DOOR_ENTITY = os.getenv("TRMNL_DOOR_ENTITY", "").strip()
 WASHER_ENTITY = os.getenv("TRMNL_WASHER_ENTITY", "").strip()
 BLIND_ENTITY = os.getenv("TRMNL_BLIND_ENTITY", "").strip()
 BLIND_OPEN_POSITION = os.getenv("TRMNL_BLIND_OPEN_POSITION", "").strip()
 THERMOSTAT_ENTITY = os.getenv("TRMNL_THERMOSTAT_ENTITY", "").strip()
 ENERGY_ENTITY = os.getenv("TRMNL_ENERGY_ENTITY", "").strip()
+DOOR_LABEL = os.getenv("TRMNL_DOOR_LABEL", "Front door").strip()
+DOOR_DETAIL_LABEL = os.getenv("TRMNL_DOOR_DETAIL_LABEL", "Security").strip()
+WASHER_LABEL = os.getenv("TRMNL_WASHER_LABEL", "Washer").strip()
+WASHER_DETAIL_LABEL = os.getenv("TRMNL_WASHER_DETAIL_LABEL", "Utility").strip()
+BLIND_LABEL = os.getenv("TRMNL_BLIND_LABEL", "Blinds").strip()
+BLIND_DETAIL_LABEL = os.getenv("TRMNL_BLIND_DETAIL_LABEL", "Position").strip()
+THERMOSTAT_LABEL = os.getenv("TRMNL_THERMOSTAT_LABEL", "Climate").strip()
+THERMOSTAT_DETAIL_LABEL = os.getenv("TRMNL_THERMOSTAT_DETAIL_LABEL", "Indoor").strip()
+SONOS_LABEL = os.getenv("TRMNL_SONOS_LABEL", "Sonos").strip()
+PEOPLE_LABEL = os.getenv("TRMNL_PEOPLE_LABEL", "People").strip()
+MEDIA_LABEL = os.getenv("TRMNL_MEDIA_LABEL", "Media").strip()
+ENERGY_LABEL = os.getenv("TRMNL_ENERGY_LABEL", "Energy").strip()
+NAV_LABELS = [e.strip() for e in os.getenv("TRMNL_NAV_LABELS", "Home,Rooms,Lights,Climate,Security,More").split(",") if e.strip()]
 SIDECAR_PAYLOAD_PATH = os.getenv("TRMNL_SIDECAR_PAYLOAD_PATH", "").strip()
 
 
@@ -136,18 +150,18 @@ def fetch_sonos() -> list:
 
 def fetch_lights() -> list:
     lights = []
-    for eid in LIGHT_ENTITIES:
+    for index, eid in enumerate(LIGHT_ENTITIES):
         try:
             e = fetch_entity(eid)
             state = e["state"]
             lights.append({
-                "label": e["attributes"].get("friendly_name", eid),
+                "label": LIGHT_LABELS[index] if index < len(LIGHT_LABELS) else e["attributes"].get("friendly_name", eid),
                 "state": state,
                 "on": state == "on",
             })
         except Exception as err:
             print(f"Error fetching {eid}: {err}")
-            lights.append({"label": eid, "state": "unknown", "on": False})
+            lights.append({"label": LIGHT_LABELS[index] if index < len(LIGHT_LABELS) else eid, "state": "unknown", "on": False})
     return lights
 
 
@@ -160,7 +174,7 @@ def fetch_energy() -> dict:
         value = e["state"]
         if value not in ("unknown", "unavailable"):
             return {
-                "label": e["attributes"].get("friendly_name", "Energy"),
+                "label": ENERGY_LABEL or e["attributes"].get("friendly_name", "Energy"),
                 "value": f"{value} {unit}".strip(),
             }
     except Exception as err:
@@ -252,6 +266,21 @@ def main() -> None:
             "layout_variant": LAYOUT_VARIANT,
             "colour_profile": COLOUR_PROFILE,
             "updated_at": datetime.datetime.now().strftime(TRMNL_UPDATED_AT_FORMAT),
+            "labels": {
+                "door": DOOR_LABEL,
+                "door_detail": DOOR_DETAIL_LABEL,
+                "washer": WASHER_LABEL,
+                "washer_detail": WASHER_DETAIL_LABEL,
+                "blinds": BLIND_LABEL,
+                "blinds_detail": BLIND_DETAIL_LABEL,
+                "thermostat": THERMOSTAT_LABEL,
+                "thermostat_detail": THERMOSTAT_DETAIL_LABEL,
+                "sonos": SONOS_LABEL,
+                "people": PEOPLE_LABEL,
+                "media": MEDIA_LABEL,
+                "energy": ENERGY_LABEL,
+            },
+            "nav": NAV_LABELS[:6],
             "people": fetch_people(),
             "weather": fetch_weather(),
             "sonos": fetch_sonos(),

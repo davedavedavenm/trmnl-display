@@ -16,6 +16,18 @@
 {% elsif c contains "sun" or c contains "clear" %}
   {% assign weather_icon = "sun" %}
 {% endif %}
+{% assign labels = labels | default: empty %}
+{% assign door_label = labels.door | default: "Front Door" %}
+{% assign door_detail = labels.door_detail | default: "Security" %}
+{% assign washer_label = labels.washer | default: "Washer" %}
+{% assign washer_detail = labels.washer_detail | default: "Utility" %}
+{% assign blind_label = labels.blinds | default: "Blinds" %}
+{% assign blind_detail = labels.blinds_detail | default: "Position" %}
+{% assign thermostat_label = labels.thermostat | default: "Climate" %}
+{% assign thermostat_detail = labels.thermostat_detail | default: "Indoor" %}
+{% assign sonos_label = labels.sonos | default: "Sonos" %}
+{% assign people_label = labels.people | default: "People" %}
+{% assign media_label = labels.media | default: "Media" %}
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -101,11 +113,11 @@
       <div style="height:9px;background:#0000FF;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="label" style="color:#fff;">Front Door</div>
+          <div class="label" style="color:#fff;">{{ door_label }}</div>
           <div class="icon"><svg viewBox="0 0 24 24" style="stroke:#fff;"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
         </div>
         <div class="value" style="color:#fff;">{% if home.door_locked %}Locked{% else %}Open{% endif %}</div>
-        <div class="sub" style="color:#fff;">Security</div>
+        <div class="sub" style="color:#fff;">{{ door_detail }}</div>
       </div>
     </div>
 
@@ -113,11 +125,11 @@
       <div style="height:9px;background:#492400;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="label" style="color:#fff;">Thermostat</div>
+          <div class="label" style="color:#fff;">{{ thermostat_label }}</div>
           <div class="icon"><svg viewBox="0 0 24 24" style="stroke:#fff;"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 8v8"/></svg></div>
         </div>
         <div class="value" style="color:#fff;">{% if home.thermostat_temp %}{{ home.thermostat_temp | round: 1 }}C{% else %}--{% endif %}</div>
-        <div class="sub" style="color:#fff;">Lounge temp</div>
+        <div class="sub" style="color:#fff;">{{ thermostat_detail }}</div>
       </div>
     </div>
 
@@ -125,11 +137,11 @@
       <div style="height:9px;background:#492400;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="label">Washer</div>
+          <div class="label">{{ washer_label }}</div>
           <div class="icon"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="14" r="4"/><path d="M8 7h.01M11 7h5"/></svg></div>
         </div>
         <div class="value">{% if home.washer_running %}Running{% else %}Off{% endif %}</div>
-        <div class="sub">Utility</div>
+        <div class="sub">{{ washer_detail }}</div>
       </div>
     </div>
 
@@ -137,11 +149,11 @@
       <div style="height:9px;background:#496D49;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:flex;flex-direction:column;justify-content:space-between;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="label">Blinds</div>
+          <div class="label">{{ blind_label }}</div>
           <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M6 8h12M6 11h12M6 14h12"/><path d="M12 5v14"/><path d="m9 17 3 3 3-3"/></svg></div>
         </div>
         <div class="value">{% if home.blind_position == "unavailable" or home.blind_position == nil %}--{% elsif home.blinds_open %}Open{% else %}Closed{% endif %}</div>
-        <div class="sub">Position</div>
+        <div class="sub">{{ blind_detail }}</div>
       </div>
     </div>
 
@@ -149,7 +161,7 @@
       <div style="height:9px;background:#FFFF00;"></div>
       <div class="card-pad" style="height:calc(100% - 9px);display:grid;grid-template-columns:1fr 56px;gap:10px;align-items:center;">
         <div style="min-width:0;">
-          <div class="label">Sonos</div>
+          <div class="label">{{ sonos_label }}</div>
           {% if active_sonos %}
             <div style="font-size:22px;font-weight:850;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:8px;">{{ active_sonos.title }}</div>
             <div class="sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:6px;">{{ active_sonos.artist }}{% if active_sonos.room %} - {{ active_sonos.room }}{% endif %}</div>
@@ -167,22 +179,22 @@
 
   <div style="height:54px;margin-top:12px;background:#496D49;color:#fff;border-radius:5px;border:1px solid #4f4f4f;display:grid;grid-template-columns:repeat(6,1fr);overflow:hidden;">
     <div style="background:#24496D;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/></svg></div><div style="font-size:10px;font-weight:850;">Home</div>
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/></svg></div><div style="font-size:10px;font-weight:850;">{{ nav[0] | default: "Home" }}</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8 14a6 6 0 1 1 8 0c-.8.6-1 1.2-1 2H9c0-.8-.2-1.4-1-2Z"/></svg></div><div style="font-size:10px;font-weight:850;">Lights</div>
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8 14a6 6 0 1 1 8 0c-.8.6-1 1.2-1 2H9c0-.8-.2-1.4-1-2Z"/></svg></div><div style="font-size:10px;font-weight:850;">{{ nav[1] | default: "Rooms" }}</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/></svg></div><div style="font-size:10px;font-weight:850;">Climate</div>
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z"/></svg></div><div style="font-size:10px;font-weight:850;">{{ nav[2] | default: "Lights" }}</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3 20 7v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4Z"/><path d="M9 12l2 2 4-5"/></svg></div><div style="font-size:10px;font-weight:850;">Security</div>
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3 20 7v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4Z"/><path d="M9 12l2 2 4-5"/></svg></div><div style="font-size:10px;font-weight:850;">{{ nav[3] | default: "Climate" }}</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></div><div style="font-size:10px;font-weight:850;">Media</div>
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></div><div style="font-size:10px;font-weight:850;">{{ nav[4] | default: "Security" }}</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-      <div style="font-size:20px;font-weight:900;line-height:1;">...</div><div style="font-size:10px;font-weight:850;">More</div>
+      <div style="font-size:20px;font-weight:900;line-height:1;">...</div><div style="font-size:10px;font-weight:850;">{{ nav[5] | default: "More" }}</div>
     </div>
   </div>
 

@@ -34,18 +34,32 @@ The sidecar exists to preserve the accepted colour proof style on the live Spect
 | `instance_label` | No | Short instance label, default `Home` |
 | `layout_variant` | No | Preferred layout, default `compact_grid` |
 | `colour_profile` | No | Renderer profile, default `inky_spectra_7` |
-| `ha_url` | Yes | Home Assistant base URL |
-| `ha_token` | Yes | Home Assistant long-lived token; do not commit live values |
+| `ha_url` | Yes | Home Assistant base URL for the companion sync script |
+| `ha_token` | Yes | Home Assistant long-lived token for the companion sync script; do not commit live values |
 | `weather_entity` | No | Weather entity |
 | `person_entities` | No | Comma-separated person entities |
 | `sonos_entities` | No | Comma-separated media players |
+| `sonos_label` | No | Label for the Sonos card |
 | `light_entities` | No | Comma-separated lights for the three room control cards |
+| `light_labels` | No | Optional comma-separated labels for light cards |
 | `door_entity` | No | Door or lock entity |
+| `door_label` | No | Label for the door card |
+| `door_detail_label` | No | Detail label for the door card |
 | `washer_entity` | No | Laundry status entity |
+| `washer_label` | No | Label for the washer card |
+| `washer_detail_label` | No | Detail label for the washer card |
 | `blind_entity` | No | Blind/cover entity |
+| `blind_label` | No | Label for the blind card |
+| `blind_detail_label` | No | Detail label for the blind card |
 | `blind_open_position` | No | Position value that means fully open; default `100`, use `0` for inverted controllers |
 | `thermostat_entity` | No | Climate or temperature entity |
+| `thermostat_label` | No | Label for the thermostat card |
+| `thermostat_detail_label` | No | Detail label for the thermostat card |
 | `energy_entity` | No | Energy sensor for the bottom-right summary card |
+| `energy_label` | No | Label for the energy card |
+| `people_label` | No | Label for the people card |
+| `media_label` | No | Label for the media card |
+| `nav_labels` | No | Comma-separated labels for the six bottom navigation slots |
 
 Keep `settings.yml` and `fields.schema.json` aligned when adding or renaming fields.
 
@@ -60,6 +74,8 @@ Top-level merge variables:
 - `layout_variant`
 - `colour_profile`
 - `updated_at`
+- `labels`
+- `nav`
 - `weather`
 - `home`
 - `people`
@@ -73,6 +89,8 @@ Nested merge variables:
 
 - `weather`: `condition`, `condition_label`, `temperature`, `humidity`, `wind_speed`
 - `home`: `door_locked`, `washer_running`, `blind_position`, `blinds_open`, `thermostat_temp`
+- `labels`: `door`, `door_detail`, `washer`, `washer_detail`, `blinds`, `blinds_detail`, `thermostat`, `thermostat_detail`, `sonos`, `people`, `media`, `energy`
+- `nav[]`: six optional bottom navigation labels
 - `people[]`: `name`, `state`
 - `lights[]`: `label`, `state`, `on`
 - `sonos[]`: `room`, `state`, `title`, `artist`, `picture`
@@ -102,6 +120,48 @@ python scripts/render_colour_dashboard.py --payload plugins/trmnl-ha-dashboard/p
 ```
 
 The companion script can also write the exact live webhook payload for sidecar rendering when `TRMNL_SIDECAR_PAYLOAD_PATH` is set.
+
+The fields `ha_url` and `ha_token` configure the companion sync source. LaraPaper does not fetch Home Assistant directly in this webhook recipe.
+
+Current supported renderer values:
+
+- `layout_variant`: `compact_grid`
+- `colour_profile`: `inky_spectra_7`
+
+## Companion Environment Mapping
+
+When using `scripts/trmnl_ha_dashboard.py`, plugin fields map to environment variables as follows:
+
+| Plugin field | Environment variable |
+|---|---|
+| `dashboard_title` | `TRMNL_DASHBOARD_TITLE` |
+| `instance_label` | `TRMNL_INSTANCE_LABEL` |
+| `layout_variant` | `TRMNL_LAYOUT_VARIANT` |
+| `colour_profile` | `TRMNL_COLOUR_PROFILE` |
+| `weather_entity` | `TRMNL_WEATHER_ENTITY` |
+| `person_entities` | `TRMNL_PERSON_ENTITIES` |
+| `sonos_entities` | `TRMNL_SONOS_ENTITIES` |
+| `sonos_label` | `TRMNL_SONOS_LABEL` |
+| `light_entities` | `TRMNL_LIGHT_ENTITIES` |
+| `light_labels` | `TRMNL_LIGHT_LABELS` |
+| `door_entity` | `TRMNL_DOOR_ENTITY` |
+| `door_label` | `TRMNL_DOOR_LABEL` |
+| `door_detail_label` | `TRMNL_DOOR_DETAIL_LABEL` |
+| `washer_entity` | `TRMNL_WASHER_ENTITY` |
+| `washer_label` | `TRMNL_WASHER_LABEL` |
+| `washer_detail_label` | `TRMNL_WASHER_DETAIL_LABEL` |
+| `blind_entity` | `TRMNL_BLIND_ENTITY` |
+| `blind_label` | `TRMNL_BLIND_LABEL` |
+| `blind_detail_label` | `TRMNL_BLIND_DETAIL_LABEL` |
+| `blind_open_position` | `TRMNL_BLIND_OPEN_POSITION` |
+| `thermostat_entity` | `TRMNL_THERMOSTAT_ENTITY` |
+| `thermostat_label` | `TRMNL_THERMOSTAT_LABEL` |
+| `thermostat_detail_label` | `TRMNL_THERMOSTAT_DETAIL_LABEL` |
+| `energy_entity` | `TRMNL_ENERGY_ENTITY` |
+| `energy_label` | `TRMNL_ENERGY_LABEL` |
+| `people_label` | `TRMNL_PEOPLE_LABEL` |
+| `media_label` | `TRMNL_MEDIA_LABEL` |
+| `nav_labels` | `TRMNL_NAV_LABELS` |
 
 ## Compatibility
 

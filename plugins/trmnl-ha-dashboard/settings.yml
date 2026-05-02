@@ -1,7 +1,7 @@
 name: HA Dashboard
 description: A shareable TRMNL/LaraPaper Home Assistant dashboard with a Liquid compatibility template and optional indexed-colour sidecar renderer for Pimoroni Inky Impression Spectra panels.
 author: David
-version: 2.9.2
+version: 2.10.0
 no_screen_padding: 'yes'
 dark_mode: 'no'
 strategy: webhook
@@ -48,6 +48,11 @@ custom_fields:
     name: Light Entities (comma-separated)
     default: ""
     placeholder: "light.living_room, light.bedroom, light.kitchen"
+  - keyname: light_labels
+    field_type: multi_string
+    name: Light Labels (comma-separated)
+    default: ""
+    placeholder: "Living, Bedroom, Kitchen"
   - keyname: person_entities
     field_type: multi_string
     name: Person Entities (comma-separated)
@@ -63,16 +68,46 @@ custom_fields:
     name: Door Lock Entity
     default: ""
     placeholder: "binary_sensor.front_door_locked"
+  - keyname: door_label
+    field_type: text
+    name: Door Label
+    default: "Front door"
+    placeholder: "Front door"
+  - keyname: door_detail_label
+    field_type: text
+    name: Door Detail Label
+    default: "Security"
+    placeholder: "Security"
   - keyname: washer_entity
     field_type: text
     name: Washer Status Entity
     default: ""
     placeholder: "binary_sensor.washer_running"
+  - keyname: washer_label
+    field_type: text
+    name: Washer Label
+    default: "Washer"
+    placeholder: "Washer"
+  - keyname: washer_detail_label
+    field_type: text
+    name: Washer Detail Label
+    default: "Utility"
+    placeholder: "Utility"
   - keyname: blind_entity
     field_type: text
     name: Blinds Entity
     default: ""
     placeholder: "cover.living_room_blinds"
+  - keyname: blind_label
+    field_type: text
+    name: Blind Label
+    default: "Blinds"
+    placeholder: "Blinds"
+  - keyname: blind_detail_label
+    field_type: text
+    name: Blind Detail Label
+    default: "Position"
+    placeholder: "Position"
   - keyname: blind_open_position
     field_type: text
     name: Blind Open Position
@@ -83,8 +118,43 @@ custom_fields:
     name: Thermostat Entity
     default: ""
     placeholder: "climate.thermostat"
+  - keyname: thermostat_label
+    field_type: text
+    name: Thermostat Label
+    default: "Climate"
+    placeholder: "Climate"
+  - keyname: thermostat_detail_label
+    field_type: text
+    name: Thermostat Detail Label
+    default: "Indoor"
+    placeholder: "Indoor"
+  - keyname: sonos_label
+    field_type: text
+    name: Sonos Label
+    default: "Sonos"
+    placeholder: "Sonos"
+  - keyname: people_label
+    field_type: text
+    name: People Label
+    default: "People"
+    placeholder: "People"
+  - keyname: media_label
+    field_type: text
+    name: Media Label
+    default: "Media"
+    placeholder: "Media"
   - keyname: energy_entity
     field_type: text
     name: Energy Entity
     default: ""
     placeholder: "sensor.daily_energy"
+  - keyname: energy_label
+    field_type: text
+    name: Energy Label
+    default: "Energy"
+    placeholder: "Energy"
+  - keyname: nav_labels
+    field_type: multi_string
+    name: Navigation Labels (comma-separated)
+    default: "Home,Rooms,Lights,Climate,Security,More"
+    placeholder: "Home,Rooms,Lights,Climate,Security,More"
