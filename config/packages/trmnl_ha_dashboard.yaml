@@ -216,6 +216,50 @@ automation:
         data:
           reason: helper_button
 
+  - id: trmnl_ha_dashboard_helper_change_refresh_v1
+    alias: TRMNL HA Dashboard Refresh On Helper Change
+    description: Requests the playlist-safe colour sidecar refresh when dashboard slot helper settings change.
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - input_select.trmnl_ha_dashboard_top_left_card_type
+          - input_select.trmnl_ha_dashboard_top_right_card_type
+          - input_select.trmnl_ha_dashboard_status_1_card_type
+          - input_select.trmnl_ha_dashboard_status_2_card_type
+          - input_select.trmnl_ha_dashboard_status_3_card_type
+          - input_select.trmnl_ha_dashboard_bottom_left_card_type
+          - input_select.trmnl_ha_dashboard_bottom_right_card_type
+          - input_text.trmnl_ha_dashboard_generic_entities
+          - input_text.trmnl_ha_dashboard_generic_labels
+          - input_text.trmnl_ha_dashboard_generic_icons
+          - input_text.trmnl_ha_dashboard_generic_status_colours
+          - input_text.trmnl_ha_dashboard_top_left_entity
+          - input_text.trmnl_ha_dashboard_top_left_label
+          - input_text.trmnl_ha_dashboard_top_left_detail_label
+          - input_text.trmnl_ha_dashboard_top_right_entity
+          - input_text.trmnl_ha_dashboard_top_right_label
+          - input_text.trmnl_ha_dashboard_top_right_detail_label
+          - input_text.trmnl_ha_dashboard_status_1_entity
+          - input_text.trmnl_ha_dashboard_status_1_label
+          - input_text.trmnl_ha_dashboard_status_1_detail_label
+          - input_text.trmnl_ha_dashboard_status_2_entity
+          - input_text.trmnl_ha_dashboard_status_2_label
+          - input_text.trmnl_ha_dashboard_status_2_detail_label
+          - input_text.trmnl_ha_dashboard_status_3_entity
+          - input_text.trmnl_ha_dashboard_status_3_label
+          - input_text.trmnl_ha_dashboard_status_3_detail_label
+          - input_text.trmnl_ha_dashboard_bottom_left_entity
+          - input_text.trmnl_ha_dashboard_bottom_left_label
+          - input_text.trmnl_ha_dashboard_bottom_left_detail_label
+          - input_text.trmnl_ha_dashboard_bottom_right_entity
+          - input_text.trmnl_ha_dashboard_bottom_right_label
+          - input_text.trmnl_ha_dashboard_bottom_right_detail_label
+    action:
+      - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
+        data:
+          reason: helper_changed
+
   - id: trmnl_ha_dashboard_push_v1
     alias: TRMNL HA Dashboard Sidecar Refresh
     description: Requests the playlist-safe colour sidecar refresh on state changes or time interval.
