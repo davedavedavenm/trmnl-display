@@ -2,28 +2,30 @@ from dotenv import load_dotenv
 import datetime
 import json
 import os
+from pathlib import Path
 import requests
 
 load_dotenv()
+load_dotenv(os.getenv("TRMNL_HA_DASHBOARD_ENV", "/home/dave/.env.trmnl-ha-dashboard"))
 
 HA_URL = os.getenv("HA_URL", "http://192.168.1.89:8123").strip()
 HA_TOKEN = os.getenv("HA_TOKEN", "").strip()
 TRMNL_WEBHOOK_URL = os.getenv("TRMNL_WEBHOOK_URL", "").strip()
 TRMNL_UPDATED_AT_FORMAT = os.getenv("TRMNL_UPDATED_AT_FORMAT", "%d %b %H:%M")
 CACHE_FILE = os.getenv("TRMNL_CACHE_FILE", "/home/dave/.trmnl_ha_cache.json")
-
-SONOS_ENTITIES = [
-    "media_player.living_room",
-    "media_player.bedroom",
-    "media_player.kitchen",
-    "media_player.gym",
-    "media_player.sonos_roam",
-]
-
-PERSON_ENTITIES = [
-    "person.david",
-    "person.jennifer",
-]
+DASHBOARD_TITLE = os.getenv("TRMNL_DASHBOARD_TITLE", "Home Assistant").strip()
+INSTANCE_LABEL = os.getenv("TRMNL_INSTANCE_LABEL", "Home").strip()
+LAYOUT_VARIANT = os.getenv("TRMNL_LAYOUT_VARIANT", "compact_grid").strip()
+COLOUR_PROFILE = os.getenv("TRMNL_COLOUR_PROFILE", "inky_spectra_7").strip()
+WEATHER_ENTITY = os.getenv("TRMNL_WEATHER_ENTITY", "weather.forecast_home").strip()
+PERSON_ENTITIES = [e.strip() for e in os.getenv("TRMNL_PERSON_ENTITIES", "person.example").split(",") if e.strip()]
+SONOS_ENTITIES = [e.strip() for e in os.getenv("TRMNL_SONOS_ENTITIES", "").split(",") if e.strip()]
+DOOR_ENTITY = os.getenv("TRMNL_DOOR_ENTITY", "").strip()
+WASHER_ENTITY = os.getenv("TRMNL_WASHER_ENTITY", "").strip()
+BLIND_ENTITY = os.getenv("TRMNL_BLIND_ENTITY", "").strip()
+BLIND_OPEN_POSITION = os.getenv("TRMNL_BLIND_OPEN_POSITION", "").strip()
+THERMOSTAT_ENTITY = os.getenv("TRMNL_THERMOSTAT_ENTITY", "").strip()
+SIDECAR_PAYLOAD_PATH = os.getenv("TRMNL_SIDECAR_PAYLOAD_PATH", "").strip()
 
 
 def load_cache() -> dict:
@@ -43,6 +45,8 @@ def save_cache(cache: dict) -> None:
 
 
 def fetch_entity(entity_id: str) -> dict:
+    if not entity_id:
+        raise ValueError("entity_id is required")
     resp = requests.get(
         f"{HA_URL}/api/states/{entity_id}",
         headers={"Authorization": f"Bearer {HA_TOKEN}"},
@@ -88,7 +92,7 @@ CONDITION_LABELS = {
 
 def fetch_weather() -> dict:
     try:
-        e = fetch_entity("weather.forecast_home")
+        e = fetch_entity(WEATHER_ENTITY)
         attrs = e["attributes"]
         raw = e["state"]
         label = CONDITION_LABELS.get(raw, raw.replace("-", " ").title())
@@ -133,26 +137,28 @@ def fetch_home_status(cache: dict) -> dict:
     cached_home = cache.get("home", {})
 
     try:
-        door = fetch_entity("binary_sensor.nuki_flat_door_locked")
+        door = fetch_entity(DOOR_ENTITY)
         result["door_locked"] = door["state"] == "off"  # device_class:lock — off=locked, on=unlocked
     except Exception as e:
         print(f"ERROR door: {e}")
         result["door_locked"] = cached_home.get("door_locked", None)
 
     try:
-        washer = fetch_entity("binary_sensor.wash_dryer_status")
+        washer = fetch_entity(WASHER_ENTITY)
         result["washer_running"] = washer["state"] == "on"
     except Exception as e:
         print(f"ERROR washer: {e}")
         result["washer_running"] = cached_home.get("washer_running", None)
 
     try:
-        blind = fetch_entity("cover.blinds_controller_curtain")
+        blind = fetch_entity(BLIND_ENTITY)
         pos = blind["attributes"].get("current_position", None)
         if pos is not None:
             result["blind_position"] = pos
-            # This controller uses inverted position: 0 = blind retracted (open), 100 = extended (closed)
-            result["blinds_open"] = (pos == 0)
+            if BLIND_OPEN_POSITION:
+                result["blinds_open"] = float(pos) == float(BLIND_OPEN_POSITION)
+            else:
+                result["blinds_open"] = blind["state"] == "open"
         else:
             raise ValueError("current_position is None")
     except Exception as e:
@@ -161,10 +167,13 @@ def fetch_home_status(cache: dict) -> dict:
         result["blinds_open"] = cached_home.get("blinds_open", False)
 
     try:
-        # Use lounge presence sensor for indoor temperature (thermostat entity unavailable)
-        temp = fetch_entity("sensor.lounge_presence_device_temperature")
+        temp = fetch_entity(THERMOSTAT_ENTITY)
         if temp["state"] not in ("unavailable", "unknown"):
-            result["thermostat_temp"] = float(temp["state"])
+            result["thermostat_temp"] = float(
+                temp["attributes"].get("current_temperature")
+                or temp["attributes"].get("temperature")
+                or temp["state"]
+            )
         else:
             raise ValueError(f"temp state={temp['state']}")
     except Exception as e:
@@ -172,6 +181,16 @@ def fetch_home_status(cache: dict) -> dict:
         result["thermostat_temp"] = cached_home.get("thermostat_temp", None)
 
     return result
+
+
+def write_sidecar_payload(payload: dict) -> None:
+    if not SIDECAR_PAYLOAD_PATH:
+        return
+    path = Path(SIDECAR_PAYLOAD_PATH)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+        f.write("\n")
 
 
 def main() -> None:
@@ -192,6 +211,10 @@ def main() -> None:
 
     payload = {
         "merge_variables": {
+            "dashboard_title": DASHBOARD_TITLE,
+            "instance_label": INSTANCE_LABEL,
+            "layout_variant": LAYOUT_VARIANT,
+            "colour_profile": COLOUR_PROFILE,
             "updated_at": datetime.datetime.now().strftime(TRMNL_UPDATED_AT_FORMAT),
             "people": fetch_people(),
             "weather": fetch_weather(),
@@ -199,6 +222,8 @@ def main() -> None:
             "home": home,
         }
     }
+
+    write_sidecar_payload(payload)
 
     resp = requests.post(TRMNL_WEBHOOK_URL, json=payload, timeout=20)
     if resp.status_code != 200:

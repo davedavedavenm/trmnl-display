@@ -107,6 +107,14 @@ scp scripts/tmp/sidecar_colour_dashboard.png trmnl-pi:/tmp/sidecar_colour_dashbo
 ssh trmnl-pi "sudo systemctl stop trmnl-display.service && /usr/local/bin/show_img.bin file=/tmp/sidecar_colour_dashboard.png invert=false mode=full"
 ```
 
+To render the same payload contract used by the LaraPaper plugin:
+
+```bash
+python scripts/render_colour_dashboard.py --payload plugins/trmnl-ha-dashboard/payload.example.json
+```
+
+On `khpi5`, set `TRMNL_SIDECAR_PAYLOAD_PATH=/home/dave/trmnl-ha-dashboard-payload.json` in `/home/dave/.env.trmnl-ha-dashboard` to have the HA companion script write the live `merge_variables` payload for sidecar rendering.
+
 Expected success lines:
 
 - `image specs: 800 x 480, 8-bpp`

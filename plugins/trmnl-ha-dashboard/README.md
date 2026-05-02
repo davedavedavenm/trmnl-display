@@ -5,7 +5,7 @@ A shareable Home Assistant dashboard plugin for TRMNL / LaraPaper.
 This plugin has two render paths:
 
 - `full.liquid` for normal TRMNL/LaraPaper plugin compatibility
-- `scripts/render_colour_dashboard.py` as the current colour sidecar proof for Pimoroni Inky Impression 7.3 / Spectra-class panels
+- `scripts/render_colour_dashboard.py` as the indexed colour sidecar renderer for Pimoroni Inky Impression 7.3 / Spectra-class panels
 
 The sidecar exists only to improve colour reproduction. The plugin must still remain configurable and shareable like a normal TRMNL recipe.
 
@@ -42,6 +42,7 @@ The sidecar exists only to improve colour reproduction. The plugin must still re
 | `door_entity` | No | Door or lock entity |
 | `washer_entity` | No | Laundry status entity |
 | `blind_entity` | No | Blind/cover entity |
+| `blind_open_position` | No | Position value that means fully open; default `100`, use `0` for inverted controllers |
 | `thermostat_entity` | No | Climate or temperature entity |
 
 Keep `settings.yml` and `fields.schema.json` aligned when adding or renaming fields.
@@ -54,6 +55,8 @@ Top-level merge variables:
 
 - `dashboard_title`
 - `instance_label`
+- `layout_variant`
+- `colour_profile`
 - `updated_at`
 - `weather`
 - `home`
@@ -62,11 +65,24 @@ Top-level merge variables:
 
 Missing optional values should render as unavailable, blank, or hidden rather than failing the screen.
 
+Nested merge variables:
+
+- `weather`: `condition`, `condition_label`, `temperature`, `humidity`, `wind_speed`
+- `home`: `door_locked`, `washer_running`, `blind_position`, `blinds_open`, `thermostat_temp`
+- `people[]`: `name`, `state`
+- `sonos[]`: `room`, `state`, `title`, `artist`, `picture`
+
 ## Sidecar Compatibility
 
-The sidecar renderer must follow the same field and payload contract as the plugin. It may use a stronger colour pipeline, but it must not become a private hardcoded dashboard that other users cannot configure.
+The sidecar renderer follows the same field and payload contract as the plugin. It may use a stronger colour pipeline, but it must not become a private hardcoded dashboard that other users cannot configure.
 
-The current proof renderer is intentionally static while the colour pipeline is being validated. Before making it the live path, wire it to the field contract and `merge_variables` payload described here.
+Render a payload locally:
+
+```bash
+python scripts/render_colour_dashboard.py --payload plugins/trmnl-ha-dashboard/payload.example.json
+```
+
+The companion script can also write the exact live webhook payload for sidecar rendering when `TRMNL_SIDECAR_PAYLOAD_PATH` is set.
 
 ## Compatibility
 

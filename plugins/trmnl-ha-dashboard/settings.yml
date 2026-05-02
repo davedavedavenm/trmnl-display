@@ -1,7 +1,7 @@
 name: HA Dashboard
 description: A shareable TRMNL/LaraPaper Home Assistant dashboard with a Liquid compatibility template and optional indexed-colour sidecar renderer for Pimoroni Inky Impression Spectra panels.
 author: David
-version: 2.9.0
+version: 2.9.1
 no_screen_padding: 'yes'
 dark_mode: 'no'
 strategy: webhook
@@ -68,6 +68,11 @@ custom_fields:
     name: Blinds Entity
     default: ""
     placeholder: "cover.living_room_blinds"
+  - keyname: blind_open_position
+    field_type: text
+    name: Blind Open Position
+    default: "100"
+    placeholder: "100"
   - keyname: thermostat_entity
     field_type: text
     name: Thermostat Entity

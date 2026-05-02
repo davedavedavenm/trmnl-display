@@ -37,16 +37,19 @@ Repo files:
 
 - `scripts/trmnl_calendar_multi.py`
 - `scripts/trmnl_ha_dashboard.py`
+- `scripts/render_colour_dashboard.py`
 - `scripts/trmnl_sonos_local.py`
 - `scripts/run_trmnl_sonos.sh`
 - `scripts/trmnl_mode_bridge.py`
 - `scripts/trmnl_set_display_mode.sh`
+- `deploy/khpi5/trmnl-ha-dashboard.env.example`
 
 Deploy:
 
 ```bash
 scp scripts/trmnl_calendar_multi.py khpi5:/home/dave/trmnl-calendar/main.py
 scp scripts/trmnl_ha_dashboard.py khpi5:/home/dave/trmnl_ha_dashboard.py
+scp scripts/render_colour_dashboard.py khpi5:/home/dave/render_colour_dashboard.py
 scp scripts/trmnl_sonos_local.py khpi5:/home/dave/trmnl-sonos-local.py
 scp scripts/run_trmnl_sonos.sh khpi5:/home/dave/run_trmnl_sonos.sh
 scp scripts/trmnl_mode_bridge.py khpi5:/home/dave/bin/trmnl-mode-bridge.py
@@ -54,6 +57,8 @@ scp scripts/trmnl_set_display_mode.sh khpi5:/home/dave/bin/trmnl-set-display-mod
 ssh khpi5 "chmod +x /home/dave/run_trmnl_sonos.sh /home/dave/bin/trmnl-mode-bridge.py /home/dave/bin/trmnl-set-display-mode"
 ssh khpi5 "sudo systemctl restart trmnl-mode-bridge.service"
 ```
+
+Create `/home/dave/.env.trmnl-ha-dashboard` on `khpi5` from `deploy/khpi5/trmnl-ha-dashboard.env.example`, filling in the live Home Assistant token, LaraPaper webhook URL, and entity IDs. The companion script loads that file automatically when run from cron.
 
 ## Pi Display Client
 
