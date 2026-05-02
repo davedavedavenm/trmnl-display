@@ -20,16 +20,13 @@ WIDTH = 800
 HEIGHT = 480
 
 
-# LaraPaper/Spectra mapped colours sampled from the accepted live BYOS render.
-# They are intentionally muted because this is what the live panel path displays,
-# not what a desktop LCD preview would show for raw CSS primaries.
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-RED = (146, 36, 36)
-YELLOW = (146, 146, 36)
-BLUE = (36, 73, 109)
-GREEN = (73, 109, 73)
-ORANGE = (73, 36, 0)
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+ORANGE = (255, 128, 0)
 
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
 

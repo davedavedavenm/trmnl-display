@@ -7,7 +7,6 @@
 - Added a khpi5 environment example and documented local/live sidecar payload rendering.
 - Added an explicit blind open-position setting so inverted cover controllers do not require hardcoded renderer logic.
 - Restored the colour sidecar to the compact icon-led dashboard layout with solid seven-colour panel fills.
-- Identified the accepted icon-led dashboard reference as the LaraPaper/BYOS render saved under `scripts/tmp/current_ha_dashboard_more_colour.png` and aligned the sidecar palette to that live Spectra colour mapping.
 
 ## 2026-05-01
 
