@@ -251,48 +251,13 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     people = data.get("people") if isinstance(data.get("people"), list) else []
     sonos = data.get("sonos") if isinstance(data.get("sonos"), list) else []
 
-    draw.rectangle((0, 0, WIDTH, 56), fill=BLACK)
-    icon_home(draw, 24, 10, WHITE)
-    draw_text(draw, (74, 11), title, 24, fill=WHITE, bold=True)
-    draw_text(draw, (76, 38), instance, 12, fill=YELLOW, bold=True)
-    draw_text(draw, (626, 5), updated_at[-5:], 37, fill=WHITE, bold=True)
-    draw_text(draw, (616, 40), fit_text(updated_at, 20), 12, fill=YELLOW, bold=True)
-
     temp = as_float(weather.get("temperature"))
     humidity = as_float(weather.get("humidity"))
     wind = as_float(weather.get("wind_speed"))
     condition = as_text(weather.get("condition"), "")
     condition_label = fit_text(weather.get("condition_label") or condition.replace("-", " ").title(), 20, "Weather")
-
-    card(draw, (22, 74, 330, 184), fill=YELLOW)
-    icon_weather(draw, 42, 91, condition)
     temp_text = f"{temp:.1f} C" if temp is not None else "-- C"
-    draw_text(draw, (146, 91), "WEATHER", 13, bold=True)
-    draw_text(draw, (146, 116), temp_text, 36, bold=True)
-    draw_text(draw, (148, 158), condition_label, 14, bold=True)
-
-    status_card(
-        draw,
-        (344, 74, 558, 184),
-        "Humidity",
-        f"{humidity:.0f}%" if humidity is not None else "--%",
-        f"Wind {wind:.0f} km/h" if wind is not None else "Wind unavailable",
-        BLUE,
-        icon_drop,
-        dark=True,
-    )
-
     thermostat = as_float(home.get("thermostat_temp"))
-    status_card(
-        draw,
-        (572, 74, 778, 184),
-        "Climate",
-        f"{thermostat:.1f} C" if thermostat is not None else "-- C",
-        "Indoor temperature",
-        ORANGE,
-        icon_thermo,
-    )
-
     locked = as_bool(home.get("door_locked"))
     washer_running = as_bool(home.get("washer_running"))
     blinds_open = as_bool(home.get("blinds_open"))
@@ -300,27 +265,112 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     if blinds_open is None and blind_pos is not None:
         blinds_open = blind_pos == 0
 
-    small_card(
-        draw,
-        (22, 202, 174, 322),
-        "Door",
-        "Locked" if locked else "Check",
-        "Secure" if locked else "Unlocked/open",
+    active_sonos = next((s for s in sonos if isinstance(s, dict) and s.get("state") == "playing"), None)
+    if active_sonos is None:
+        active_sonos = next((s for s in sonos if isinstance(s, dict) and s.get("state") == "paused"), None)
+    idle_count = sum(1 for s in sonos if isinstance(s, dict) and s.get("state") == "idle")
+
+    # Header mirrors the LaraPaper compatibility template: quiet, compact, icon-led.
+    draw.rectangle((18, 15, 782, 71), fill=WHITE)
+    draw.line((18, 71, 782, 71), fill=BLACK, width=1)
+    draw.rounded_rectangle((28, 18, 59, 49), radius=5, fill=BLUE, outline=BLACK, width=1)
+    icon_home(draw, 26, 16, WHITE)
+    draw_text(draw, (72, 17), title, 17, bold=True)
+    draw_text(draw, (72, 42), instance, 11, fill=GREEN, bold=True)
+    draw_text(draw, (642, 13), updated_at[-5:], 36, bold=False)
+    draw_text(draw, (620, 52), fit_text(updated_at, 20), 11, bold=True)
+
+    # Top metrics: solid ACeP colours with large values and simple line icons.
+    card(draw, (22, 84, 328, 172), fill=YELLOW, width=1)
+    draw.ellipse((48, 98, 88, 138), fill=ORANGE, outline=BLACK, width=2)
+    draw.ellipse((39, 126, 83, 158), fill=WHITE, outline=BLACK, width=2)
+    draw.ellipse((72, 118, 122, 160), fill=WHITE, outline=BLACK, width=2)
+    draw.rectangle((52, 141, 116, 161), fill=WHITE)
+    draw.arc((39, 126, 83, 158), 180, 360, fill=BLACK, width=2)
+    draw.arc((72, 118, 122, 160), 180, 360, fill=BLACK, width=2)
+    draw.line((52, 160, 116, 160), fill=BLACK, width=2)
+    draw_text(draw, (148, 101), temp_text, 31, bold=True)
+    draw_text(draw, (150, 139), condition_label, 13, bold=True)
+
+    card(draw, (342, 84, 558, 172), fill=BLUE, width=1)
+    icon_drop(draw, 358, 101)
+    draw_text(draw, (416, 101), "HUMIDITY", 11, fill=WHITE, bold=True)
+    draw_text(draw, (416, 127), f"{humidity:.0f}%" if humidity is not None else "--%", 29, fill=WHITE, bold=True)
+    draw_text(draw, (418, 157), f"Wind {wind:.0f} km/h" if wind is not None else "Wind --", 11, fill=WHITE, bold=True)
+
+    card(draw, (572, 84, 778, 172), fill=GREEN, width=1)
+    draw.line((592, 126, 650, 126), fill=BLACK, width=3)
+    draw.arc((596, 95, 632, 131), 180, 360, fill=BLACK, width=3)
+    draw.line((650, 126, 688, 126), fill=BLACK, width=3)
+    draw_text(draw, (670, 100), "WIND", 11, bold=True)
+    draw_text(draw, (646, 127), f"{wind:.0f} km/h" if wind is not None else "--", 26, bold=True)
+
+    def mini(
+        box: tuple[int, int, int, int],
+        label: str,
+        value: str,
+        detail: str,
+        fill: tuple[int, int, int],
+        icon: Callable[[ImageDraw.ImageDraw, int, int], None],
+        dark: bool = False,
+    ) -> None:
+        fg = WHITE if dark else BLACK
+        card(draw, box, fill=fill, width=1)
+        draw.rectangle((box[0] + 1, box[1] + 1, box[2] - 1, box[1] + 9), fill=fill)
+        draw_text(draw, (box[0] + 12, box[1] + 18), label.upper(), 10, fill=fg, bold=True)
+        icon(draw, box[2] - 58, box[1] + 19)
+        draw_text(draw, (box[0] + 12, box[1] + 49), fit_text(value, 10), 24, fill=fg, bold=True)
+        draw_text(draw, (box[0] + 12, box[1] + 78), fit_text(detail, 14, ""), 11, fill=fg, bold=True, fallback="")
+
+    grid_x = [22, 216, 410, 604]
+    row_y = [186, 304]
+    w, h = 178, 106
+
+    for i in range(2):
+        person = people[i] if i < len(people) and isinstance(people[i], dict) else {}
+        state = as_text(person.get("state"), "unknown").lower()
+        home_state = state == "home"
+        fill = YELLOW if home_state else RED
+        mini(
+            (grid_x[i], row_y[0], grid_x[i] + w, row_y[0] + h),
+            fit_text(person.get("name"), 12, "Person"),
+            "Home" if home_state else "Away",
+            "Presence",
+            fill,
+            lambda d, x, y: icon_person(d, x, y),
+            dark=not home_state,
+        )
+
+    mini(
+        (grid_x[2], row_y[0], grid_x[2] + w, row_y[0] + h),
+        "Front Door",
+        "Locked" if locked else "Open",
+        "Security",
         BLUE if locked else RED,
         lambda d, x, y: icon_lock(d, x, y, locked),
+        dark=True,
     )
-    small_card(
-        draw,
-        (190, 202, 342, 322),
+
+    mini(
+        (grid_x[3], row_y[0], grid_x[3] + w, row_y[0] + h),
+        "Thermostat",
+        f"{thermostat:.1f} C" if thermostat is not None else "--",
+        "Indoor temp",
+        ORANGE,
+        icon_thermo,
+    )
+
+    mini(
+        (grid_x[0], row_y[1], grid_x[0] + w, row_y[1] + h),
         "Washer",
         "Running" if washer_running else "Idle",
-        "Laundry",
+        "Utility",
         ORANGE if washer_running else WHITE,
         lambda d, x, y: icon_washer(d, x, y, washer_running),
     )
-    small_card(
-        draw,
-        (358, 202, 510, 322),
+
+    mini(
+        (grid_x[1], row_y[1], grid_x[1] + w, row_y[1] + h),
         "Blinds",
         "Open" if blinds_open else "Closed",
         f"{blind_pos:.0f}%" if blind_pos is not None else "Position",
@@ -328,63 +378,46 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
         lambda d, x, y: icon_blinds(d, x, y, blinds_open),
     )
 
-    card(draw, (526, 202, 778, 322), fill=WHITE)
-    draw_text(draw, (542, 218), "PRESENCE", 12, bold=True)
-    for i in range(3):
-        person = people[i] if i < len(people) and isinstance(people[i], dict) else None
-        y = 244 + i * 24
-        if person:
-            state = as_text(person.get("state"), "unknown").lower()
-            fill = GREEN if state == "home" else RED if state in {"away", "not_home"} else ORANGE
-            draw.ellipse((544, y + 4, 556, y + 16), fill=fill, outline=BLACK)
-            draw_text(draw, (566, y), fit_text(person.get("name"), 12, "Person"), 17, bold=True)
-            label = "Home" if state == "home" else "Away" if state in {"away", "not_home"} else fit_text(state.title(), 8)
-            draw_text(draw, (702, y + 2), label, 14, bold=True)
-        else:
-            draw.ellipse((544, y + 4, 556, y + 16), fill=WHITE, outline=BLACK)
-            draw_text(draw, (566, y), "Unassigned", 15)
-
-    active_sonos = next((s for s in sonos if isinstance(s, dict) and s.get("state") == "playing"), None)
-    if active_sonos is None:
-        active_sonos = next((s for s in sonos if isinstance(s, dict) and s.get("state") == "paused"), None)
-    idle_count = sum(1 for s in sonos if isinstance(s, dict) and s.get("state") == "idle")
-
-    card(draw, (22, 340, 500, 432), fill=YELLOW)
-    icon_music(draw, 42, 352)
-    draw_text(draw, (122, 356), "SONOS", 12, bold=True)
+    card(draw, (grid_x[2], row_y[1], 782, row_y[1] + h), fill=YELLOW, width=1)
+    draw_text(draw, (grid_x[2] + 14, row_y[1] + 18), "SONOS", 10, bold=True)
+    icon_music(draw, 710, row_y[1] + 20)
     if active_sonos:
         state = as_text(active_sonos.get("state"), "idle").title()
-        title_text = fit_text(active_sonos.get("title"), 26, "No title")
-        room = fit_text(active_sonos.get("room"), 14, "Room")
+        title_text = fit_text(active_sonos.get("title"), 28, "No title")
+        room = fit_text(active_sonos.get("room"), 16, "Room")
         artist = fit_text(active_sonos.get("artist"), 18, "")
-        draw_text(draw, (122, 379), title_text, 25, bold=True)
-        draw_text(draw, (124, 410), f"{state} - {room}" if artist == "" else f"{artist} - {room}", 13, bold=True)
+        draw_text(draw, (grid_x[2] + 14, row_y[1] + 44), title_text, 23, bold=True)
+        draw_text(draw, (grid_x[2] + 16, row_y[1] + 76), f"{state} - {room}" if artist == "" else f"{artist} - {room}", 12, bold=True)
     else:
-        draw_text(draw, (122, 381), "No active music", 26, bold=True)
-        draw_text(draw, (124, 411), f"{idle_count} rooms idle" if idle_count else "No rooms reporting", 13, bold=True)
+        draw_text(draw, (grid_x[2] + 14, row_y[1] + 45), "No active music", 24, bold=True)
+        draw_text(draw, (grid_x[2] + 16, row_y[1] + 76), f"{idle_count} rooms idle" if idle_count else "No rooms reporting", 12, bold=True)
 
-    card(draw, (516, 340, 778, 432), fill=BLACK)
-    draw_text(draw, (538, 356), "HOME SUMMARY", 12, fill=YELLOW, bold=True)
-    home_people = sum(1 for p in people if isinstance(p, dict) and as_text(p.get("state"), "").lower() == "home")
-    draw_text(draw, (538, 378), f"{home_people}/{len(people)} home" if people else "Presence unknown", 24, fill=WHITE, bold=True)
-    summary = [
-        ("Door", "OK" if locked else "Check", BLUE if locked else RED),
-        ("Wash", "On" if washer_running else "Idle", ORANGE if washer_running else WHITE),
-        ("Blinds", "Open" if blinds_open else "Closed", GREEN if blinds_open else WHITE),
-    ]
-    for i, (label, value, fill) in enumerate(summary):
-        x0 = 538 + i * 76
-        draw.rounded_rectangle((x0, 411, x0 + 66, 429), radius=4, fill=fill, outline=WHITE, width=1)
-        draw_text(draw, (x0 + 5, 414), f"{label} {value}", 9, fill=BLACK if fill != BLACK else WHITE, bold=True)
-
-    draw.rectangle((0, 448, WIDTH, 480), fill=GREEN)
-    nav = [("Home", BLACK), ("Climate", ORANGE), ("Security", BLUE), ("Media", YELLOW), ("People", WHITE)]
+    # The nav bar is decorative parity with the LaraPaper recipe; no state logic lives here.
+    nav_top = 424
+    draw.rounded_rectangle((18, nav_top, 782, 474), radius=5, fill=GREEN, outline=BLACK, width=1)
+    nav = [("Home", BLUE), ("Lights", GREEN), ("Climate", ORANGE), ("Security", BLUE), ("Media", YELLOW), ("More", BLACK)]
     for i, (label, fill) in enumerate(nav):
-        x0 = i * 160
+        x0 = 18 + i * 127
+        x1 = 18 + (i + 1) * 127 if i < 5 else 782
         if i == 0:
-            draw.rectangle((x0, 448, x0 + 160, 480), fill=BLACK)
-            fill = WHITE
-        centered_text(draw, (x0, 451, x0 + 160, 477), label, 15, fill=fill, bold=True)
+            draw.rectangle((x0, nav_top, x1, 474), fill=BLUE)
+        centered_text(draw, (x0, nav_top + 34, x1, nav_top + 48), label, 9, fill=WHITE if i == 0 or fill == BLACK else BLACK, bold=True)
+        cx = (x0 + x1) // 2
+        if label == "Home":
+            draw.polygon([(cx - 10, nav_top + 19), (cx, nav_top + 9), (cx + 10, nav_top + 19)], fill=WHITE, outline=WHITE)
+            draw.rectangle((cx - 7, nav_top + 19, cx + 7, nav_top + 29), fill=WHITE)
+        elif label == "Climate":
+            draw.rounded_rectangle((cx - 3, nav_top + 7, cx + 3, nav_top + 22), radius=3, fill=WHITE, outline=BLACK, width=1)
+            draw.ellipse((cx - 7, nav_top + 20, cx + 7, nav_top + 34), fill=ORANGE, outline=BLACK, width=1)
+        elif label == "Security":
+            draw.arc((cx - 8, nav_top + 8, cx + 8, nav_top + 26), 180, 360, fill=BLACK, width=2)
+            draw.rounded_rectangle((cx - 10, nav_top + 22, cx + 10, nav_top + 34), radius=2, fill=BLUE if locked else RED, outline=BLACK, width=1)
+        elif label == "Media":
+            draw.line((cx - 3, nav_top + 8, cx - 3, nav_top + 28), fill=BLACK, width=2)
+            draw.line((cx - 3, nav_top + 8, cx + 11, nav_top + 5), fill=BLACK, width=2)
+            draw.ellipse((cx - 15, nav_top + 25, cx - 3, nav_top + 36), fill=YELLOW, outline=BLACK, width=1)
+        else:
+            draw.ellipse((cx - 8, nav_top + 9, cx + 8, nav_top + 25), fill=fill, outline=BLACK, width=2)
 
     return img
 

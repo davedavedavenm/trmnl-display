@@ -6,6 +6,7 @@
 - Updated the HA dashboard companion payload to include plugin fields and configurable entity IDs via `/home/dave/.env.trmnl-ha-dashboard`.
 - Added a khpi5 environment example and documented local/live sidecar payload rendering.
 - Added an explicit blind open-position setting so inverted cover controllers do not require hardcoded renderer logic.
+- Restored the colour sidecar to the compact icon-led dashboard layout with solid seven-colour panel fills.
 
 ## 2026-05-01
 
