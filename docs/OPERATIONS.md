@@ -159,7 +159,7 @@ The HA dashboard package can expose local helper entities for choosing sidecar s
 - `input_text.trmnl_ha_dashboard_generic_*`
 - `input_button.trmnl_ha_dashboard_refresh`
 
-Changes to these helper entities request the same playlist-safe refresh endpoint. The endpoint cooldown remains responsible for avoiding excessive e-paper updates.
+Changes to these helper entities request the same playlist-safe refresh endpoint with `force: true`, because they are deliberate configuration edits. Routine sensor/media refreshes still use the endpoint cooldown to avoid excessive e-paper updates.
 
 Enable helper-driven payload settings on `khpi5` with:
 

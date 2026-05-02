@@ -138,7 +138,8 @@ rest_command:
     payload: >
       {
         "source": "home_assistant",
-        "reason": "{{ reason | default('state_change') }}"
+        "reason": "{{ reason | default('state_change') }}",
+        "force": {{ force | default(false) | tojson }}
       }
 
   trmnl_ha_dashboard_push:
@@ -215,6 +216,7 @@ automation:
       - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
         data:
           reason: helper_button
+          force: true
 
   - id: trmnl_ha_dashboard_helper_change_refresh_v1
     alias: TRMNL HA Dashboard Refresh On Helper Change
@@ -259,6 +261,7 @@ automation:
       - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
         data:
           reason: helper_changed
+          force: true
 
   - id: trmnl_ha_dashboard_push_v1
     alias: TRMNL HA Dashboard Sidecar Refresh
