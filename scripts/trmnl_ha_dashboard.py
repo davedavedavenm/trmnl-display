@@ -27,7 +27,6 @@ WASHER_ENTITY = os.getenv("TRMNL_WASHER_ENTITY", "").strip()
 BLIND_ENTITY = os.getenv("TRMNL_BLIND_ENTITY", "").strip()
 BLIND_OPEN_POSITION = os.getenv("TRMNL_BLIND_OPEN_POSITION", "").strip()
 THERMOSTAT_ENTITY = os.getenv("TRMNL_THERMOSTAT_ENTITY", "").strip()
-ENERGY_ENTITY = os.getenv("TRMNL_ENERGY_ENTITY", "").strip()
 DOOR_LABEL = os.getenv("TRMNL_DOOR_LABEL", "Front door").strip()
 DOOR_DETAIL_LABEL = os.getenv("TRMNL_DOOR_DETAIL_LABEL", "Security").strip()
 WASHER_LABEL = os.getenv("TRMNL_WASHER_LABEL", "Washer").strip()
@@ -39,8 +38,6 @@ THERMOSTAT_DETAIL_LABEL = os.getenv("TRMNL_THERMOSTAT_DETAIL_LABEL", "Indoor").s
 SONOS_LABEL = os.getenv("TRMNL_SONOS_LABEL", "Sonos").strip()
 PEOPLE_LABEL = os.getenv("TRMNL_PEOPLE_LABEL", "People").strip()
 MEDIA_LABEL = os.getenv("TRMNL_MEDIA_LABEL", "Media").strip()
-ENERGY_LABEL = os.getenv("TRMNL_ENERGY_LABEL", "Energy").strip()
-NAV_LABELS = [e.strip() for e in os.getenv("TRMNL_NAV_LABELS", "Home,Rooms,Lights,Climate,Security,More").split(",") if e.strip()]
 SIDECAR_PAYLOAD_PATH = os.getenv("TRMNL_SIDECAR_PAYLOAD_PATH", "").strip()
 
 
@@ -165,23 +162,6 @@ def fetch_lights() -> list:
     return lights
 
 
-def fetch_energy() -> dict:
-    if not ENERGY_ENTITY:
-        return {}
-    try:
-        e = fetch_entity(ENERGY_ENTITY)
-        unit = e["attributes"].get("unit_of_measurement", "")
-        value = e["state"]
-        if value not in ("unknown", "unavailable"):
-            return {
-                "label": ENERGY_LABEL or e["attributes"].get("friendly_name", "Energy"),
-                "value": f"{value} {unit}".strip(),
-            }
-    except Exception as err:
-        print(f"Error fetching energy: {err}")
-    return {}
-
-
 def fetch_home_status(cache: dict) -> dict:
     result = {}
     cached_home = cache.get("home", {})
@@ -278,14 +258,11 @@ def main() -> None:
                 "sonos": SONOS_LABEL,
                 "people": PEOPLE_LABEL,
                 "media": MEDIA_LABEL,
-                "energy": ENERGY_LABEL,
             },
-            "nav": NAV_LABELS[:6],
             "people": fetch_people(),
             "weather": fetch_weather(),
             "sonos": fetch_sonos(),
             "lights": fetch_lights(),
-            "energy": fetch_energy(),
             "home": home,
         }
     }

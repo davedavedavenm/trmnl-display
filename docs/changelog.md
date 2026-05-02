@@ -2,6 +2,8 @@
 
 ## 2026-05-02
 
+- Refined the HA colour sidecar layout to remove the top bar, bottom navigation, and energy card, group people into one presence card, and dedicate the lower-right card to media.
+- Updated the HA dashboard plugin contract, payload example, and docs so navigation and energy are no longer advertised as active fields in the current `compact_grid` sidecar layout.
 - Expanded the HA dashboard plugin contract with configurable labels for sidecar cards, light cards, media/presence summaries, and bottom navigation.
 - Improved the proof-style sidecar render so it avoids clipped metric titles, uses higher-contrast navigation labels, and shows honest empty-state text for unconfigured optional cards.
 - Integrated the accepted HA colour sidecar back into LaraPaper BYOS delivery by handing off `sidecar_colour_dashboard_next.png` through LaraPaper's generated-image storage during `ha_dashboard` mode.

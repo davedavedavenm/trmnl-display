@@ -143,18 +143,3 @@ custom_fields:
     name: Media Label
     default: "Media"
     placeholder: "Media"
-  - keyname: energy_entity
-    field_type: text
-    name: Energy Entity
-    default: ""
-    placeholder: "sensor.daily_energy"
-  - keyname: energy_label
-    field_type: text
-    name: Energy Label
-    default: "Energy"
-    placeholder: "Energy"
-  - keyname: nav_labels
-    field_type: multi_string
-    name: Navigation Labels (comma-separated)
-    default: "Home,Rooms,Lights,Climate,Security,More"
-    placeholder: "Home,Rooms,Lights,Climate,Security,More"

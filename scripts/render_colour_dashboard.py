@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
@@ -98,6 +97,13 @@ def fit_text(value: Any, max_chars: int, fallback: str = "--") -> str:
     if len(text_value) <= max_chars:
         return text_value
     return text_value[: max(1, max_chars - 1)].rstrip() + "."
+
+
+def format_temp(value: float | None, with_unit: bool = False) -> str:
+    if value is None:
+        return "--C" if with_unit else "--"
+    rendered = f"{value:.0f}" if abs(value - round(value)) < 0.05 else f"{value:.1f}"
+    return f"{rendered}C" if with_unit else rendered
 
 
 def text(
@@ -252,6 +258,18 @@ def icon_music_compact(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
     draw.ellipse((x + 34, y + 24, x + 54, y + 40), fill=YELLOW, outline=BLACK, width=2)
 
 
+def icon_person(draw: ImageDraw.ImageDraw, x: int, y: int, home: bool | None = None) -> None:
+    badge = GREEN if home else ORANGE if home is False else WHITE
+    draw.ellipse((x + 12, y + 4, x + 38, y + 30), fill=WHITE, outline=BLACK, width=2)
+    draw.rounded_rectangle((x + 4, y + 32, x + 46, y + 62), radius=10, fill=WHITE, outline=BLACK, width=2)
+    draw.ellipse((x + 33, y + 42, x + 49, y + 58), fill=badge, outline=BLACK, width=2)
+
+
+def status_band(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], label: str, fill: tuple[int, int, int]) -> None:
+    draw.rounded_rectangle(box, radius=5, fill=fill, outline=BLACK, width=2)
+    centered_text(draw, (box[0] + 6, box[1] + 2, box[2] - 6, box[3] - 2), fit_text(label, 12), 15, bold=True)
+
+
 def metric(
     draw: ImageDraw.ImageDraw,
     box: tuple[int, int, int, int],
@@ -285,6 +303,22 @@ def control(
     centered_text(draw, (box[0] + 4, box[3] - 28, box[2] - 4, box[3] - 8), fit_text(value, 10), 15)
 
 
+def person_row(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], person: dict[str, Any]) -> None:
+    name = fit_text(person.get("name"), 14, "Person")
+    state = as_text(person.get("state"), "unknown").strip().lower()
+    at_home = True if state == "home" else False if state not in {"unknown", "unavailable", "--"} else None
+    state_label = "Home" if at_home else "Away" if at_home is False else "Unknown"
+    accent = GREEN if at_home else ORANGE if at_home is False else WHITE
+    draw.rounded_rectangle(box, radius=7, fill=WHITE, outline=BLACK, width=2)
+    icon_x = box[0] + 12
+    icon_y = box[1] + 8
+    draw.ellipse((icon_x + 8, icon_y, icon_x + 32, icon_y + 24), fill=WHITE, outline=BLACK, width=2)
+    draw.arc((icon_x, icon_y + 24, icon_x + 40, icon_y + 58), 200, 340, fill=BLACK, width=2)
+    draw.ellipse((icon_x + 30, icon_y + 26, icon_x + 44, icon_y + 40), fill=accent, outline=BLACK, width=2)
+    text(draw, (box[0] + 74, box[1] + 13), name, 24, bold=True)
+    status_band(draw, (box[2] - 92, box[1] + 12, box[2] - 14, box[1] + 40), state_label, accent)
+
+
 def first_dict(items: Any, index: int = 0) -> dict[str, Any]:
     if isinstance(items, list) and len(items) > index and isinstance(items[index], dict):
         return items[index]
@@ -310,13 +344,8 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     people = data.get("people") if isinstance(data.get("people"), list) else []
     sonos = data.get("sonos") if isinstance(data.get("sonos"), list) else []
     lights = data.get("lights") if isinstance(data.get("lights"), list) else []
-    energy = data.get("energy") if isinstance(data.get("energy"), dict) else {}
     labels = data.get("labels") if isinstance(data.get("labels"), dict) else {}
-    nav_labels = data.get("nav") if isinstance(data.get("nav"), list) else []
 
-    updated_at = as_text(data.get("updated_at"), datetime.now().strftime("%d %b %H:%M"))
-    updated_time = updated_at[-5:] if len(updated_at) >= 5 else updated_at
-    title = fit_text(data.get("dashboard_title"), 24, "Home Assistant")
     instance_label = fit_text(data.get("instance_label"), 18, "Home")
     door_label = fit_text(labels.get("door"), 10, "Front door")
     washer_label = fit_text(labels.get("washer"), 10, "Washer")
@@ -329,7 +358,6 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     sonos_label = fit_text(labels.get("sonos"), 10, "Sonos")
     people_label = fit_text(labels.get("people"), 12, "People")
     media_label = fit_text(labels.get("media"), 12, "Media")
-    energy_label = fit_text(labels.get("energy") or energy.get("label"), 12, "Energy")
 
     temp = as_float(weather.get("temperature"))
     humidity = as_float(weather.get("humidity"))
@@ -343,25 +371,18 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     if blinds_open is None and blind_pos is not None:
         blinds_open = blind_pos > 0
 
-    draw.rectangle((0, 0, WIDTH, 54), fill=WHITE)
-    icon_home(draw, 24, 10)
-    text(draw, (74, 16), title, 24, bold=True)
-    right_text(draw, (604, 6, 778, 46), updated_time, 40, bold=True)
-    right_text(draw, (604, 40, 778, 54), fit_text(updated_at, 18), 13)
-    draw.line((22, 56, 778, 56), fill=BLACK, width=2)
-
     metric(
         draw,
-        (24, 76, 212, 174),
+        (22, 18, 212, 124),
         "Weather",
-        f"{temp:.1f}" if temp is not None else "--",
+        format_temp(temp),
         condition_label,
         SOFT_YELLOW,
         lambda d, x, y: icon_sun_cloud_compact(d, x, y, condition),
     )
     metric(
         draw,
-        (226, 76, 384, 174),
+        (226, 18, 386, 124),
         "Humidity",
         f"{humidity:.0f}%" if humidity is not None else "--%",
         instance_label,
@@ -370,16 +391,16 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     )
     metric(
         draw,
-        (398, 76, 556, 174),
+        (400, 18, 558, 124),
         thermostat_label,
-        f"{thermostat:.1f} C" if thermostat is not None else "-- C",
+        format_temp(thermostat, with_unit=True),
         thermostat_detail,
         SOFT_ORANGE,
         icon_thermo,
     )
     metric(
         draw,
-        (570, 76, 776, 174),
+        (572, 18, 778, 124),
         door_label,
         "Locked" if locked else "Open" if locked is False else "--",
         "Secure" if locked else door_detail if locked is False else "Unavailable",
@@ -395,58 +416,37 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
         light_cards.append((fit_text(label, 10), "On" if on else "Off", SOFT_YELLOW if on else SOFT_GREY, on))
 
     controls = [
-        ((24, 192, 144, 306), light_cards[0][0], light_cards[0][1], light_cards[0][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[0][3])),
-        ((158, 192, 278, 306), light_cards[1][0], light_cards[1][1], light_cards[1][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[1][3])),
-        ((292, 192, 412, 306), light_cards[2][0], light_cards[2][1], light_cards[2][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[2][3])),
-        ((426, 192, 546, 306), blind_label, "Open" if blinds_open else "Closed" if blinds_open is False else "--", SOFT_GREEN if blinds_open else SOFT_GREY, lambda d, x, y: icon_blinds(d, x, y, blinds_open)),
-        ((560, 192, 680, 306), washer_label, "Running" if washer_running else "Idle" if washer_running is False else "--", SOFT_BLUE if washer_running else SOFT_GREY, lambda d, x, y: icon_washer(d, x, y, washer_running)),
-        ((694, 192, 776, 306), sonos_label, as_text(active_sonos(sonos).get("state"), "Idle").title(), SOFT_ORANGE, icon_music_compact),
+        ((22, 144, 166, 262), light_cards[0][0], light_cards[0][1], light_cards[0][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[0][3])),
+        ((180, 144, 324, 262), light_cards[1][0], light_cards[1][1], light_cards[1][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[1][3])),
+        ((338, 144, 482, 262), light_cards[2][0], light_cards[2][1], light_cards[2][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[2][3])),
+        ((496, 144, 640, 262), blind_label, "Open" if blinds_open else "Closed" if blinds_open is False else "--", SOFT_GREEN if blinds_open else SOFT_GREY, lambda d, x, y: icon_blinds(d, x, y, blinds_open)),
+        ((654, 144, 778, 262), washer_label, "Running" if washer_running else "Idle" if washer_running is False else "--", SOFT_BLUE if washer_running else SOFT_GREY, lambda d, x, y: icon_washer(d, x, y, washer_running)),
     ]
     for args in controls:
         control(draw, *args)
 
-    card(draw, (24, 328, 244, 424), SOFT_GREEN)
-    text(draw, (44, 344), people_label, 18, bold=True)
-    person_1 = first_dict(people, 0)
-    person_2 = first_dict(people, 1)
-    text(draw, (44, 374), f"{fit_text(person_1.get('name'), 10, 'Person')}: {as_text(person_1.get('state'), 'unknown').title()}", 22, bold=True)
-    text(draw, (44, 400), f"{fit_text(person_2.get('name'), 10, 'Person')}: {as_text(person_2.get('state'), 'unknown').title()}", 18)
-
-    card(draw, (264, 328, 536, 424), SOFT_BLUE)
-    media = active_sonos(sonos)
-    media_room = fit_text(media.get("room"), 18, "No active room")
-    media_title = fit_text(media.get("title") or media.get("artist") or "No active playback", 24)
-    media_state = as_text(media.get("state"), "Idle").title()
-    text(draw, (284, 344), media_label, 18, bold=True)
-    text(draw, (284, 374), media_room, 22, bold=True)
-    text(draw, (284, 400), fit_text(f"{media_state} - {media_title}", 28), 17)
-
-    card(draw, (556, 328, 776, 424), SOFT_YELLOW)
-    text(draw, (576, 344), energy_label, 18, bold=True)
-    energy_value = as_text(energy.get("value"), "")
-    bars = energy.get("bars") if isinstance(energy.get("bars"), list) else []
-    numeric_bars = [as_float(v) for v in bars]
-    numeric_bars = [v for v in numeric_bars if v is not None]
-    if energy_value:
-        if numeric_bars:
-            max_bar = max(numeric_bars) or 1
-            for i, value in enumerate(numeric_bars[:6]):
-                x = 590 + i * 26
-                h = int(74 * value / max_bar)
-                draw.rectangle((x, 408 - h, x + 16, 408), fill=BLUE, outline=BLACK)
-        text(draw, (682, 374), fit_text(energy_value, 9), 22, bold=True)
+    card(draw, (22, 284, 332, 462), SOFT_GREEN)
+    text(draw, (44, 306), people_label, 24, bold=True)
+    visible_people = [p for p in people[:2] if isinstance(p, dict)]
+    if visible_people:
+        for index, person in enumerate(visible_people):
+            person_row(draw, (44, 346 + index * 52, 286, 391 + index * 52), person)
     else:
-        text(draw, (576, 374), "No sensor", 24, bold=True)
-        text(draw, (578, 402), "Configure entity", 13)
+        icon_person(draw, 54, 356, None)
+        text(draw, (126, 360), "No people", 24, bold=True)
+        text(draw, (128, 400), "configured", 18)
 
-    draw.rectangle((0, 442, WIDTH, 480), fill=(120, 168, 150))
-    labels_for_nav = [as_text(v) for v in nav_labels[:6]] or ["Home", "Rooms", "Lights", "Climate", "Security", "More"]
-    while len(labels_for_nav) < 6:
-        labels_for_nav.append("")
-    for i, label in enumerate(labels_for_nav[:6]):
-        x = 54 + i * 126
-        fill = WHITE
-        centered_text(draw, (x - 44, 448, x + 44, 474), label, 15, fill=fill, bold=True)
+    card(draw, (354, 284, 778, 462), SOFT_BLUE)
+    media = active_sonos(sonos)
+    media_room = fit_text(media.get("room"), 24, "No active room")
+    media_title = fit_text(media.get("title") or media.get("artist") or "No active playback", 30)
+    media_state = as_text(media.get("state"), "Idle").title()
+    icon_music(draw, 382, 332)
+    text(draw, (382, 306), media_label, 24, bold=True)
+    text(draw, (466, 338), media_room, 33, bold=True)
+    text(draw, (468, 386), media_title, 22)
+    status_band(draw, (466, 420, 570, 450), media_state, ORANGE if media_state == "Playing" else YELLOW)
+    text(draw, (590, 425), sonos_label, 18, bold=True)
 
     return img
 

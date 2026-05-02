@@ -8,7 +8,7 @@
       "type": "text",
       "required": false,
       "default": "Home Assistant",
-      "description": "Title displayed in the dashboard header."
+      "description": "Dashboard metadata title for plugin management and compatible renderers. The colour sidecar does not render a top bar."
     },
     {
       "key": "instance_label",
@@ -23,7 +23,7 @@
       "required": false,
       "default": "compact_grid",
       "allowed_values": ["compact_grid"],
-      "description": "Layout family. The current sidecar and Liquid compatibility renderer support compact_grid."
+      "description": "Layout family. The current colour sidecar compact_grid has no top bar, no bottom navigation, grouped people, and no energy card."
     },
     {
       "key": "colour_profile",
@@ -181,25 +181,11 @@
       "description": "Detail label for the thermostat card."
     },
     {
-      "key": "energy_entity",
-      "type": "text",
-      "required": false,
-      "default": "",
-      "description": "Energy sensor entity rendered in the bottom-right summary card."
-    },
-    {
-      "key": "energy_label",
-      "type": "text",
-      "required": false,
-      "default": "Energy",
-      "description": "Label for the energy summary card."
-    },
-    {
       "key": "people_label",
       "type": "text",
       "required": false,
       "default": "People",
-      "description": "Label for the people/presence summary card."
+      "description": "Label for the grouped people/presence card."
     },
     {
       "key": "media_label",
@@ -207,13 +193,6 @@
       "required": false,
       "default": "Media",
       "description": "Label for the media summary card."
-    },
-    {
-      "key": "nav_labels",
-      "type": "multi_string",
-      "required": false,
-      "default": "Home,Rooms,Lights,Climate,Security,More",
-      "description": "Comma-separated labels for the six navigation slots."
     }
   ],
   "sidecar": {

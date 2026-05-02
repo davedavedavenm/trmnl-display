@@ -16,10 +16,8 @@
       "thermostat_detail": "Indoor",
       "sonos": "Sonos",
       "people": "People",
-      "media": "Media",
-      "energy": "Energy"
+      "media": "Media"
     },
-    "nav": ["Home", "Rooms", "Lights", "Climate", "Security", "More"],
     "weather": {
       "condition": "partlycloudy",
       "condition_label": "Partly cloudy",
@@ -69,11 +67,6 @@
         "artist": "",
         "picture": ""
       }
-    ],
-    "energy": {
-      "label": "Energy",
-      "value": "8.2 kWh",
-      "bars": [18, 28, 24, 40, 56, 74]
-    }
+    ]
   }
 }

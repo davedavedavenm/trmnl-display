@@ -30,7 +30,7 @@ The sidecar exists to preserve the accepted colour proof style on the live Spect
 
 | Field | Required | Purpose |
 |---|---:|---|
-| `dashboard_title` | No | Header title, default `Home Assistant` |
+| `dashboard_title` | No | Plugin metadata title, default `Home Assistant`; the colour sidecar does not render a top bar |
 | `instance_label` | No | Short instance label, default `Home` |
 | `layout_variant` | No | Preferred layout, default `compact_grid` |
 | `colour_profile` | No | Renderer profile, default `inky_spectra_7` |
@@ -55,11 +55,8 @@ The sidecar exists to preserve the accepted colour proof style on the live Spect
 | `thermostat_entity` | No | Climate or temperature entity |
 | `thermostat_label` | No | Label for the thermostat card |
 | `thermostat_detail_label` | No | Detail label for the thermostat card |
-| `energy_entity` | No | Energy sensor for the bottom-right summary card |
-| `energy_label` | No | Label for the energy card |
-| `people_label` | No | Label for the people card |
+| `people_label` | No | Label for the grouped people card |
 | `media_label` | No | Label for the media card |
-| `nav_labels` | No | Comma-separated labels for the six bottom navigation slots |
 
 Keep `settings.yml` and `fields.schema.json` aligned when adding or renaming fields.
 
@@ -75,13 +72,11 @@ Top-level merge variables:
 - `colour_profile`
 - `updated_at`
 - `labels`
-- `nav`
 - `weather`
 - `home`
 - `people`
 - `lights`
 - `sonos`
-- `energy`
 
 Missing optional values should render as unavailable, blank, or hidden rather than failing the screen.
 
@@ -89,12 +84,10 @@ Nested merge variables:
 
 - `weather`: `condition`, `condition_label`, `temperature`, `humidity`, `wind_speed`
 - `home`: `door_locked`, `washer_running`, `blind_position`, `blinds_open`, `thermostat_temp`
-- `labels`: `door`, `door_detail`, `washer`, `washer_detail`, `blinds`, `blinds_detail`, `thermostat`, `thermostat_detail`, `sonos`, `people`, `media`, `energy`
-- `nav[]`: six optional bottom navigation labels
-- `people[]`: `name`, `state`
+- `labels`: `door`, `door_detail`, `washer`, `washer_detail`, `blinds`, `blinds_detail`, `thermostat`, `thermostat_detail`, `sonos`, `people`, `media`
+- `people[]`: `name`, `state`; rendered together in one grouped presence card, with empty and one-person states handled in place
 - `lights[]`: `label`, `state`, `on`
 - `sonos[]`: `room`, `state`, `title`, `artist`, `picture`
-- `energy`: `label`, `value`, `bars`
 
 ## Sidecar Compatibility
 
@@ -125,7 +118,7 @@ The fields `ha_url` and `ha_token` configure the companion sync source. LaraPape
 
 Current supported renderer values:
 
-- `layout_variant`: `compact_grid`
+- `layout_variant`: `compact_grid` - no top bar, no bottom navigation, grouped people card, no energy card
 - `colour_profile`: `inky_spectra_7`
 
 ## Companion Environment Mapping
@@ -157,11 +150,8 @@ When using `scripts/trmnl_ha_dashboard.py`, plugin fields map to environment var
 | `thermostat_entity` | `TRMNL_THERMOSTAT_ENTITY` |
 | `thermostat_label` | `TRMNL_THERMOSTAT_LABEL` |
 | `thermostat_detail_label` | `TRMNL_THERMOSTAT_DETAIL_LABEL` |
-| `energy_entity` | `TRMNL_ENERGY_ENTITY` |
-| `energy_label` | `TRMNL_ENERGY_LABEL` |
 | `people_label` | `TRMNL_PEOPLE_LABEL` |
 | `media_label` | `TRMNL_MEDIA_LABEL` |
-| `nav_labels` | `TRMNL_NAV_LABELS` |
 
 ## Compatibility
 
