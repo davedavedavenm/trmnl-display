@@ -172,6 +172,22 @@ def icon_sun_cloud(draw: ImageDraw.ImageDraw, x: int, y: int, condition: str = "
             draw.line((x + offset, y + 72, x + offset - 5, y + 84), fill=BLUE, width=3)
 
 
+def icon_sun_cloud_compact(draw: ImageDraw.ImageDraw, x: int, y: int, condition: str = "") -> None:
+    sun_fill = ORANGE if any(token in condition.lower() for token in ("sun", "clear")) else YELLOW
+    draw.ellipse((x + 16, y + 1, x + 48, y + 33), fill=sun_fill, outline=BLACK, width=2)
+    for dx, dy in [(32, -6), (32, 40), (5, 18), (58, 18), (12, 0), (52, 0)]:
+        draw.line((x + 32, y + 17, x + dx, y + dy), fill=BLACK, width=2)
+    draw.ellipse((x + 4, y + 26, x + 38, y + 56), fill=WHITE, outline=BLACK, width=2)
+    draw.ellipse((x + 29, y + 21, x + 68, y + 57), fill=WHITE, outline=BLACK, width=2)
+    draw.rectangle((x + 13, y + 39, x + 63, y + 58), fill=WHITE)
+    draw.arc((x + 4, y + 26, x + 38, y + 56), 180, 360, fill=BLACK, width=2)
+    draw.arc((x + 29, y + 21, x + 68, y + 57), 180, 360, fill=BLACK, width=2)
+    draw.line((x + 13, y + 57, x + 63, y + 57), fill=BLACK, width=2)
+    if any(token in condition.lower() for token in ("rain", "drizzle", "shower")):
+        for offset in (20, 40, 60):
+            draw.line((x + offset, y + 63, x + offset - 4, y + 73), fill=BLUE, width=3)
+
+
 def icon_bulb(draw: ImageDraw.ImageDraw, x: int, y: int, on: bool | None = True) -> None:
     fill = YELLOW if on else WHITE
     draw.ellipse((x + 8, y, x + 42, y + 34), fill=fill, outline=BLACK, width=2)
@@ -246,10 +262,13 @@ def metric(
     icon_fn: Callable[[ImageDraw.ImageDraw, int, int], None],
 ) -> None:
     card(draw, box, fill=fill)
-    icon_fn(draw, box[0] + 14, box[1] + 18)
-    text(draw, (box[0] + 90, box[1] + 16), fit_text(title, 10), 15, bold=True)
-    text(draw, (box[0] + 90, box[1] + 43), fit_text(value, 9), 27, bold=True)
-    text(draw, (box[0] + 90, box[1] + 78), fit_text(detail, 18, ""), 13, fallback="")
+    icon_fn(draw, box[0] + 14, box[1] + 17)
+    text_x = box[0] + (98 if (box[2] - box[0]) >= 180 else 88)
+    title_chars = 10 if (box[2] - box[0]) >= 180 else 8
+    detail_chars = 15 if (box[2] - box[0]) >= 180 else 12
+    text(draw, (text_x, box[1] + 15), fit_text(title, title_chars), 15, bold=True)
+    text(draw, (text_x, box[1] + 42), fit_text(value, 8), 27, bold=True)
+    text(draw, (text_x, box[1] + 77), fit_text(detail, detail_chars, ""), 13, fallback="")
 
 
 def control(
@@ -261,9 +280,9 @@ def control(
     icon_fn: Callable[[ImageDraw.ImageDraw, int, int], None],
 ) -> None:
     card(draw, box, fill=fill)
-    centered_text(draw, (box[0], box[1] + 8, box[2], box[1] + 32), fit_text(title, 10), 15, bold=True)
-    icon_fn(draw, (box[0] + box[2]) // 2 - 26, box[1] + 38)
-    centered_text(draw, (box[0], box[3] - 30, box[2], box[3] - 8), fit_text(value, 10), 15)
+    centered_text(draw, (box[0] + 4, box[1] + 8, box[2] - 4, box[1] + 30), fit_text(title, 10), 15, bold=True)
+    icon_fn(draw, (box[0] + box[2]) // 2 - 26, box[1] + 36)
+    centered_text(draw, (box[0] + 4, box[3] - 28, box[2] - 4, box[3] - 8), fit_text(value, 10), 15)
 
 
 def first_dict(items: Any, index: int = 0) -> dict[str, Any]:
@@ -338,7 +357,7 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
         f"{temp:.1f}" if temp is not None else "--",
         condition_label,
         SOFT_YELLOW,
-        lambda d, x, y: icon_sun_cloud(d, x, y, condition),
+        lambda d, x, y: icon_sun_cloud_compact(d, x, y, condition),
     )
     metric(
         draw,
