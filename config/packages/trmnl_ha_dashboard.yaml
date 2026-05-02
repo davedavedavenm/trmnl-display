@@ -1,4 +1,16 @@
 rest_command:
+  trmnl_ha_dashboard_refresh_sidecar:
+    url: "http://192.168.1.143:8787/ha-dashboard/refresh"
+    method: POST
+    content_type: application/json
+    headers:
+      Authorization: !secret trmnl_mode_bridge_bearer
+    payload: >
+      {
+        "source": "home_assistant",
+        "reason": "{{ reason | default('state_change') }}"
+      }
+
   trmnl_ha_dashboard_push:
     url: "http://192.168.1.143:4567/api/custom_plugins/4349fdad-a273-450b-aa00-3d32f2de788d"
     method: POST
@@ -10,6 +22,16 @@ rest_command:
           "instance_label": "Home",
           "layout_variant": "compact_grid",
           "colour_profile": "inky_spectra_7",
+          "slots": {
+            "top_left": {"type": "weather", "entity": "", "label": "", "detail_label": ""},
+            "top_right": {"type": "indoor", "entity": "", "label": "", "detail_label": ""},
+            "status_1": {"type": "door_lock", "entity": "", "label": "Front door", "detail_label": "Security"},
+            "status_2": {"type": "cover", "entity": "", "label": "Blinds", "detail_label": "Position"},
+            "status_3": {"type": "washer", "entity": "", "label": "Washer", "detail_label": "Utility"},
+            "bottom_left": {"type": "person_group", "entity": "", "label": "People", "detail_label": ""},
+            "bottom_right": {"type": "media", "entity": "", "label": "Media", "detail_label": "Sonos"}
+          },
+          "generic_entities": [],
           "updated_at": "{{ now().strftime('%d %b %H:%M') }}",
           "people": [
             {
@@ -53,8 +75,8 @@ rest_command:
 
 automation:
   - id: trmnl_ha_dashboard_push_v1
-    alias: TRMNL HA Dashboard Push
-    description: Pushes dashboard data to LaraPaper on state changes or time interval.
+    alias: TRMNL HA Dashboard Sidecar Refresh
+    description: Requests the playlist-safe colour sidecar refresh on state changes or time interval.
     mode: restart
     trigger:
       - platform: time_pattern
@@ -74,8 +96,47 @@ automation:
           - media_player.gym
           - media_player.sonos_roam
     action:
-      - service: rest_command.trmnl_ha_dashboard_push
+      - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
+        data:
+          reason: scheduled_or_state_change
       - service: system_log.write
         data:
           level: info
-          message: "TRMNL HA Dashboard pushed to LaraPaper."
+          message: "TRMNL HA Dashboard sidecar refresh requested."
+
+  - id: trmnl_ha_dashboard_media_refresh_sidecar_v1
+    alias: TRMNL HA Dashboard Refresh Sidecar On Media
+    description: Requests the playlist-safe colour sidecar refresh endpoint when Sonos playback metadata changes.
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+      - platform: state
+        entity_id:
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+        attribute: media_title
+      - platform: state
+        entity_id:
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+        attribute: media_artist
+    action:
+      - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
+        data:
+          reason: media_changed
+      - service: system_log.write
+        data:
+          level: info
+          message: "TRMNL HA Dashboard sidecar refresh requested for media change."

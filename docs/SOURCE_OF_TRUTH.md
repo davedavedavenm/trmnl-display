@@ -12,6 +12,7 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | `/home/dave/larapaper/nginx/*` | `deploy/larapaper/nginx/` |
 | `/home/dave/bin/trmnl-mode-bridge.py` | `scripts/trmnl_mode_bridge.py` |
 | `/home/dave/bin/trmnl-set-display-mode` | `scripts/trmnl_set_display_mode.sh` |
+| `/home/dave/bin/trmnl-refresh-ha-sidecar` | `scripts/trmnl_refresh_ha_sidecar.sh` |
 | `/home/dave/bin/trmnl-update-ha-sidecar-image` | `scripts/trmnl_update_ha_sidecar_image.sh` |
 | `/home/dave/trmnl-calendar/main.py` | `scripts/trmnl_calendar_multi.py` |
 | `/home/dave/trmnl_ha_dashboard.py` | `scripts/trmnl_ha_dashboard.py` |
@@ -57,6 +58,7 @@ Use these to compare live files against the repo.
 ```bash
 scp khpi5:/home/dave/bin/trmnl-mode-bridge.py scripts/trmnl_mode_bridge.py
 scp khpi5:/home/dave/bin/trmnl-set-display-mode scripts/trmnl_set_display_mode.sh
+scp khpi5:/home/dave/bin/trmnl-refresh-ha-sidecar scripts/trmnl_refresh_ha_sidecar.sh
 scp khpi5:/home/dave/bin/trmnl-update-ha-sidecar-image scripts/trmnl_update_ha_sidecar_image.sh
 scp khpi5:/home/dave/trmnl-calendar/main.py scripts/trmnl_calendar_multi.py
 scp khpi5:/home/dave/trmnl_ha_dashboard.py scripts/trmnl_ha_dashboard.py

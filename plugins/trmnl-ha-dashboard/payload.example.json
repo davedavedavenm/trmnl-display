@@ -18,6 +18,61 @@
       "people": "People",
       "media": "Media"
     },
+    "slots": {
+      "top_left": {
+        "type": "weather",
+        "entity": "",
+        "label": "",
+        "detail_label": ""
+      },
+      "top_right": {
+        "type": "indoor",
+        "entity": "",
+        "label": "",
+        "detail_label": ""
+      },
+      "status_1": {
+        "type": "door_lock",
+        "entity": "",
+        "label": "Front door",
+        "detail_label": "Security"
+      },
+      "status_2": {
+        "type": "cover",
+        "entity": "",
+        "label": "Blinds",
+        "detail_label": "Position"
+      },
+      "status_3": {
+        "type": "washer",
+        "entity": "",
+        "label": "Washer",
+        "detail_label": "Utility"
+      },
+      "bottom_left": {
+        "type": "person_group",
+        "entity": "",
+        "label": "People",
+        "detail_label": ""
+      },
+      "bottom_right": {
+        "type": "media",
+        "entity": "",
+        "label": "Media",
+        "detail_label": "Sonos"
+      }
+    },
+    "generic_entities": [
+      {
+        "id": "sensor.server_status",
+        "label": "Server",
+        "state": "OK",
+        "detail": "Homelab",
+        "unit": "",
+        "icon": "server",
+        "status_colour": "green"
+      }
+    ],
     "weather": {
       "condition": "partlycloudy",
       "condition_label": "Partly cloudy",

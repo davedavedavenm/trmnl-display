@@ -37,50 +37,48 @@ Manual test mode:
 
 ## Implemented Playlist-Safe Step
 
-`scripts/trmnl_update_ha_sidecar_image.sh` is the routine handoff script. It updates the plugin image only.
+`scripts/trmnl_refresh_ha_sidecar.sh` is the routine refresh wrapper. It pulls Home Assistant state, renders the seven-colour PNG, then calls `scripts/trmnl_update_ha_sidecar_image.sh`.
+
+`scripts/trmnl_update_ha_sidecar_image.sh` remains the final LaraPaper handoff script. It updates the plugin image only.
 
 The `khpi5` cron should call:
 
 ```sh
-cd /home/dave
-python3 /home/dave/trmnl_ha_dashboard.py
-python3 /home/dave/render_colour_dashboard.py --payload /home/dave/trmnl-ha-dashboard-payload.json --output /home/dave/sidecar_colour_dashboard_next.png --source-output /home/dave/sidecar_colour_dashboard_source_next.png
-/home/dave/bin/trmnl-update-ha-sidecar-image
+/home/dave/bin/trmnl-refresh-ha-sidecar
 ```
 
-## Dynamic Card Roadmap
+## Configurable Card Slots
 
-The current `compact_grid` renderer is dynamic by data and labels, but not yet fully dynamic by card placement. The next step is a plugin slot contract.
+The current `compact_grid` renderer is dynamic by data, labels, and fixed card slot intent. LaraPaper/plugin configuration chooses the card type and optional entity/labels for each slot; the sidecar renderer still owns safe pixel placement.
 
-Proposed slot fields:
+Implemented slot fields:
 
-- `slot_1_type`
-- `slot_1_entity`
-- `slot_1_label`
-- `slot_1_detail_label`
-- `slot_2_type`
-- `slot_2_entity`
-- `slot_2_label`
-- `slot_2_detail_label`
-- repeat for each supported visible slot
+- `top_left_card_type`, `top_left_entity`, `top_left_label`, `top_left_detail_label`
+- `top_right_card_type`, `top_right_entity`, `top_right_label`, `top_right_detail_label`
+- `status_1_card_type`, `status_1_entity`, `status_1_label`, `status_1_detail_label`
+- `status_2_card_type`, `status_2_entity`, `status_2_label`, `status_2_detail_label`
+- `status_3_card_type`, `status_3_entity`, `status_3_label`, `status_3_detail_label`
+- `bottom_left_card_type`, `bottom_left_entity`, `bottom_left_label`, `bottom_left_detail_label`
+- `bottom_right_card_type`, `bottom_right_entity`, `bottom_right_label`, `bottom_right_detail_label`
 
-Proposed card types:
+Implemented card types:
 
 - `weather`
 - `indoor`
+- `door_lock`
+- `cover`
+- `washer`
+- `light_group`
 - `person_group`
 - `media`
-- `door_lock`
-- `washer`
-- `cover`
-- `light_group`
 - `generic_entity`
+- `hidden`
 
-The renderer should keep the current visual design as the default preset. Slot configuration should map onto fixed, readable card templates instead of allowing arbitrary pixel positioning.
+Default slots preserve the current visual design: weather, indoor climate/humidity, door, blinds, washer, people, and media.
 
 ## Generic Entity Contract
 
-To support useful non-HA or homelab data, add a `generic_entities` payload array.
+To support useful non-HA or homelab data, the payload includes a `generic_entities` array.
 
 Proposed item shape:
 
@@ -102,11 +100,12 @@ Proposed item shape:
 
 Sonos currently updates when the companion script next pulls Home Assistant media player state. With a 10-minute cron, the practical latency is up to about 10 minutes plus e-paper refresh time.
 
-Future improvement:
+Implemented improvement:
 
-- add a Home Assistant automation that triggers the companion update when configured `media_player.*` entities change state or media title
-- keep the same playlist-safe sidecar update script
-- optionally rate-limit updates to avoid excessive panel refreshes
+- `scripts/trmnl_mode_bridge.py` exposes authenticated `POST /ha-dashboard/refresh`
+- the endpoint runs `/home/dave/bin/trmnl-refresh-ha-sidecar`
+- Home Assistant can call the endpoint when configured `media_player.*` entities change state, title, or artist
+- the endpoint rate-limits successful refreshes with a default 120-second cooldown unless `{"force": true}` is posted
 
 ## Validation Requirements
 

@@ -38,7 +38,37 @@ THERMOSTAT_DETAIL_LABEL = os.getenv("TRMNL_THERMOSTAT_DETAIL_LABEL", "Indoor").s
 SONOS_LABEL = os.getenv("TRMNL_SONOS_LABEL", "Sonos").strip()
 PEOPLE_LABEL = os.getenv("TRMNL_PEOPLE_LABEL", "People").strip()
 MEDIA_LABEL = os.getenv("TRMNL_MEDIA_LABEL", "Media").strip()
+GENERIC_ENTITY_IDS = [e.strip() for e in os.getenv("TRMNL_GENERIC_ENTITIES", "").split(",") if e.strip()]
+GENERIC_ENTITY_LABELS = [e.strip() for e in os.getenv("TRMNL_GENERIC_LABELS", "").split(",") if e.strip()]
+GENERIC_ENTITY_ICONS = [e.strip() for e in os.getenv("TRMNL_GENERIC_ICONS", "").split(",") if e.strip()]
+GENERIC_ENTITY_COLOURS = [e.strip() for e in os.getenv("TRMNL_GENERIC_STATUS_COLOURS", "").split(",") if e.strip()]
 SIDECAR_PAYLOAD_PATH = os.getenv("TRMNL_SIDECAR_PAYLOAD_PATH", "").strip()
+
+SLOT_NAMES = (
+    "top_left",
+    "top_right",
+    "status_1",
+    "status_2",
+    "status_3",
+    "bottom_left",
+    "bottom_right",
+)
+DEFAULT_SLOT_TYPES = {
+    "top_left": "weather",
+    "top_right": "indoor",
+    "status_1": "door_lock",
+    "status_2": "cover",
+    "status_3": "washer",
+    "bottom_left": "person_group",
+    "bottom_right": "media",
+}
+DEFAULT_SLOT_LABELS = {
+    "status_1": ("Front door", "Security"),
+    "status_2": ("Blinds", "Position"),
+    "status_3": ("Washer", "Utility"),
+    "bottom_left": ("People", ""),
+    "bottom_right": ("Media", "Sonos"),
+}
 
 
 def load_cache() -> dict:
@@ -162,6 +192,50 @@ def fetch_lights() -> list:
     return lights
 
 
+def fetch_generic_entities() -> list:
+    entities = []
+    for index, eid in enumerate(GENERIC_ENTITY_IDS):
+        try:
+            e = fetch_entity(eid)
+            attrs = e.get("attributes", {})
+            unit = attrs.get("unit_of_measurement", "")
+            entities.append({
+                "id": eid,
+                "label": GENERIC_ENTITY_LABELS[index] if index < len(GENERIC_ENTITY_LABELS) else attrs.get("friendly_name", eid),
+                "state": e.get("state", "unknown"),
+                "detail": unit or attrs.get("device_class", "") or eid,
+                "unit": unit,
+                "icon": GENERIC_ENTITY_ICONS[index] if index < len(GENERIC_ENTITY_ICONS) else attrs.get("device_class", "generic"),
+                "status_colour": GENERIC_ENTITY_COLOURS[index] if index < len(GENERIC_ENTITY_COLOURS) else "white",
+            })
+        except Exception as err:
+            print(f"Error fetching generic entity {eid}: {err}")
+            entities.append({
+                "id": eid,
+                "label": GENERIC_ENTITY_LABELS[index] if index < len(GENERIC_ENTITY_LABELS) else eid,
+                "state": "unknown",
+                "detail": "Unavailable",
+                "unit": "",
+                "icon": GENERIC_ENTITY_ICONS[index] if index < len(GENERIC_ENTITY_ICONS) else "generic",
+                "status_colour": GENERIC_ENTITY_COLOURS[index] if index < len(GENERIC_ENTITY_COLOURS) else "white",
+            })
+    return entities
+
+
+def slot_config() -> dict:
+    slots = {}
+    for name in SLOT_NAMES:
+        env_prefix = f"TRMNL_{name.upper()}"
+        default_label, default_detail = DEFAULT_SLOT_LABELS.get(name, ("", ""))
+        slots[name] = {
+            "type": os.getenv(f"{env_prefix}_CARD_TYPE", DEFAULT_SLOT_TYPES[name]).strip() or DEFAULT_SLOT_TYPES[name],
+            "entity": os.getenv(f"{env_prefix}_ENTITY", "").strip(),
+            "label": os.getenv(f"{env_prefix}_LABEL", default_label).strip(),
+            "detail_label": os.getenv(f"{env_prefix}_DETAIL_LABEL", default_detail).strip(),
+        }
+    return slots
+
+
 def fetch_home_status(cache: dict) -> dict:
     result = {}
     cached_home = cache.get("home", {})
@@ -259,6 +333,8 @@ def main() -> None:
                 "people": PEOPLE_LABEL,
                 "media": MEDIA_LABEL,
             },
+            "slots": slot_config(),
+            "generic_entities": fetch_generic_entities(),
             "people": fetch_people(),
             "weather": fetch_weather(),
             "sonos": fetch_sonos(),

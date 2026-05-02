@@ -143,14 +143,11 @@ Before it becomes the normal live path, it must honor the HA dashboard plugin co
 
 If the sidecar cannot support one of those plugin/recipe expectations, document the blocker and the fallback in the plugin README before shipping it.
 
-Current status: the sidecar renderer consumes the same `merge_variables` payload shape as the plugin and preserves the accepted proof style. `scripts/trmnl_ha_dashboard.py` writes the live sidecar payload via `TRMNL_SIDECAR_PAYLOAD_PATH`, the `khpi5` cron renders the indexed PNG, and `scripts/trmnl_set_display_mode.sh` hands the image to LaraPaper when `ha_dashboard` is active.
+Current status: the sidecar renderer consumes the same `merge_variables` payload shape as the plugin and preserves the accepted proof style. `scripts/trmnl_ha_dashboard.py` writes the live sidecar payload via `TRMNL_SIDECAR_PAYLOAD_PATH`, `scripts/trmnl_refresh_ha_sidecar.sh` renders the indexed PNG, and `scripts/trmnl_update_ha_sidecar_image.sh` updates only the LaraPaper `Home Assistant` plugin image. `scripts/trmnl_set_display_mode.sh ha_dashboard` remains a manual mode activation/test path only.
 
 Playlist-safe sidecar update command on `khpi5`:
 
 ```sh
-cd /home/dave
-python3 /home/dave/trmnl_ha_dashboard.py
-python3 /home/dave/render_colour_dashboard.py --payload /home/dave/trmnl-ha-dashboard-payload.json --output /home/dave/sidecar_colour_dashboard_next.png --source-output /home/dave/sidecar_colour_dashboard_source_next.png
-/home/dave/bin/trmnl-update-ha-sidecar-image
+/home/dave/bin/trmnl-refresh-ha-sidecar
 curl -fsS http://127.0.0.1:4567/storage/images/generated/sidecar_colour_dashboard_next.png -o /tmp/ha-dashboard.png
 ```

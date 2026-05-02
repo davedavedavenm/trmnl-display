@@ -42,6 +42,7 @@ Repo files:
 - `scripts/run_trmnl_sonos.sh`
 - `scripts/trmnl_mode_bridge.py`
 - `scripts/trmnl_set_display_mode.sh`
+- `scripts/trmnl_refresh_ha_sidecar.sh`
 - `scripts/trmnl_update_ha_sidecar_image.sh`
 - `deploy/khpi5/trmnl-ha-dashboard.env.example`
 
@@ -55,8 +56,9 @@ scp scripts/trmnl_sonos_local.py khpi5:/home/dave/trmnl-sonos-local.py
 scp scripts/run_trmnl_sonos.sh khpi5:/home/dave/run_trmnl_sonos.sh
 scp scripts/trmnl_mode_bridge.py khpi5:/home/dave/bin/trmnl-mode-bridge.py
 scp scripts/trmnl_set_display_mode.sh khpi5:/home/dave/bin/trmnl-set-display-mode
+scp scripts/trmnl_refresh_ha_sidecar.sh khpi5:/home/dave/bin/trmnl-refresh-ha-sidecar
 scp scripts/trmnl_update_ha_sidecar_image.sh khpi5:/home/dave/bin/trmnl-update-ha-sidecar-image
-ssh khpi5 "chmod +x /home/dave/run_trmnl_sonos.sh /home/dave/bin/trmnl-mode-bridge.py /home/dave/bin/trmnl-set-display-mode /home/dave/bin/trmnl-update-ha-sidecar-image"
+ssh khpi5 "chmod +x /home/dave/run_trmnl_sonos.sh /home/dave/bin/trmnl-mode-bridge.py /home/dave/bin/trmnl-set-display-mode /home/dave/bin/trmnl-refresh-ha-sidecar /home/dave/bin/trmnl-update-ha-sidecar-image"
 ssh khpi5 "sudo systemctl restart trmnl-mode-bridge.service"
 ```
 

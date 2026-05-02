@@ -1,7 +1,7 @@
 {
   "plugin_id": "trmnl-ha-dashboard",
   "name": "HA Dashboard",
-  "version": "2.10.0",
+  "version": "2.11.0",
   "fields": [
     {
       "key": "dashboard_title",
@@ -193,6 +193,238 @@
       "required": false,
       "default": "Media",
       "description": "Label for the media summary card."
+    },
+    {
+      "key": "generic_entities",
+      "type": "multi_string",
+      "required": false,
+      "default": "",
+      "description": "Comma-separated arbitrary HA or homelab entity IDs that can feed generic_entity slots."
+    },
+    {
+      "key": "generic_labels",
+      "type": "multi_string",
+      "required": false,
+      "default": "",
+      "description": "Optional comma-separated labels aligned with generic_entities."
+    },
+    {
+      "key": "generic_icons",
+      "type": "multi_string",
+      "required": false,
+      "default": "",
+      "description": "Optional comma-separated generic icon hints aligned with generic_entities."
+    },
+    {
+      "key": "generic_status_colours",
+      "type": "multi_string",
+      "required": false,
+      "default": "",
+      "allowed_values": ["green", "yellow", "orange", "red", "blue", "white", "grey"],
+      "description": "Optional comma-separated colour hints aligned with generic_entities."
+    },
+    {
+      "key": "top_left_card_type",
+      "type": "text",
+      "required": false,
+      "default": "weather",
+      "allowed_values": ["weather", "indoor", "door_lock", "cover", "washer", "light_group", "person_group", "media", "generic_entity", "hidden"],
+      "description": "Card template for the top-left fixed slot."
+    },
+    {
+      "key": "top_left_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional entity ID used when the top-left slot is generic_entity."
+    },
+    {
+      "key": "top_left_label",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional label override for the top-left slot."
+    },
+    {
+      "key": "top_left_detail_label",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional detail label override for the top-left slot."
+    },
+    {
+      "key": "top_right_card_type",
+      "type": "text",
+      "required": false,
+      "default": "indoor",
+      "allowed_values": ["weather", "indoor", "door_lock", "cover", "washer", "light_group", "person_group", "media", "generic_entity", "hidden"],
+      "description": "Card template for the top-right fixed slot."
+    },
+    {
+      "key": "top_right_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional entity ID used when the top-right slot is generic_entity."
+    },
+    {
+      "key": "top_right_label",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional label override for the top-right slot."
+    },
+    {
+      "key": "top_right_detail_label",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional detail label override for the top-right slot."
+    },
+    {
+      "key": "status_1_card_type",
+      "type": "text",
+      "required": false,
+      "default": "door_lock",
+      "allowed_values": ["weather", "indoor", "door_lock", "cover", "washer", "light_group", "person_group", "media", "generic_entity", "hidden"],
+      "description": "Card template for the first status-row fixed slot."
+    },
+    {
+      "key": "status_1_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional entity ID used when the first status slot is generic_entity."
+    },
+    {
+      "key": "status_1_label",
+      "type": "text",
+      "required": false,
+      "default": "Front door",
+      "description": "Label override for the first status slot."
+    },
+    {
+      "key": "status_1_detail_label",
+      "type": "text",
+      "required": false,
+      "default": "Security",
+      "description": "Detail label override for the first status slot."
+    },
+    {
+      "key": "status_2_card_type",
+      "type": "text",
+      "required": false,
+      "default": "cover",
+      "allowed_values": ["weather", "indoor", "door_lock", "cover", "washer", "light_group", "person_group", "media", "generic_entity", "hidden"],
+      "description": "Card template for the second status-row fixed slot."
+    },
+    {
+      "key": "status_2_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional entity ID used when the second status slot is generic_entity."
+    },
+    {
+      "key": "status_2_label",
+      "type": "text",
+      "required": false,
+      "default": "Blinds",
+      "description": "Label override for the second status slot."
+    },
+    {
+      "key": "status_2_detail_label",
+      "type": "text",
+      "required": false,
+      "default": "Position",
+      "description": "Detail label override for the second status slot."
+    },
+    {
+      "key": "status_3_card_type",
+      "type": "text",
+      "required": false,
+      "default": "washer",
+      "allowed_values": ["weather", "indoor", "door_lock", "cover", "washer", "light_group", "person_group", "media", "generic_entity", "hidden"],
+      "description": "Card template for the third status-row fixed slot."
+    },
+    {
+      "key": "status_3_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional entity ID used when the third status slot is generic_entity."
+    },
+    {
+      "key": "status_3_label",
+      "type": "text",
+      "required": false,
+      "default": "Washer",
+      "description": "Label override for the third status slot."
+    },
+    {
+      "key": "status_3_detail_label",
+      "type": "text",
+      "required": false,
+      "default": "Utility",
+      "description": "Detail label override for the third status slot."
+    },
+    {
+      "key": "bottom_left_card_type",
+      "type": "text",
+      "required": false,
+      "default": "person_group",
+      "allowed_values": ["weather", "indoor", "door_lock", "cover", "washer", "light_group", "person_group", "media", "generic_entity", "hidden"],
+      "description": "Card template for the bottom-left fixed slot."
+    },
+    {
+      "key": "bottom_left_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional entity ID used when the bottom-left slot is generic_entity."
+    },
+    {
+      "key": "bottom_left_label",
+      "type": "text",
+      "required": false,
+      "default": "People",
+      "description": "Label override for the bottom-left slot."
+    },
+    {
+      "key": "bottom_left_detail_label",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Detail label override for the bottom-left slot."
+    },
+    {
+      "key": "bottom_right_card_type",
+      "type": "text",
+      "required": false,
+      "default": "media",
+      "allowed_values": ["weather", "indoor", "door_lock", "cover", "washer", "light_group", "person_group", "media", "generic_entity", "hidden"],
+      "description": "Card template for the bottom-right fixed slot."
+    },
+    {
+      "key": "bottom_right_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Optional entity ID used when the bottom-right slot is generic_entity."
+    },
+    {
+      "key": "bottom_right_label",
+      "type": "text",
+      "required": false,
+      "default": "Media",
+      "description": "Label override for the bottom-right slot."
+    },
+    {
+      "key": "bottom_right_detail_label",
+      "type": "text",
+      "required": false,
+      "default": "Sonos",
+      "description": "Detail label override for the bottom-right slot."
     }
   ],
   "sidecar": {

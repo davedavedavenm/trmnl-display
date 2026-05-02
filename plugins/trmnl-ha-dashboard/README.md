@@ -157,6 +157,14 @@ When using `scripts/trmnl_ha_dashboard.py`, plugin fields map to environment var
 | `thermostat_detail_label` | `TRMNL_THERMOSTAT_DETAIL_LABEL` |
 | `people_label` | `TRMNL_PEOPLE_LABEL` |
 | `media_label` | `TRMNL_MEDIA_LABEL` |
+| `generic_entities` | `TRMNL_GENERIC_ENTITIES` |
+| `generic_labels` | `TRMNL_GENERIC_LABELS` |
+| `generic_icons` | `TRMNL_GENERIC_ICONS` |
+| `generic_status_colours` | `TRMNL_GENERIC_STATUS_COLOURS` |
+| `*_card_type` | `TRMNL_*_CARD_TYPE` |
+| `*_entity` | `TRMNL_*_ENTITY` |
+| `*_label` | `TRMNL_*_LABEL` |
+| `*_detail_label` | `TRMNL_*_DETAIL_LABEL` |
 
 ## Compatibility
 
@@ -164,26 +172,54 @@ The Liquid template is intended to remain broadly TRMNL/LaraPaper compatible.
 
 The sidecar colour path is designed for the Pimoroni Inky Impression 7.3" / Spectra-class `800x480` colour panel. Other panels should use a different `colour_profile`.
 
-## Planned Slot Configuration
+## Slot Configuration
 
-The current `compact_grid` layout is configurable by entity and label, but its visible card positions are still fixed in the sidecar renderer. The next portability step is a slot contract that lets a plugin user choose visible cards without editing Python.
+The `compact_grid` colour sidecar uses fixed, readable card positions, but each position can choose a supported card template. This keeps the plugin shareable without making LaraPaper responsible for pixel placement.
 
-Planned slot fields:
+Supported slot names:
 
-- `slot_1_type`, `slot_1_entity`, `slot_1_label`
-- `slot_2_type`, `slot_2_entity`, `slot_2_label`
-- repeat for the supported card positions
+- `top_left`
+- `top_right`
+- `status_1`
+- `status_2`
+- `status_3`
+- `bottom_left`
+- `bottom_right`
 
-Planned card types:
+Each slot exposes:
+
+- `*_card_type`
+- `*_entity`
+- `*_label`
+- `*_detail_label`
+
+Supported card types:
 
 - `weather`
 - `indoor`
+- `door_lock`
+- `cover`
+- `washer`
+- `light_group`
 - `person_group`
 - `media`
-- `door_lock`
-- `washer`
-- `cover`
-- `light_group`
 - `generic_entity`
+- `hidden`
 
-The sidecar renderer should keep today's layout as the default preset and map slots to safe, readable card templates.
+Default slots preserve the accepted colour dashboard: weather, indoor climate/humidity, door, blinds, washer, people, and media. The renderer maps slot intent onto existing card templates; arbitrary coordinates and custom pixel layout are intentionally not plugin settings.
+
+`generic_entities` lets a slot render arbitrary Home Assistant or homelab state without adding a bespoke card type. Each item uses:
+
+```json
+{
+  "id": "sensor.example",
+  "label": "Example",
+  "state": "OK",
+  "detail": "Updated recently",
+  "unit": "",
+  "icon": "server",
+  "status_colour": "green"
+}
+```
+
+`status_colour` accepts `green`, `yellow`, `orange`, `red`, `blue`, `white`, or `grey`; the sidecar still emits the fixed seven-colour panel palette.

@@ -136,10 +136,18 @@ The HA dashboard sidecar is served through LaraPaper, not a separate Pi endpoint
 Routine playlist-safe update:
 
 ```bash
-ssh khpi5 "cd /home/dave && python3 /home/dave/trmnl_ha_dashboard.py && python3 /home/dave/render_colour_dashboard.py --payload /home/dave/trmnl-ha-dashboard-payload.json --output /home/dave/sidecar_colour_dashboard_next.png --source-output /home/dave/sidecar_colour_dashboard_source_next.png && /home/dave/bin/trmnl-update-ha-sidecar-image"
+ssh khpi5 "/home/dave/bin/trmnl-refresh-ha-sidecar"
 ```
 
 That command updates the `Home Assistant` plugin image in LaraPaper and leaves the active playlist untouched. If the plugin is part of any LaraPaper playlist, normal playlist rotation can serve the refreshed image.
+
+Media-triggered refreshes can call the mode bridge endpoint instead:
+
+```bash
+ssh khpi5 "curl -fsS -X POST http://127.0.0.1:8787/ha-dashboard/refresh -H 'Authorization: Bearer $TRMNL_MODE_BRIDGE_TOKEN' -H 'Content-Type: application/json' -d '{\"reason\":\"manual\",\"force\":true}'"
+```
+
+The endpoint runs the same wrapper and rate-limits successful refreshes with a default 120-second cooldown unless `force` is set.
 
 Manual HA-only mode activation:
 

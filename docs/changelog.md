@@ -2,6 +2,7 @@
 
 ## 2026-05-02
 
+- Implemented configurable fixed card slots for the HA colour dashboard plugin contract, added `generic_entities`, and wired a playlist-safe `/ha-dashboard/refresh` endpoint with a 120-second cooldown for Sonos/media-triggered updates.
 - Added a playlist-safe HA sidecar updater that refreshes the LaraPaper plugin image without activating playlists or overriding the device current image, and documented the dynamic card-slot roadmap.
 - Reworked the HA colour sidecar grid to hide visible light cards, combine climate and humidity into one indoor card, and use the freed space for a wider home-status row.
 - Refined the HA colour sidecar layout to remove the top bar, bottom navigation, and energy card, group people into one presence card, and dedicate the lower-right card to media.

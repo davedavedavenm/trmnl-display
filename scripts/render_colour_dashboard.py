@@ -371,6 +371,77 @@ def active_sonos(sonos: Any) -> dict[str, Any]:
     return first_dict(sonos)
 
 
+def slot(data: dict[str, Any], name: str, default_type: str) -> dict[str, Any]:
+    slots = data.get("slots") if isinstance(data.get("slots"), dict) else {}
+    item = slots.get(name) if isinstance(slots.get(name), dict) else {}
+    return {"type": default_type, **item}
+
+
+def slot_text(item: dict[str, Any], key: str, fallback: str) -> str:
+    return as_text(item.get(key), fallback)
+
+
+def status_colour(value: Any, fallback: tuple[int, int, int] = SOFT_GREY) -> tuple[int, int, int]:
+    key = as_text(value, "").lower().replace(" ", "_")
+    return {
+        "green": SOFT_GREEN,
+        "yellow": SOFT_YELLOW,
+        "orange": SOFT_ORANGE,
+        "red": (255, 220, 220),
+        "blue": SOFT_BLUE,
+        "white": WHITE,
+        "grey": SOFT_GREY,
+        "gray": SOFT_GREY,
+    }.get(key, fallback)
+
+
+def generic_entity(data: dict[str, Any], entity_id: str = "") -> dict[str, Any]:
+    entities = data.get("generic_entities") if isinstance(data.get("generic_entities"), list) else []
+    for item in entities:
+        if isinstance(item, dict) and entity_id and item.get("id") == entity_id:
+            return item
+    for item in entities:
+        if isinstance(item, dict):
+            return item
+    return {}
+
+
+def icon_generic(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
+    draw.rounded_rectangle((x + 8, y + 8, x + 50, y + 50), radius=5, fill=WHITE, outline=BLACK, width=3)
+    draw.line((x + 16, y + 22, x + 42, y + 22), fill=BLACK, width=3)
+    draw.line((x + 16, y + 36, x + 42, y + 36), fill=BLACK, width=3)
+    draw.ellipse((x + 18, y + 42, x + 26, y + 50), fill=GREEN, outline=BLACK, width=1)
+
+
+def icon_light_group(draw: ImageDraw.ImageDraw, x: int, y: int, active: bool | None = None) -> None:
+    fill = YELLOW if active else WHITE if active is False else SOFT_GREY
+    draw.ellipse((x + 14, y + 4, x + 46, y + 36), fill=fill, outline=BLACK, width=3)
+    draw.rectangle((x + 22, y + 35, x + 38, y + 52), fill=WHITE, outline=BLACK, width=2)
+    draw.line((x + 18, y + 56, x + 42, y + 56), fill=BLACK, width=3)
+
+
+def render_generic_metric(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], item: dict[str, Any], title: str = "") -> None:
+    label = fit_text(title or item.get("label"), 14, "Status")
+    state = fit_text(as_text(item.get("state"), "--") + as_text(item.get("unit"), ""), 10)
+    detail = fit_text(item.get("detail"), 18, "")
+    metric(draw, box, label, state, detail, status_colour(item.get("status_colour"), WHITE), icon_generic)
+
+
+def render_generic_status(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], item: dict[str, Any], title: str = "") -> None:
+    label = fit_text(title or item.get("label"), 14, "Status")
+    state = fit_text(as_text(item.get("state"), "--") + as_text(item.get("unit"), ""), 12)
+    detail = fit_text(item.get("detail"), 12, "")
+    status_column(draw, box, label, state, detail, status_colour(item.get("status_colour"), WHITE), icon_generic)
+
+
+def light_summary(lights: list[Any]) -> tuple[str, str, bool | None]:
+    valid = [item for item in lights if isinstance(item, dict)]
+    if not valid:
+        return "Lights", "--", None
+    on_count = sum(1 for item in valid if item.get("on") is True)
+    return "Lights", f"{on_count}/{len(valid)} on", on_count > 0
+
+
 def render_dashboard(data: dict[str, Any]) -> Image.Image:
     img = Image.new("RGB", (WIDTH, HEIGHT), SOURCE_BG)
     draw = ImageDraw.Draw(img)
@@ -379,17 +450,19 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     home = data.get("home") if isinstance(data.get("home"), dict) else {}
     people = data.get("people") if isinstance(data.get("people"), list) else []
     sonos = data.get("sonos") if isinstance(data.get("sonos"), list) else []
+    lights = data.get("lights") if isinstance(data.get("lights"), list) else []
     labels = data.get("labels") if isinstance(data.get("labels"), dict) else {}
+    top_left_slot = slot(data, "top_left", "weather")
+    top_right_slot = slot(data, "top_right", "indoor")
+    status_1_slot = slot(data, "status_1", "door_lock")
+    status_2_slot = slot(data, "status_2", "cover")
+    status_3_slot = slot(data, "status_3", "washer")
+    bottom_left_slot = slot(data, "bottom_left", "person_group")
+    bottom_right_slot = slot(data, "bottom_right", "media")
 
     instance_label = fit_text(data.get("instance_label"), 18, "Home")
-    door_label = fit_text(labels.get("door"), 10, "Front door")
-    washer_label = fit_text(labels.get("washer"), 10, "Washer")
-    blind_label = fit_text(labels.get("blinds"), 10, "Blinds")
     thermostat_label = fit_text(labels.get("thermostat"), 10, "Climate")
     thermostat_detail = fit_text(labels.get("thermostat_detail"), 16, "Indoor")
-    door_detail = fit_text(labels.get("door_detail"), 18, "Security")
-    washer_detail = fit_text(labels.get("washer_detail"), 12, "Utility")
-    blind_detail = fit_text(labels.get("blinds_detail"), 12, "Position")
     sonos_label = fit_text(labels.get("sonos"), 10, "Sonos")
     people_label = fit_text(labels.get("people"), 12, "People")
     media_label = fit_text(labels.get("media"), 12, "Media")
@@ -406,77 +479,157 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     if blinds_open is None and blind_pos is not None:
         blinds_open = blind_pos > 0
 
-    metric(
-        draw,
-        (22, 18, 354, 136),
-        "Weather",
-        format_temp(temp),
-        condition_label,
-        SOFT_YELLOW,
-        lambda d, x, y: icon_sun_cloud_compact(d, x, y, condition),
-    )
-    indoor_card(
-        draw,
-        (376, 18, 778, 136),
-        thermostat_label,
-        format_temp(thermostat, with_unit=True),
-        thermostat_detail,
-        f"{humidity:.0f}%" if humidity is not None else "--%",
-        instance_label,
-    )
+    top_left_type = as_text(top_left_slot.get("type"), "weather")
+    if top_left_type == "weather":
+        metric(
+            draw,
+            (22, 18, 354, 136),
+            slot_text(top_left_slot, "label", "Weather"),
+            format_temp(temp),
+            condition_label,
+            SOFT_YELLOW,
+            lambda d, x, y: icon_sun_cloud_compact(d, x, y, condition),
+        )
+    elif top_left_type == "generic_entity":
+        render_generic_metric(draw, (22, 18, 354, 136), generic_entity(data, as_text(top_left_slot.get("entity"), "")), slot_text(top_left_slot, "label", ""))
+    elif top_left_type != "hidden":
+        render_generic_metric(draw, (22, 18, 354, 136), {}, slot_text(top_left_slot, "label", top_left_type.replace("_", " ").title()))
+
+    top_right_type = as_text(top_right_slot.get("type"), "indoor")
+    if top_right_type == "indoor":
+        indoor_card(
+            draw,
+            (376, 18, 778, 136),
+            thermostat_label,
+            format_temp(thermostat, with_unit=True),
+            thermostat_detail,
+            f"{humidity:.0f}%" if humidity is not None else "--%",
+            instance_label,
+        )
+    elif top_right_type == "weather":
+        metric(
+            draw,
+            (376, 18, 778, 136),
+            slot_text(top_right_slot, "label", "Weather"),
+            format_temp(temp),
+            condition_label,
+            SOFT_YELLOW,
+            lambda d, x, y: icon_sun_cloud_compact(d, x, y, condition),
+        )
+    elif top_right_type == "generic_entity":
+        render_generic_metric(draw, (376, 18, 778, 136), generic_entity(data, as_text(top_right_slot.get("entity"), "")), slot_text(top_right_slot, "label", ""))
+    elif top_right_type != "hidden":
+        render_generic_metric(draw, (376, 18, 778, 136), {}, slot_text(top_right_slot, "label", top_right_type.replace("_", " ").title()))
 
     card(draw, (22, 154, 778, 286), WHITE)
     text(draw, (44, 174), "Home status", 22, bold=True)
-    status_column(
-        draw,
-        (44, 206, 276, 278),
-        door_label,
-        "Locked" if locked else "Open" if locked is False else "--",
-        "Secure" if locked else door_detail if locked is False else "Unavailable",
-        SOFT_GREEN if locked else SOFT_ORANGE,
-        lambda d, x, y: icon_lock(d, x, y, locked),
-    )
-    status_column(
-        draw,
-        (294, 206, 526, 278),
-        blind_label,
-        "Open" if blinds_open else "Closed" if blinds_open is False else "--",
-        blind_detail,
-        SOFT_GREEN if blinds_open else SOFT_GREY,
-        lambda d, x, y: icon_blinds(d, x, y, blinds_open),
-    )
-    status_column(
-        draw,
-        (544, 206, 756, 278),
-        washer_label,
-        "Running" if washer_running else "Idle" if washer_running is False else "--",
-        washer_detail,
-        SOFT_BLUE if washer_running else SOFT_GREY,
-        lambda d, x, y: icon_washer(d, x, y, washer_running),
-    )
+    for item, box in (
+        (status_1_slot, (44, 206, 276, 278)),
+        (status_2_slot, (294, 206, 526, 278)),
+        (status_3_slot, (544, 206, 756, 278)),
+    ):
+        card_type = as_text(item.get("type"), "generic_entity")
+        if card_type == "door_lock":
+            status_column(
+                draw,
+                box,
+                fit_text(slot_text(item, "label", labels.get("door") or "Front door"), 10, "Front door"),
+                "Locked" if locked else "Open" if locked is False else "--",
+                "Secure" if locked else fit_text(slot_text(item, "detail_label", labels.get("door_detail") or "Security"), 18, "Security") if locked is False else "Unavailable",
+                SOFT_GREEN if locked else SOFT_ORANGE,
+                lambda d, x, y: icon_lock(d, x, y, locked),
+            )
+        elif card_type == "cover":
+            status_column(
+                draw,
+                box,
+                fit_text(slot_text(item, "label", labels.get("blinds") or "Blinds"), 10, "Blinds"),
+                "Open" if blinds_open else "Closed" if blinds_open is False else "--",
+                fit_text(slot_text(item, "detail_label", labels.get("blinds_detail") or "Position"), 12, "Position"),
+                SOFT_GREEN if blinds_open else SOFT_GREY,
+                lambda d, x, y: icon_blinds(d, x, y, blinds_open),
+            )
+        elif card_type == "washer":
+            status_column(
+                draw,
+                box,
+                fit_text(slot_text(item, "label", labels.get("washer") or "Washer"), 10, "Washer"),
+                "Running" if washer_running else "Idle" if washer_running is False else "--",
+                fit_text(slot_text(item, "detail_label", labels.get("washer_detail") or "Utility"), 12, "Utility"),
+                SOFT_BLUE if washer_running else SOFT_GREY,
+                lambda d, x, y: icon_washer(d, x, y, washer_running),
+            )
+        elif card_type == "light_group":
+            light_title, light_value, light_active = light_summary(lights)
+            status_column(
+                draw,
+                box,
+                slot_text(item, "label", light_title),
+                light_value,
+                slot_text(item, "detail_label", "Lights"),
+                SOFT_YELLOW if light_active else SOFT_GREY,
+                lambda d, x, y: icon_light_group(d, x, y, light_active),
+            )
+        elif card_type == "generic_entity":
+            render_generic_status(draw, box, generic_entity(data, as_text(item.get("entity"), "")), slot_text(item, "label", ""))
+        elif card_type != "hidden":
+            render_generic_status(draw, box, {}, slot_text(item, "label", card_type.replace("_", " ").title()))
 
-    card(draw, (22, 302, 332, 462), SOFT_GREEN)
-    text(draw, (44, 320), people_label, 24, bold=True)
-    visible_people = [p for p in people[:2] if isinstance(p, dict)]
-    if visible_people:
-        for index, person in enumerate(visible_people):
-            person_row(draw, (44, 350 + index * 54, 310, 404 + index * 54), person)
-    else:
-        icon_person(draw, 54, 366, None)
-        text(draw, (126, 370), "No people", 24, bold=True)
-        text(draw, (128, 410), "configured", 18)
+    bottom_left_type = as_text(bottom_left_slot.get("type"), "person_group")
+    if bottom_left_type == "person_group":
+        card(draw, (22, 302, 332, 462), SOFT_GREEN)
+        text(draw, (44, 320), slot_text(bottom_left_slot, "label", people_label), 24, bold=True)
+        visible_people = [p for p in people[:2] if isinstance(p, dict)]
+        if visible_people:
+            for index, person in enumerate(visible_people):
+                person_row(draw, (44, 350 + index * 54, 310, 404 + index * 54), person)
+        else:
+            icon_person(draw, 54, 366, None)
+            text(draw, (126, 370), "No people", 24, bold=True)
+            text(draw, (128, 410), "configured", 18)
+    elif bottom_left_type == "media":
+        card(draw, (22, 302, 332, 462), SOFT_BLUE)
+        media = active_sonos(sonos)
+        media_room = fit_text(media.get("room"), 18, "No active room")
+        media_title = fit_text(media.get("title") or media.get("artist") or "No active playback", 20)
+        media_state = as_text(media.get("state"), "Idle").title()
+        icon_music_compact(draw, 44, 344)
+        text(draw, (44, 320), slot_text(bottom_left_slot, "label", media_label), 24, bold=True)
+        text(draw, (126, 350), media_room, 23, bold=True)
+        text(draw, (128, 390), media_title, 18)
+        status_band(draw, (128, 420, 230, 450), media_state, ORANGE if media_state == "Playing" else YELLOW)
+    elif bottom_left_type == "generic_entity":
+        render_generic_metric(draw, (22, 302, 332, 462), generic_entity(data, as_text(bottom_left_slot.get("entity"), "")), slot_text(bottom_left_slot, "label", ""))
+    elif bottom_left_type != "hidden":
+        render_generic_metric(draw, (22, 302, 332, 462), {}, slot_text(bottom_left_slot, "label", bottom_left_type.replace("_", " ").title()))
 
-    card(draw, (354, 302, 778, 462), SOFT_BLUE)
-    media = active_sonos(sonos)
-    media_room = fit_text(media.get("room"), 24, "No active room")
-    media_title = fit_text(media.get("title") or media.get("artist") or "No active playback", 30)
-    media_state = as_text(media.get("state"), "Idle").title()
-    icon_music(draw, 382, 344)
-    text(draw, (382, 320), media_label, 24, bold=True)
-    text(draw, (466, 350), media_room, 33, bold=True)
-    text(draw, (468, 396), media_title, 22)
-    status_band(draw, (466, 422, 570, 452), media_state, ORANGE if media_state == "Playing" else YELLOW)
-    text(draw, (590, 427), sonos_label, 18, bold=True)
+    bottom_right_type = as_text(bottom_right_slot.get("type"), "media")
+    if bottom_right_type == "media":
+        card(draw, (354, 302, 778, 462), SOFT_BLUE)
+        media = active_sonos(sonos)
+        media_room = fit_text(media.get("room"), 24, "No active room")
+        media_title = fit_text(media.get("title") or media.get("artist") or "No active playback", 30)
+        media_state = as_text(media.get("state"), "Idle").title()
+        icon_music(draw, 382, 344)
+        text(draw, (382, 320), slot_text(bottom_right_slot, "label", media_label), 24, bold=True)
+        text(draw, (466, 350), media_room, 33, bold=True)
+        text(draw, (468, 396), media_title, 22)
+        status_band(draw, (466, 422, 570, 452), media_state, ORANGE if media_state == "Playing" else YELLOW)
+        text(draw, (590, 427), slot_text(bottom_right_slot, "detail_label", sonos_label), 18, bold=True)
+    elif bottom_right_type == "person_group":
+        card(draw, (354, 302, 778, 462), SOFT_GREEN)
+        text(draw, (382, 320), slot_text(bottom_right_slot, "label", people_label), 24, bold=True)
+        visible_people = [p for p in people[:3] if isinstance(p, dict)]
+        if visible_people:
+            for index, person in enumerate(visible_people[:2]):
+                person_row(draw, (382, 350 + index * 54, 734, 404 + index * 54), person)
+        else:
+            icon_person(draw, 382, 366, None)
+            text(draw, (466, 370), "No people configured", 24, bold=True)
+    elif bottom_right_type == "generic_entity":
+        render_generic_metric(draw, (354, 302, 778, 462), generic_entity(data, as_text(bottom_right_slot.get("entity"), "")), slot_text(bottom_right_slot, "label", ""))
+    elif bottom_right_type != "hidden":
+        render_generic_metric(draw, (354, 302, 778, 462), {}, slot_text(bottom_right_slot, "label", bottom_right_type.replace("_", " ").title()))
 
     return img
 

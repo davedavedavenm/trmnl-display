@@ -57,6 +57,7 @@ plugins/<plugin-id>/
 - Home Assistant URL
 - entity IDs
 - room/device labels where user-specific naming matters
+- fixed card slot type/entity/label/detail settings when a renderer supports configurable card intent
 - renderer or colour profile when multiple display classes are supported
 - refresh interval
 
