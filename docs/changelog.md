@@ -2,6 +2,9 @@
 
 ## 2026-05-02
 
+- Made `scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png` the tracked canonical colour-dashboard visual reference and documented that the muted LaraPaper-style render is not the target design.
+- Restored `scripts/render_colour_dashboard.py` to the accepted proof-style icon/card layout while keeping TRMNL `merge_variables` payload input and writing non-overwriting `*_next.png` iteration files.
+- Extended the HA dashboard plugin contract and companion payload writer with optional light and energy fields for the proof-style card surfaces.
 - Aligned the HA dashboard colour sidecar with the plugin payload contract by rendering from TRMNL `merge_variables` JSON instead of static proof data.
 - Updated the HA dashboard companion payload to include plugin fields and configurable entity IDs via `/home/dave/.env.trmnl-ha-dashboard`.
 - Added a khpi5 environment example and documented local/live sidecar payload rendering.

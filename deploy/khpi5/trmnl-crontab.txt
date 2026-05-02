@@ -10,5 +10,5 @@
 # Push Sonos now-playing payloads into the Sonos Local LaraPaper plugin.
 * * * * * /home/dave/run_trmnl_sonos.sh 2>&1 | logger -t trmnl-sonos-local
 
-# Push Home Assistant dashboard state into LaraPaper.
-*/10 * * * * cd /home/dave && python3 /home/dave/trmnl_ha_dashboard.py 2>&1 | logger -t trmnl-ha-dashboard
+# Push Home Assistant dashboard state into LaraPaper, then render the accepted colour sidecar image from the same payload.
+*/10 * * * * { cd /home/dave && python3 /home/dave/trmnl_ha_dashboard.py && python3 /home/dave/render_colour_dashboard.py --payload /home/dave/trmnl-ha-dashboard-payload.json --output /home/dave/sidecar_colour_dashboard_next.png --source-output /home/dave/sidecar_colour_dashboard_source_next.png; } 2>&1 | logger -t trmnl-ha-dashboard

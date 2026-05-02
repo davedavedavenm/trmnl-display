@@ -14,11 +14,10 @@ ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_DIR = ROOT / "plugins" / "trmnl-ha-dashboard"
 DEFAULT_PAYLOAD = PLUGIN_DIR / "payload.example.json"
 OUT_DIR = Path(__file__).resolve().parent / "tmp"
-OUT_PATH = OUT_DIR / "sidecar_colour_dashboard.png"
-SOURCE_PATH = OUT_DIR / "sidecar_colour_dashboard_source.png"
+OUT_PATH = OUT_DIR / "sidecar_colour_dashboard_next.png"
+SOURCE_PATH = OUT_DIR / "sidecar_colour_dashboard_source_next.png"
 WIDTH = 800
 HEIGHT = 480
-
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -27,6 +26,13 @@ YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 ORANGE = (255, 128, 0)
+
+SOURCE_BG = (250, 248, 239)
+SOFT_YELLOW = (255, 245, 180)
+SOFT_BLUE = (210, 230, 255)
+SOFT_GREEN = (220, 255, 220)
+SOFT_ORANGE = (255, 220, 205)
+SOFT_GREY = (235, 235, 235)
 
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
 
@@ -48,23 +54,25 @@ def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.Im
 def load_payload(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         raw = json.load(f)
-    if "merge_variables" in raw and isinstance(raw["merge_variables"], dict):
+    if isinstance(raw, dict) and isinstance(raw.get("merge_variables"), dict):
         return raw["merge_variables"]
-    return raw
+    if isinstance(raw, dict):
+        return raw
+    return {}
 
 
 def as_text(value: Any, fallback: str = "--") -> str:
     if value is None:
         return fallback
     if isinstance(value, str):
-        value = value.strip()
-        return value if value else fallback
+        stripped = value.strip()
+        return stripped if stripped else fallback
     return str(value)
 
 
 def as_float(value: Any) -> float | None:
     try:
-        if value in (None, "", "unavailable", "unknown"):
+        if value in (None, "", "unknown", "unavailable"):
             return None
         return float(value)
     except (TypeError, ValueError):
@@ -76,9 +84,9 @@ def as_bool(value: Any) -> bool | None:
         return value
     if isinstance(value, str):
         lowered = value.strip().lower()
-        if lowered in {"true", "yes", "on", "open", "home", "locked"}:
+        if lowered in {"true", "yes", "on", "open", "home", "locked", "running", "playing"}:
             return True
-        if lowered in {"false", "no", "off", "closed", "away", "unlocked"}:
+        if lowered in {"false", "no", "off", "closed", "away", "unlocked", "idle", "paused"}:
             return False
     if value is None:
         return None
@@ -92,7 +100,7 @@ def fit_text(value: Any, max_chars: int, fallback: str = "--") -> str:
     return text_value[: max(1, max_chars - 1)].rstrip() + "."
 
 
-def draw_text(
+def text(
     draw: ImageDraw.ImageDraw,
     xy: tuple[int, int],
     value: Any,
@@ -121,89 +129,89 @@ def centered_text(
     draw.text((x, y), text_value, font=f, fill=fill)
 
 
-def card(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], fill: tuple[int, int, int] = WHITE, outline: tuple[int, int, int] = BLACK, width: int = 2) -> None:
-    draw.rounded_rectangle(box, radius=7, fill=fill, outline=outline, width=width)
+def card(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], fill: tuple[int, int, int], width: int = 2) -> None:
+    draw.rounded_rectangle(box, radius=8, fill=fill, outline=BLACK, width=width)
 
 
 def icon_home(draw: ImageDraw.ImageDraw, x: int, y: int, fill: tuple[int, int, int] = BLACK) -> None:
-    draw.polygon([(x, y + 16), (x + 18, y), (x + 36, y + 16)], fill=fill)
-    draw.rectangle((x + 6, y + 16, x + 30, y + 38), fill=fill)
-    draw.rectangle((x + 16, y + 26, x + 24, y + 38), fill=WHITE)
+    draw.polygon([(x, y + 18), (x + 18, y), (x + 36, y + 18)], fill=fill)
+    draw.rectangle((x + 6, y + 18, x + 30, y + 38), fill=fill)
+    draw.rectangle((x + 16, y + 25, x + 24, y + 38), fill=WHITE)
 
 
-def icon_person(draw: ImageDraw.ImageDraw, x: int, y: int, fill: tuple[int, int, int] = BLACK) -> None:
-    draw.ellipse((x + 12, y, x + 38, y + 26), fill=WHITE, outline=fill, width=3)
-    draw.arc((x + 4, y + 28, x + 46, y + 72), 200, 340, fill=fill, width=4)
-
-
-def icon_weather(draw: ImageDraw.ImageDraw, x: int, y: int, condition: str) -> None:
-    c = condition.lower()
-    sun_fill = ORANGE if "sun" in c or "clear" in c else YELLOW
-    draw.ellipse((x + 26, y + 2, x + 66, y + 42), fill=sun_fill, outline=BLACK, width=2)
-    for dx, dy in [(46, -8), (46, 54), (10, 22), (82, 22), (19, 0), (73, 0)]:
-        draw.line((x + 46, y + 22, x + dx, y + dy), fill=BLACK, width=2)
-    if any(token in c for token in ("rain", "drizzle", "shower", "cloud", "partly")):
-        draw.ellipse((x + 6, y + 30, x + 48, y + 66), fill=WHITE, outline=BLACK, width=2)
-        draw.ellipse((x + 38, y + 24, x + 86, y + 68), fill=WHITE, outline=BLACK, width=2)
-        draw.rectangle((x + 18, y + 46, x + 80, y + 69), fill=WHITE)
-        draw.arc((x + 6, y + 30, x + 48, y + 66), 180, 360, fill=BLACK, width=2)
-        draw.arc((x + 38, y + 24, x + 86, y + 68), 180, 360, fill=BLACK, width=2)
-        draw.line((x + 16, y + 68, x + 80, y + 68), fill=BLACK, width=2)
-    if "rain" in c or "drizzle" in c or "shower" in c:
+def icon_sun_cloud(draw: ImageDraw.ImageDraw, x: int, y: int, condition: str = "") -> None:
+    sun_fill = ORANGE if any(token in condition.lower() for token in ("sun", "clear")) else YELLOW
+    draw.ellipse((x + 20, y, x + 58, y + 38), fill=sun_fill, outline=BLACK, width=2)
+    for dx, dy in [(39, -10), (39, 48), (5, 19), (73, 19), (14, -4), (64, -4)]:
+        draw.line((x + 39, y + 19, x + dx, y + dy), fill=BLACK, width=2)
+    draw.ellipse((x + 5, y + 28, x + 45, y + 65), fill=WHITE, outline=BLACK, width=2)
+    draw.ellipse((x + 35, y + 22, x + 82, y + 66), fill=WHITE, outline=BLACK, width=2)
+    draw.rectangle((x + 16, y + 44, x + 76, y + 67), fill=WHITE)
+    draw.arc((x + 5, y + 28, x + 45, y + 65), 180, 360, fill=BLACK, width=2)
+    draw.arc((x + 35, y + 22, x + 82, y + 66), 180, 360, fill=BLACK, width=2)
+    draw.line((x + 15, y + 66, x + 75, y + 66), fill=BLACK, width=2)
+    if any(token in condition.lower() for token in ("rain", "drizzle", "shower")):
         for offset in (24, 48, 72):
-            draw.line((x + offset, y + 74, x + offset - 5, y + 86), fill=BLUE, width=3)
+            draw.line((x + offset, y + 72, x + offset - 5, y + 84), fill=BLUE, width=3)
+
+
+def icon_bulb(draw: ImageDraw.ImageDraw, x: int, y: int, on: bool | None = True) -> None:
+    fill = YELLOW if on else WHITE
+    draw.ellipse((x + 8, y, x + 42, y + 34), fill=fill, outline=BLACK, width=2)
+    draw.rectangle((x + 18, y + 33, x + 32, y + 47), fill=WHITE, outline=BLACK, width=2)
+    draw.line((x + 14, y + 50, x + 36, y + 50), fill=BLACK, width=2)
+    if on:
+        for x1, y1, x2, y2 in [
+            (x + 25, y - 8, x + 25, y - 18),
+            (x + 2, y + 14, x - 8, y + 10),
+            (x + 48, y + 14, x + 58, y + 10),
+        ]:
+            draw.line((x1, y1, x2, y2), fill=BLACK, width=2)
 
 
 def icon_drop(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
-    draw.ellipse((x + 10, y + 28, x + 42, y + 60), fill=BLUE, outline=BLACK, width=2)
-    draw.polygon([(x + 26, y + 2), (x + 10, y + 40), (x + 42, y + 40)], fill=BLUE, outline=BLACK)
+    draw.ellipse((x + 9, y + 24, x + 39, y + 54), fill=BLUE, outline=BLACK, width=2)
+    draw.polygon([(x + 24, y), (x + 9, y + 34), (x + 39, y + 34)], fill=BLUE, outline=BLACK)
 
 
-def icon_lock(draw: ImageDraw.ImageDraw, x: int, y: int, locked: bool | None) -> None:
-    fill = BLUE if locked else RED
+def icon_lock(draw: ImageDraw.ImageDraw, x: int, y: int, locked: bool | None = True) -> None:
     if locked:
-        draw.arc((x + 9, y + 2, x + 47, y + 42), 180, 360, fill=BLACK, width=5)
+        draw.arc((x + 8, y, x + 42, y + 36), 180, 360, fill=BLACK, width=5)
     else:
-        draw.arc((x + 18, y + 2, x + 56, y + 42), 180, 330, fill=BLACK, width=5)
-    draw.rounded_rectangle((x + 6, y + 30, x + 50, y + 66), radius=4, fill=fill, outline=BLACK, width=2)
-    draw.ellipse((x + 25, y + 43, x + 33, y + 51), fill=WHITE)
+        draw.arc((x + 17, y, x + 51, y + 36), 180, 330, fill=BLACK, width=5)
+    draw.rectangle((x + 5, y + 25, x + 45, y + 58), fill=BLACK)
+    draw.ellipse((x + 22, y + 36, x + 30, y + 44), fill=WHITE)
 
 
 def icon_thermo(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
-    draw.rounded_rectangle((x + 18, y + 4, x + 34, y + 48), radius=8, fill=WHITE, outline=BLACK, width=2)
-    draw.ellipse((x + 10, y + 40, x + 42, y + 72), fill=RED, outline=BLACK, width=2)
-    draw.rectangle((x + 22, y + 18, x + 30, y + 54), fill=RED)
+    draw.rounded_rectangle((x + 18, y, x + 32, y + 42), radius=7, fill=WHITE, outline=BLACK, width=2)
+    draw.ellipse((x + 10, y + 34, x + 40, y + 64), fill=RED, outline=BLACK, width=2)
+    draw.rectangle((x + 21, y + 14, x + 29, y + 48), fill=RED)
 
 
-def icon_washer(draw: ImageDraw.ImageDraw, x: int, y: int, running: bool | None) -> None:
-    fill = ORANGE if running else WHITE
-    draw.rounded_rectangle((x + 8, y + 2, x + 54, y + 68), radius=5, fill=fill, outline=BLACK, width=3)
-    draw.ellipse((x + 17, y + 27, x + 45, y + 55), fill=WHITE, outline=BLACK, width=3)
-    draw.arc((x + 22, y + 33, x + 42, y + 49), 20, 210, fill=BLUE, width=2)
-    draw.ellipse((x + 16, y + 10, x + 22, y + 16), fill=BLACK)
-    draw.line((x + 29, y + 13, x + 46, y + 13), fill=BLACK, width=2)
-
-
-def icon_blinds(draw: ImageDraw.ImageDraw, x: int, y: int, open_: bool | None) -> None:
-    draw.line((x + 4, y + 8, x + 58, y + 8), fill=BLACK, width=4)
-    for row in (20, 32, 44):
-        draw.rectangle((x + 10, y + row, x + 52, y + row + 5), fill=GREEN if open_ else WHITE, outline=BLACK)
-    draw.line((x + 32, y + 8, x + 32, y + 64), fill=BLACK, width=2)
+def icon_blinds(draw: ImageDraw.ImageDraw, x: int, y: int, open_: bool | None = True) -> None:
     if open_:
-        draw.polygon([(x + 22, y + 58), (x + 32, y + 68), (x + 42, y + 58)], fill=GREEN, outline=BLACK)
+        centered_text(draw, (x - 2, y + 4, x + 52, y + 54), "|||", 34, bold=True)
     else:
-        draw.polygon([(x + 22, y + 64), (x + 32, y + 54), (x + 42, y + 64)], fill=WHITE, outline=BLACK)
+        for row in (8, 20, 32, 44):
+            draw.rectangle((x + 2, y + row, x + 50, y + row + 5), fill=WHITE, outline=BLACK)
+
+
+def icon_washer(draw: ImageDraw.ImageDraw, x: int, y: int, running: bool | None = False) -> None:
+    draw.rounded_rectangle((x + 6, y + 4, x + 46, y + 58), radius=4, fill=WHITE, outline=BLACK, width=3)
+    if running:
+        draw.ellipse((x + 14, y + 24, x + 38, y + 48), fill=SOFT_BLUE, outline=BLACK, width=2)
 
 
 def icon_music(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
-    draw.line((x + 32, y + 8, x + 32, y + 52), fill=BLACK, width=4)
+    draw.line((x + 32, y + 8, x + 32, y + 48), fill=BLACK, width=4)
     draw.line((x + 32, y + 8, x + 58, y + 2), fill=BLACK, width=4)
-    draw.line((x + 58, y + 2, x + 58, y + 44), fill=BLACK, width=4)
-    draw.ellipse((x + 10, y + 48, x + 34, y + 70), fill=YELLOW, outline=BLACK, width=2)
-    draw.ellipse((x + 38, y + 40, x + 62, y + 62), fill=YELLOW, outline=BLACK, width=2)
+    draw.line((x + 58, y + 2, x + 58, y + 42), fill=BLACK, width=4)
+    draw.ellipse((x + 10, y + 45, x + 34, y + 66), fill=YELLOW, outline=BLACK, width=2)
+    draw.ellipse((x + 38, y + 37, x + 62, y + 58), fill=YELLOW, outline=BLACK, width=2)
 
 
-def status_card(
+def metric(
     draw: ImageDraw.ImageDraw,
     box: tuple[int, int, int, int],
     title: str,
@@ -211,213 +219,166 @@ def status_card(
     detail: str,
     fill: tuple[int, int, int],
     icon_fn: Callable[[ImageDraw.ImageDraw, int, int], None],
-    dark: bool = False,
 ) -> None:
     card(draw, box, fill=fill)
-    fg = WHITE if dark else BLACK
     icon_fn(draw, box[0] + 14, box[1] + 18)
-    draw_text(draw, (box[0] + 86, box[1] + 14), title.upper(), 12, fill=fg, bold=True)
-    draw_text(draw, (box[0] + 86, box[1] + 38), fit_text(value, 13), 25, fill=fg, bold=True)
-    draw_text(draw, (box[0] + 86, box[1] + 70), fit_text(detail, 20, ""), 13, fill=fg, bold=False, fallback="")
+    text(draw, (box[0] + 90, box[1] + 16), fit_text(title, 12), 16, bold=True)
+    text(draw, (box[0] + 90, box[1] + 43), fit_text(value, 9), 27, bold=True)
+    text(draw, (box[0] + 90, box[1] + 78), fit_text(detail, 18, ""), 13, fallback="")
 
 
-def small_card(
+def control(
     draw: ImageDraw.ImageDraw,
     box: tuple[int, int, int, int],
     title: str,
     value: str,
-    detail: str,
     fill: tuple[int, int, int],
     icon_fn: Callable[[ImageDraw.ImageDraw, int, int], None],
 ) -> None:
     card(draw, box, fill=fill)
-    draw.rectangle((box[0] + 1, box[1] + 1, box[2] - 1, box[1] + 10), fill=fill)
-    draw_text(draw, (box[0] + 12, box[1] + 18), title.upper(), 11, bold=True)
-    icon_fn(draw, box[2] - 66, box[1] + 22)
-    draw_text(draw, (box[0] + 12, box[1] + 48), fit_text(value, 10), 23, bold=True)
-    draw_text(draw, (box[0] + 12, box[1] + 78), fit_text(detail, 16, ""), 12, fallback="")
+    centered_text(draw, (box[0], box[1] + 8, box[2], box[1] + 32), fit_text(title, 10), 15, bold=True)
+    icon_fn(draw, box[0] + 38, box[1] + 40)
+    centered_text(draw, (box[0], box[3] - 30, box[2], box[3] - 8), fit_text(value, 10), 15)
+
+
+def first_dict(items: Any, index: int = 0) -> dict[str, Any]:
+    if isinstance(items, list) and len(items) > index and isinstance(items[index], dict):
+        return items[index]
+    return {}
+
+
+def active_sonos(sonos: Any) -> dict[str, Any]:
+    if not isinstance(sonos, list):
+        return {}
+    for state in ("playing", "paused"):
+        for item in sonos:
+            if isinstance(item, dict) and item.get("state") == state:
+                return item
+    return first_dict(sonos)
 
 
 def render_dashboard(data: dict[str, Any]) -> Image.Image:
-    img = Image.new("RGB", (WIDTH, HEIGHT), WHITE)
+    img = Image.new("RGB", (WIDTH, HEIGHT), SOURCE_BG)
     draw = ImageDraw.Draw(img)
-    draw.rectangle((0, 0, WIDTH, HEIGHT), fill=WHITE)
 
-    title = fit_text(data.get("dashboard_title"), 22, "Home Assistant")
-    instance = fit_text(data.get("instance_label"), 18, "Home")
-    updated_at = as_text(data.get("updated_at"), datetime.now().strftime("%d %b %H:%M"))
     weather = data.get("weather") if isinstance(data.get("weather"), dict) else {}
     home = data.get("home") if isinstance(data.get("home"), dict) else {}
     people = data.get("people") if isinstance(data.get("people"), list) else []
     sonos = data.get("sonos") if isinstance(data.get("sonos"), list) else []
+    lights = data.get("lights") if isinstance(data.get("lights"), list) else []
+    energy = data.get("energy") if isinstance(data.get("energy"), dict) else {}
+
+    updated_at = as_text(data.get("updated_at"), datetime.now().strftime("%d %b %H:%M"))
+    updated_time = updated_at[-5:] if len(updated_at) >= 5 else updated_at
+    title = fit_text(data.get("dashboard_title"), 24, "Home Assistant")
 
     temp = as_float(weather.get("temperature"))
     humidity = as_float(weather.get("humidity"))
-    wind = as_float(weather.get("wind_speed"))
     condition = as_text(weather.get("condition"), "")
-    condition_label = fit_text(weather.get("condition_label") or condition.replace("-", " ").title(), 20, "Weather")
-    temp_text = f"{temp:.1f} C" if temp is not None else "-- C"
+    condition_label = fit_text(weather.get("condition_label") or condition.replace("-", " ").title(), 18, "Weather")
     thermostat = as_float(home.get("thermostat_temp"))
     locked = as_bool(home.get("door_locked"))
     washer_running = as_bool(home.get("washer_running"))
-    blinds_open = as_bool(home.get("blinds_open"))
     blind_pos = as_float(home.get("blind_position"))
+    blinds_open = as_bool(home.get("blinds_open"))
     if blinds_open is None and blind_pos is not None:
-        blinds_open = blind_pos == 0
+        blinds_open = blind_pos > 0
 
-    active_sonos = next((s for s in sonos if isinstance(s, dict) and s.get("state") == "playing"), None)
-    if active_sonos is None:
-        active_sonos = next((s for s in sonos if isinstance(s, dict) and s.get("state") == "paused"), None)
-    idle_count = sum(1 for s in sonos if isinstance(s, dict) and s.get("state") == "idle")
+    draw.rectangle((0, 0, WIDTH, 54), fill=WHITE)
+    icon_home(draw, 24, 10)
+    text(draw, (74, 16), title, 24, bold=True)
+    text(draw, (626, 6), updated_time, 40, bold=True)
+    text(draw, (648, 40), fit_text(updated_at, 18), 13)
+    draw.line((22, 56, 778, 56), fill=BLACK, width=2)
 
-    # Header mirrors the LaraPaper compatibility template: quiet, compact, icon-led.
-    draw.rectangle((18, 15, 782, 71), fill=WHITE)
-    draw.line((18, 71, 782, 71), fill=BLACK, width=1)
-    draw.rounded_rectangle((28, 18, 59, 49), radius=5, fill=BLUE, outline=BLACK, width=1)
-    icon_home(draw, 26, 16, WHITE)
-    draw_text(draw, (72, 17), title, 17, bold=True)
-    draw_text(draw, (72, 42), instance, 11, fill=GREEN, bold=True)
-    draw_text(draw, (642, 13), updated_at[-5:], 36, bold=False)
-    draw_text(draw, (620, 52), fit_text(updated_at, 20), 11, bold=True)
-
-    # Top metrics: solid ACeP colours with large values and simple line icons.
-    card(draw, (22, 84, 328, 172), fill=YELLOW, width=1)
-    draw.ellipse((48, 98, 88, 138), fill=ORANGE, outline=BLACK, width=2)
-    draw.ellipse((39, 126, 83, 158), fill=WHITE, outline=BLACK, width=2)
-    draw.ellipse((72, 118, 122, 160), fill=WHITE, outline=BLACK, width=2)
-    draw.rectangle((52, 141, 116, 161), fill=WHITE)
-    draw.arc((39, 126, 83, 158), 180, 360, fill=BLACK, width=2)
-    draw.arc((72, 118, 122, 160), 180, 360, fill=BLACK, width=2)
-    draw.line((52, 160, 116, 160), fill=BLACK, width=2)
-    draw_text(draw, (148, 101), temp_text, 31, bold=True)
-    draw_text(draw, (150, 139), condition_label, 13, bold=True)
-
-    card(draw, (342, 84, 558, 172), fill=BLUE, width=1)
-    icon_drop(draw, 358, 101)
-    draw_text(draw, (416, 101), "HUMIDITY", 11, fill=WHITE, bold=True)
-    draw_text(draw, (416, 127), f"{humidity:.0f}%" if humidity is not None else "--%", 29, fill=WHITE, bold=True)
-    draw_text(draw, (418, 157), f"Wind {wind:.0f} km/h" if wind is not None else "Wind --", 11, fill=WHITE, bold=True)
-
-    card(draw, (572, 84, 778, 172), fill=GREEN, width=1)
-    draw.line((592, 126, 650, 126), fill=BLACK, width=3)
-    draw.arc((596, 95, 632, 131), 180, 360, fill=BLACK, width=3)
-    draw.line((650, 126, 688, 126), fill=BLACK, width=3)
-    draw_text(draw, (670, 100), "WIND", 11, bold=True)
-    draw_text(draw, (646, 127), f"{wind:.0f} km/h" if wind is not None else "--", 26, bold=True)
-
-    def mini(
-        box: tuple[int, int, int, int],
-        label: str,
-        value: str,
-        detail: str,
-        fill: tuple[int, int, int],
-        icon: Callable[[ImageDraw.ImageDraw, int, int], None],
-        dark: bool = False,
-    ) -> None:
-        fg = WHITE if dark else BLACK
-        card(draw, box, fill=fill, width=1)
-        draw.rectangle((box[0] + 1, box[1] + 1, box[2] - 1, box[1] + 9), fill=fill)
-        draw_text(draw, (box[0] + 12, box[1] + 18), label.upper(), 10, fill=fg, bold=True)
-        icon(draw, box[2] - 58, box[1] + 19)
-        draw_text(draw, (box[0] + 12, box[1] + 49), fit_text(value, 10), 24, fill=fg, bold=True)
-        draw_text(draw, (box[0] + 12, box[1] + 78), fit_text(detail, 14, ""), 11, fill=fg, bold=True, fallback="")
-
-    grid_x = [22, 216, 410, 604]
-    row_y = [186, 304]
-    w, h = 178, 106
-
-    for i in range(2):
-        person = people[i] if i < len(people) and isinstance(people[i], dict) else {}
-        state = as_text(person.get("state"), "unknown").lower()
-        home_state = state == "home"
-        fill = YELLOW if home_state else RED
-        mini(
-            (grid_x[i], row_y[0], grid_x[i] + w, row_y[0] + h),
-            fit_text(person.get("name"), 12, "Person"),
-            "Home" if home_state else "Away",
-            "Presence",
-            fill,
-            lambda d, x, y: icon_person(d, x, y),
-            dark=not home_state,
-        )
-
-    mini(
-        (grid_x[2], row_y[0], grid_x[2] + w, row_y[0] + h),
-        "Front Door",
-        "Locked" if locked else "Open",
-        "Security",
-        BLUE if locked else RED,
-        lambda d, x, y: icon_lock(d, x, y, locked),
-        dark=True,
+    metric(
+        draw,
+        (24, 76, 212, 174),
+        "Weather",
+        f"{temp:.1f}" if temp is not None else "--",
+        condition_label,
+        SOFT_YELLOW,
+        lambda d, x, y: icon_sun_cloud(d, x, y, condition),
     )
-
-    mini(
-        (grid_x[3], row_y[0], grid_x[3] + w, row_y[0] + h),
+    metric(
+        draw,
+        (226, 76, 384, 174),
+        "Humidity",
+        f"{humidity:.0f}%" if humidity is not None else "--%",
+        fit_text(data.get("instance_label"), 18, "Home"),
+        SOFT_BLUE,
+        icon_drop,
+    )
+    metric(
+        draw,
+        (398, 76, 556, 174),
         "Thermostat",
-        f"{thermostat:.1f} C" if thermostat is not None else "--",
-        "Indoor temp",
-        ORANGE,
+        f"{thermostat:.1f} C" if thermostat is not None else "-- C",
+        "Indoor",
+        SOFT_ORANGE,
         icon_thermo,
     )
-
-    mini(
-        (grid_x[0], row_y[1], grid_x[0] + w, row_y[1] + h),
-        "Washer",
-        "Running" if washer_running else "Idle",
-        "Utility",
-        ORANGE if washer_running else WHITE,
-        lambda d, x, y: icon_washer(d, x, y, washer_running),
+    metric(
+        draw,
+        (570, 76, 776, 174),
+        "Front door",
+        "Locked" if locked else "Open",
+        "Secure" if locked else "Check door",
+        SOFT_GREEN if locked else SOFT_ORANGE,
+        lambda d, x, y: icon_lock(d, x, y, locked),
     )
 
-    mini(
-        (grid_x[1], row_y[1], grid_x[1] + w, row_y[1] + h),
-        "Blinds",
-        "Open" if blinds_open else "Closed",
-        f"{blind_pos:.0f}%" if blind_pos is not None else "Position",
-        GREEN if blinds_open else WHITE,
-        lambda d, x, y: icon_blinds(d, x, y, blinds_open),
-    )
+    light_cards = []
+    for i in range(3):
+        light = first_dict(lights, i)
+        on = as_bool(light.get("on", light.get("state")))
+        label = light.get("label") or light.get("name") or ["Living", "Bedroom", "Kitchen"][i]
+        light_cards.append((fit_text(label, 10), "On" if on else "Off", SOFT_YELLOW if on else SOFT_GREY, on))
 
-    card(draw, (grid_x[2], row_y[1], 782, row_y[1] + h), fill=YELLOW, width=1)
-    draw_text(draw, (grid_x[2] + 14, row_y[1] + 18), "SONOS", 10, bold=True)
-    icon_music(draw, 710, row_y[1] + 20)
-    if active_sonos:
-        state = as_text(active_sonos.get("state"), "idle").title()
-        title_text = fit_text(active_sonos.get("title"), 28, "No title")
-        room = fit_text(active_sonos.get("room"), 16, "Room")
-        artist = fit_text(active_sonos.get("artist"), 18, "")
-        draw_text(draw, (grid_x[2] + 14, row_y[1] + 44), title_text, 23, bold=True)
-        draw_text(draw, (grid_x[2] + 16, row_y[1] + 76), f"{state} - {room}" if artist == "" else f"{artist} - {room}", 12, bold=True)
-    else:
-        draw_text(draw, (grid_x[2] + 14, row_y[1] + 45), "No active music", 24, bold=True)
-        draw_text(draw, (grid_x[2] + 16, row_y[1] + 76), f"{idle_count} rooms idle" if idle_count else "No rooms reporting", 12, bold=True)
+    controls = [
+        ((24, 192, 144, 306), light_cards[0][0], light_cards[0][1], light_cards[0][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[0][3])),
+        ((158, 192, 278, 306), light_cards[1][0], light_cards[1][1], light_cards[1][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[1][3])),
+        ((292, 192, 412, 306), light_cards[2][0], light_cards[2][1], light_cards[2][2], lambda d, x, y: icon_bulb(d, x, y + 4, light_cards[2][3])),
+        ((426, 192, 546, 306), "Blinds", "Open" if blinds_open else "Closed", SOFT_GREEN if blinds_open else SOFT_GREY, lambda d, x, y: icon_blinds(d, x, y, blinds_open)),
+        ((560, 192, 680, 306), "Washer", "Running" if washer_running else "Idle", SOFT_BLUE if washer_running else SOFT_GREY, lambda d, x, y: icon_washer(d, x, y, washer_running)),
+        ((694, 192, 776, 306), "Sonos", as_text(active_sonos(sonos).get("state"), "Idle").title(), SOFT_ORANGE, icon_music),
+    ]
+    for args in controls:
+        control(draw, *args)
 
-    # The nav bar is decorative parity with the LaraPaper recipe; no state logic lives here.
-    nav_top = 424
-    draw.rounded_rectangle((18, nav_top, 782, 474), radius=5, fill=GREEN, outline=BLACK, width=1)
-    nav = [("Home", BLUE), ("Lights", GREEN), ("Climate", ORANGE), ("Security", BLUE), ("Media", YELLOW), ("More", BLACK)]
-    for i, (label, fill) in enumerate(nav):
-        x0 = 18 + i * 127
-        x1 = 18 + (i + 1) * 127 if i < 5 else 782
-        if i == 0:
-            draw.rectangle((x0, nav_top, x1, 474), fill=BLUE)
-        centered_text(draw, (x0, nav_top + 34, x1, nav_top + 48), label, 9, fill=WHITE if i == 0 or fill == BLACK else BLACK, bold=True)
-        cx = (x0 + x1) // 2
-        if label == "Home":
-            draw.polygon([(cx - 10, nav_top + 19), (cx, nav_top + 9), (cx + 10, nav_top + 19)], fill=WHITE, outline=WHITE)
-            draw.rectangle((cx - 7, nav_top + 19, cx + 7, nav_top + 29), fill=WHITE)
-        elif label == "Climate":
-            draw.rounded_rectangle((cx - 3, nav_top + 7, cx + 3, nav_top + 22), radius=3, fill=WHITE, outline=BLACK, width=1)
-            draw.ellipse((cx - 7, nav_top + 20, cx + 7, nav_top + 34), fill=ORANGE, outline=BLACK, width=1)
-        elif label == "Security":
-            draw.arc((cx - 8, nav_top + 8, cx + 8, nav_top + 26), 180, 360, fill=BLACK, width=2)
-            draw.rounded_rectangle((cx - 10, nav_top + 22, cx + 10, nav_top + 34), radius=2, fill=BLUE if locked else RED, outline=BLACK, width=1)
-        elif label == "Media":
-            draw.line((cx - 3, nav_top + 8, cx - 3, nav_top + 28), fill=BLACK, width=2)
-            draw.line((cx - 3, nav_top + 8, cx + 11, nav_top + 5), fill=BLACK, width=2)
-            draw.ellipse((cx - 15, nav_top + 25, cx - 3, nav_top + 36), fill=YELLOW, outline=BLACK, width=1)
-        else:
-            draw.ellipse((cx - 8, nav_top + 9, cx + 8, nav_top + 25), fill=fill, outline=BLACK, width=2)
+    card(draw, (24, 328, 244, 424), SOFT_GREEN)
+    text(draw, (44, 344), "People", 18, bold=True)
+    person_1 = first_dict(people, 0)
+    person_2 = first_dict(people, 1)
+    text(draw, (44, 374), f"{fit_text(person_1.get('name'), 10, 'Person')}: {as_text(person_1.get('state'), 'unknown').title()}", 22, bold=True)
+    text(draw, (44, 400), f"{fit_text(person_2.get('name'), 10, 'Person')}: {as_text(person_2.get('state'), 'unknown').title()}", 18)
+
+    card(draw, (264, 328, 536, 424), SOFT_BLUE)
+    media = active_sonos(sonos)
+    media_room = fit_text(media.get("room"), 18, "No active room")
+    media_title = fit_text(media.get("title") or media.get("artist") or "No active playback", 26)
+    media_state = as_text(media.get("state"), "Idle").title()
+    text(draw, (284, 344), "Media", 18, bold=True)
+    text(draw, (284, 374), media_room, 22, bold=True)
+    text(draw, (284, 400), f"{media_state} - {media_title}", 17)
+
+    card(draw, (556, 328, 776, 424), SOFT_YELLOW)
+    text(draw, (576, 344), fit_text(energy.get("label"), 12, "Energy"), 18, bold=True)
+    bars = energy.get("bars") if isinstance(energy.get("bars"), list) else [18, 28, 24, 40, 56, 74]
+    numeric_bars = [as_float(v) for v in bars]
+    numeric_bars = [v for v in numeric_bars if v is not None] or [18, 28, 24, 40, 56, 74]
+    max_bar = max(numeric_bars) or 1
+    for i, value in enumerate(numeric_bars[:6]):
+        x = 590 + i * 26
+        h = int(74 * value / max_bar)
+        draw.rectangle((x, 408 - h, x + 16, 408), fill=BLUE, outline=BLACK)
+    text(draw, (690, 374), fit_text(energy.get("value"), 8, "--"), 22, bold=True)
+
+    draw.rectangle((0, 442, WIDTH, 480), fill=(120, 168, 150))
+    for i, label in enumerate(["Home", "Rooms", "Lights", "Climate", "Security", "More"]):
+        x = 54 + i * 126
+        fill = WHITE if i == 0 else BLACK
+        centered_text(draw, (x - 44, 448, x + 44, 474), label, 15, fill=fill, bold=i == 0)
 
     return img
 
@@ -429,7 +390,7 @@ def remap_to_panel_palette(img: Image.Image) -> Image.Image:
         flat.extend(rgb)
     flat.extend([0, 0, 0] * (256 - len(PANEL_PALETTE)))
     palette.putpalette(flat)
-    return img.quantize(palette=palette, dither=Image.Dither.NONE)
+    return img.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG)
 
 
 def build(payload_path: Path = DEFAULT_PAYLOAD) -> Image.Image:
@@ -437,8 +398,8 @@ def build(payload_path: Path = DEFAULT_PAYLOAD) -> Image.Image:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Render the HA dashboard plugin payload to an indexed seven-colour PNG.")
-    parser.add_argument("--payload", type=Path, default=DEFAULT_PAYLOAD, help="JSON payload using TRMNL merge_variables, or the unwrapped merge variables object.")
+    parser = argparse.ArgumentParser(description="Render the HA dashboard plugin payload to a seven-colour indexed PNG.")
+    parser.add_argument("--payload", type=Path, default=DEFAULT_PAYLOAD, help="TRMNL merge_variables payload or unwrapped merge variables object.")
     parser.add_argument("--output", type=Path, default=OUT_PATH, help="Panel-ready indexed PNG output path.")
     parser.add_argument("--source-output", type=Path, default=SOURCE_PATH, help="RGB source PNG output path for visual debugging.")
     return parser.parse_args()

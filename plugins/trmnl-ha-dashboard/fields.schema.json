@@ -1,7 +1,7 @@
 {
   "plugin_id": "trmnl-ha-dashboard",
   "name": "HA Dashboard",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "fields": [
     {
       "key": "dashboard_title",
@@ -69,6 +69,13 @@
       "description": "Comma-separated media_player entities."
     },
     {
+      "key": "light_entities",
+      "type": "multi_string",
+      "required": false,
+      "default": "",
+      "description": "Comma-separated light entities rendered as the three room control cards in the colour sidecar."
+    },
+    {
       "key": "door_entity",
       "type": "text",
       "required": false,
@@ -102,13 +109,21 @@
       "required": false,
       "default": "",
       "description": "Climate or temperature entity."
+    },
+    {
+      "key": "energy_entity",
+      "type": "text",
+      "required": false,
+      "default": "",
+      "description": "Energy sensor entity rendered in the bottom-right summary card."
     }
   ],
   "sidecar": {
     "supported": true,
     "renderer": "scripts/render_colour_dashboard.py",
-    "output": "scripts/tmp/sidecar_colour_dashboard.png",
+    "output": "scripts/tmp/sidecar_colour_dashboard_next.png",
     "payload_input": "TRMNL merge_variables JSON payload, such as plugins/trmnl-ha-dashboard/payload.example.json or a live payload written by scripts/trmnl_ha_dashboard.py.",
-    "notes": "The sidecar honors this field contract and renders from the same merge_variables payload consumed by full.liquid."
+    "canonical_reference": "scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png",
+    "notes": "The sidecar honors this field contract while preserving the accepted 2026-05-01 icon-led seven-colour proof style."
   }
 }

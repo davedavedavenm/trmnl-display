@@ -7,7 +7,7 @@ This plugin has two render paths:
 - `full.liquid` for normal TRMNL/LaraPaper plugin compatibility
 - `scripts/render_colour_dashboard.py` as the indexed colour sidecar renderer for Pimoroni Inky Impression 7.3 / Spectra-class panels
 
-The sidecar exists only to improve colour reproduction. The plugin must still remain configurable and shareable like a normal TRMNL recipe.
+The sidecar exists to preserve the accepted colour proof style on the live Spectra-class panel: icon-led cards, black outlines, readable text, and the seven-colour panel palette. Do not replace this path with the muted LaraPaper-style green/olive render. The plugin must still remain configurable and shareable like a normal TRMNL recipe.
 
 ## Features
 
@@ -39,11 +39,13 @@ The sidecar exists only to improve colour reproduction. The plugin must still re
 | `weather_entity` | No | Weather entity |
 | `person_entities` | No | Comma-separated person entities |
 | `sonos_entities` | No | Comma-separated media players |
+| `light_entities` | No | Comma-separated lights for the three room control cards |
 | `door_entity` | No | Door or lock entity |
 | `washer_entity` | No | Laundry status entity |
 | `blind_entity` | No | Blind/cover entity |
 | `blind_open_position` | No | Position value that means fully open; default `100`, use `0` for inverted controllers |
 | `thermostat_entity` | No | Climate or temperature entity |
+| `energy_entity` | No | Energy sensor for the bottom-right summary card |
 
 Keep `settings.yml` and `fields.schema.json` aligned when adding or renaming fields.
 
@@ -61,7 +63,9 @@ Top-level merge variables:
 - `weather`
 - `home`
 - `people`
+- `lights`
 - `sonos`
+- `energy`
 
 Missing optional values should render as unavailable, blank, or hidden rather than failing the screen.
 
@@ -70,9 +74,24 @@ Nested merge variables:
 - `weather`: `condition`, `condition_label`, `temperature`, `humidity`, `wind_speed`
 - `home`: `door_locked`, `washer_running`, `blind_position`, `blinds_open`, `thermostat_temp`
 - `people[]`: `name`, `state`
+- `lights[]`: `label`, `state`, `on`
 - `sonos[]`: `room`, `state`, `title`, `artist`, `picture`
+- `energy`: `label`, `value`, `bars`
 
 ## Sidecar Compatibility
+
+The canonical accepted sidecar reference is:
+
+```text
+scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png
+```
+
+That file is intentionally tracked as a reference and must not be overwritten by normal renderer runs. The current renderer writes the next iteration to:
+
+```text
+scripts/tmp/sidecar_colour_dashboard_source_next.png
+scripts/tmp/sidecar_colour_dashboard_next.png
+```
 
 The sidecar renderer follows the same field and payload contract as the plugin. It may use a stronger colour pipeline, but it must not become a private hardcoded dashboard that other users cannot configure.
 
