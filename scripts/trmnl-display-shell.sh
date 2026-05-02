@@ -3,18 +3,26 @@
 # Fetches images from LaraPaper BYOS server and renders them via show_img.
 # Replaces the Go binary to work around a Go runtime + libgpiod fork incompatibility.
 
-trap '' HUP INT TERM USR1 USR2 PIPE ALRM
-
 CONFIG_DIR="${HOME}/.config/trmnl"
 CONFIG_FILE="${CONFIG_DIR}/config.json"
 TMPDIR="${TMPDIR:-/tmp}"
 TMP_IMG=""
+SHUTDOWN=0
 
 cleanup() {
     if [[ -n "${TMP_IMG}" && -f "${TMP_IMG}" ]]; then
         rm -f "${TMP_IMG}"
     fi
 }
+
+shutdown() {
+    SHUTDOWN=1
+    cleanup
+    exit 0
+}
+
+trap shutdown HUP INT TERM
+trap '' USR1 USR2 PIPE ALRM
 trap cleanup EXIT
 
 BASE_URL=$(python3 -c "
@@ -50,6 +58,8 @@ except:
 echo "Using base URL: ${BASE_URL}"
 
 while true; do
+    [[ "${SHUTDOWN}" -eq 1 ]] && exit 0
+
     RESPONSE=$(curl -sf -m 30 \
         -H "ID: ${DEVICE_ID}" \
         -H "access-token: ${API_KEY}" \
@@ -114,6 +124,7 @@ print(json.dumps({
     [[ -z "${SLEEP_FOR}" ]] && SLEEP_FOR=600
     echo "Cycle complete, sleeping ${SLEEP_FOR}s..."
     sleep "${SLEEP_FOR}"
+    [[ "${SHUTDOWN}" -eq 1 ]] && exit 0
     echo "Sleep done, looping..."
 done
 echo "ERROR: exited main loop unexpectedly"

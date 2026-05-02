@@ -78,8 +78,9 @@ This proves the physical Pi and panel can accept richer colour than the current 
 flowchart LR
   HA["Home Assistant\nstate + mode intent"] --> Renderer["Colour renderer\nrepo-owned 800x480 indexed PNG"]
   Renderer --> Image["Panel-ready image\n7-colour indexed PNG"]
-  Image --> BYOS["BYOS delivery\nLaraPaper or small sidecar endpoint"]
-  BYOS --> Pi["trmnl-pi\nthin display client"]
+  Image --> Handoff["Sidecar image handoff\nLaraPaper generated-image storage"]
+  Handoff --> LaraPaper["LaraPaper\nplugins + playlists + /api/display"]
+  LaraPaper --> Pi["trmnl-pi\nthin display client"]
   Pi --> Panel["Inky Impression 7.3\nEP73_SPECTRA_800x480"]
 ```
 
@@ -111,10 +112,10 @@ Turn the proof into a live sidecar flow:
 - fetch real Home Assistant state
 - render the accepted dashboard layout
 - emit an indexed seven-colour PNG
-- serve it from `khpi5`
-- point the Pi at it through BYOS-compatible delivery
+- install it into LaraPaper's generated-image storage during `ha_dashboard` mode activation
+- keep the Pi polling LaraPaper's normal BYOS `/api/display` endpoint
 
-The first live version can be intentionally simple. It should prioritize colour fidelity, readable icons, and a stable direct path over full LaraPaper feature parity.
+The first live version is intentionally simple. `scripts/trmnl_set_display_mode.sh` activates the normal LaraPaper HA dashboard playlist, then hands off the repo-rendered sidecar PNG by copying it into LaraPaper's generated-image storage and updating LaraPaper's current image pointer for that plugin/device. LaraPaper remains the BYOS server and rollback is selecting another mode or disabling the handoff environment.
 
 Local render command:
 
@@ -135,4 +136,11 @@ Before it becomes the normal live path, it must honor the HA dashboard plugin co
 
 If the sidecar cannot support one of those plugin/recipe expectations, document the blocker and the fallback in the plugin README before shipping it.
 
-Current status: the sidecar renderer consumes the same `merge_variables` payload shape as the plugin and preserves the accepted proof style. `scripts/trmnl_ha_dashboard.py` can write the live sidecar payload via `TRMNL_SIDECAR_PAYLOAD_PATH`; BYOS image handoff through LaraPaper or a compatible sidecar endpoint remains the next integration step.
+Current status: the sidecar renderer consumes the same `merge_variables` payload shape as the plugin and preserves the accepted proof style. `scripts/trmnl_ha_dashboard.py` writes the live sidecar payload via `TRMNL_SIDECAR_PAYLOAD_PATH`, the `khpi5` cron renders the indexed PNG, and `scripts/trmnl_set_display_mode.sh` hands the image to LaraPaper when `ha_dashboard` is active.
+
+Sidecar handoff test command on `khpi5`:
+
+```sh
+/home/dave/bin/trmnl-set-display-mode ha_dashboard
+curl -fsS http://127.0.0.1:4567/storage/images/generated/sidecar_colour_dashboard_next.png -o /tmp/ha-dashboard.png
+```

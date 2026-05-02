@@ -11,6 +11,10 @@ LARAPAPER_CONTAINER="${TRMNL_LARAPAPER_CONTAINER:-larapaper-app-1}"
 DEVICE_ID="${TRMNL_DEVICE_ID:-1}"
 PLAYLIST_PREFIX="${TRMNL_PLAYLIST_PREFIX:-TRMNL Mode}"
 REFRESH_TIME="${TRMNL_MODE_REFRESH_TIME:-600}"
+SIDECAR_HANDOFF_ENABLED="${TRMNL_SIDECAR_HANDOFF_ENABLED:-1}"
+SIDECAR_IMAGE_PATH="${TRMNL_SIDECAR_IMAGE_PATH:-/home/dave/sidecar_colour_dashboard_next.png}"
+SIDECAR_IMAGE_NAME="${TRMNL_SIDECAR_IMAGE_NAME:-sidecar_colour_dashboard_next}"
+SIDECAR_CONTAINER_IMAGE_PATH="${TRMNL_SIDECAR_CONTAINER_IMAGE_PATH:-/var/www/html/storage/app/public/images/generated/${SIDECAR_IMAGE_NAME}.png}"
 
 plugin_name_for_mode() {
   case "$1" in
@@ -158,3 +162,56 @@ echo json_encode([
     'playlist_name' => $playlistName,
 ]);
 PHP
+
+if [[ "${MODE}" == "ha_dashboard" && "${SIDECAR_HANDOFF_ENABLED}" == "1" ]]; then
+  if [[ ! -s "${SIDECAR_IMAGE_PATH}" ]]; then
+    echo "sidecar handoff skipped; image not found: ${SIDECAR_IMAGE_PATH}" >&2
+    exit 0
+  fi
+
+  docker cp "${SIDECAR_IMAGE_PATH}" "${LARAPAPER_CONTAINER}:${SIDECAR_CONTAINER_IMAGE_PATH}"
+
+  docker exec \
+    -e DEVICE_ID="${DEVICE_ID}" \
+    -e PLUGIN_NAME="${PLUGIN_NAME}" \
+    -e SIDECAR_IMAGE_NAME="${SIDECAR_IMAGE_NAME}" \
+    -i "${LARAPAPER_CONTAINER}" php <<'PHP'
+<?php
+require '/var/www/html/vendor/autoload.php';
+$app = require '/var/www/html/bootstrap/app.php';
+$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+$deviceId = (int) getenv('DEVICE_ID');
+$pluginName = getenv('PLUGIN_NAME');
+$imageName = getenv('SIDECAR_IMAGE_NAME');
+$metadata = json_encode([
+    'width' => 800,
+    'height' => 480,
+    'rotation' => 0,
+    'palette_id' => 10,
+    'mime_type' => 'image/png',
+]);
+
+DB::table('devices')
+    ->where('id', $deviceId)
+    ->update([
+        'current_screen_image' => $imageName,
+        'updated_at' => now(),
+    ]);
+
+DB::table('plugins')
+    ->where('name', $pluginName)
+    ->update([
+        'current_image' => $imageName,
+        'current_image_metadata' => $metadata,
+        'data_payload_updated_at' => now()->subHours(2),
+        'updated_at' => now(),
+    ]);
+
+echo json_encode([
+    'sidecar_handoff' => true,
+    'plugin' => $pluginName,
+    'image' => $imageName,
+]);
+PHP
+fi
