@@ -27,6 +27,36 @@ The sidecar exists to preserve the accepted colour proof style on the live Spect
 4. Run the script via cron or a Home Assistant automation to push state updates to LaraPaper.
 5. For colour panels, run the sidecar renderer and `trmnl-update-ha-sidecar-image` after payload updates so the plugin image is refreshed without changing LaraPaper playlist state.
 
+## Shareable Installation Modes
+
+Use one of these modes depending on the target display.
+
+### Standard TRMNL/LaraPaper
+
+- Install `settings.yml` and `full.liquid`.
+- Configure the plugin fields in the LaraPaper/TRMNL UI.
+- Push payloads to the plugin webhook using `merge_variables`.
+- Use LaraPaper's normal rendered plugin image.
+
+This path is the portability baseline and does not require the Python sidecar.
+
+### Spectra Colour Sidecar
+
+- Install the same plugin files and configure the same fields.
+- Run `scripts/trmnl_ha_dashboard.py` to pull Home Assistant state and write the same payload to disk.
+- Render with `scripts/render_colour_dashboard.py`.
+- Hand off with `scripts/trmnl_update_ha_sidecar_image.sh`.
+
+The sidecar updates only this plugin's `current_image`, so the plugin can remain one item in a normal LaraPaper playlist. Pixel placement remains in the repo-owned renderer; user configuration remains in the plugin payload contract.
+
+### Local Home Assistant Helper UI
+
+For this repo's live installation, `config/packages/trmnl_ha_dashboard.yaml` exposes Home Assistant helpers that write the same slot intent and generic entity values. This is optional local management, not a replacement for the shareable plugin fields. Enable it in the companion environment with:
+
+```bash
+TRMNL_HA_MANAGED_CONFIG=1
+```
+
 ## Configuration Fields
 
 | Field | Required | Purpose |
@@ -111,6 +141,13 @@ Render a payload locally:
 
 ```bash
 python scripts/render_colour_dashboard.py --payload plugins/trmnl-ha-dashboard/payload.example.json
+```
+
+Validate the plugin contract and slot render matrix:
+
+```bash
+python scripts/validate_trmnl_ha_plugin_contract.py
+python scripts/validate_colour_dashboard.py
 ```
 
 The companion script can also write the exact live webhook payload for sidecar rendering when `TRMNL_SIDECAR_PAYLOAD_PATH` is set.

@@ -2,7 +2,9 @@
 
 ## 2026-05-02
 
+- Added a HA dashboard plugin contract validator to catch drift between `settings.yml`, `fields.schema.json`, and `payload.example.json`.
 - Added a colour dashboard validation script that renders default, card-type, generic, and hidden slot cases and enforces `800x480`, paletted seven-colour output.
+- Documented the HA dashboard plugin's three installation modes: standard LaraPaper, Spectra colour sidecar, and optional local Home Assistant helper UI.
 - Wired HA dashboard helper changes to the playlist-safe sidecar refresh endpoint with deliberate `force` refreshes so local slot edits propagate without waiting for the next scheduled cycle.
 - Added an optional Home Assistant managed configuration facade for the HA colour dashboard slots, including helpers, a refresh button, and a Lovelace helper-view YAML source.
 - Increased the HA colour sidecar card fill saturation so card backgrounds read more strongly on the physical Spectra panel while keeping seven-colour indexed output.
