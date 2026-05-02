@@ -2,6 +2,7 @@
 
 ## 2026-05-02
 
+- Added a colour dashboard validation script that renders default, card-type, generic, and hidden slot cases and enforces `800x480`, paletted seven-colour output.
 - Wired HA dashboard helper changes to the playlist-safe sidecar refresh endpoint with deliberate `force` refreshes so local slot edits propagate without waiting for the next scheduled cycle.
 - Added an optional Home Assistant managed configuration facade for the HA colour dashboard slots, including helpers, a refresh button, and a Lovelace helper-view YAML source.
 - Increased the HA colour sidecar card fill saturation so card backgrounds read more strongly on the physical Spectra panel while keeping seven-colour indexed output.

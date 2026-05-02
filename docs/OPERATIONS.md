@@ -115,6 +115,14 @@ To render the same payload contract used by the LaraPaper plugin:
 python scripts/render_colour_dashboard.py --payload plugins/trmnl-ha-dashboard/payload.example.json
 ```
 
+To validate the default render, supported card types, and fixed slot behavior:
+
+```bash
+python scripts/validate_colour_dashboard.py --write-images
+```
+
+The validator writes optional proof images under `scripts/tmp/colour_dashboard_validation/` and fails if any generated panel PNG is not `800x480`, paletted mode `P`, constrained to the seven panel colours, and using all seven colours.
+
 On `khpi5`, set `TRMNL_SIDECAR_PAYLOAD_PATH=/home/dave/trmnl-ha-dashboard-payload.json` in `/home/dave/.env.trmnl-ha-dashboard` to have the HA companion script write the live `merge_variables` payload for sidecar rendering.
 
 Expected success lines:
