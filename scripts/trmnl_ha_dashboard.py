@@ -20,11 +20,13 @@ COLOUR_PROFILE = os.getenv("TRMNL_COLOUR_PROFILE", "inky_spectra_7").strip()
 WEATHER_ENTITY = os.getenv("TRMNL_WEATHER_ENTITY", "weather.forecast_home").strip()
 PERSON_ENTITIES = [e.strip() for e in os.getenv("TRMNL_PERSON_ENTITIES", "person.example").split(",") if e.strip()]
 SONOS_ENTITIES = [e.strip() for e in os.getenv("TRMNL_SONOS_ENTITIES", "").split(",") if e.strip()]
+LIGHT_ENTITIES = [e.strip() for e in os.getenv("TRMNL_LIGHT_ENTITIES", "").split(",") if e.strip()]
 DOOR_ENTITY = os.getenv("TRMNL_DOOR_ENTITY", "").strip()
 WASHER_ENTITY = os.getenv("TRMNL_WASHER_ENTITY", "").strip()
 BLIND_ENTITY = os.getenv("TRMNL_BLIND_ENTITY", "").strip()
 BLIND_OPEN_POSITION = os.getenv("TRMNL_BLIND_OPEN_POSITION", "").strip()
 THERMOSTAT_ENTITY = os.getenv("TRMNL_THERMOSTAT_ENTITY", "").strip()
+ENERGY_ENTITY = os.getenv("TRMNL_ENERGY_ENTITY", "").strip()
 SIDECAR_PAYLOAD_PATH = os.getenv("TRMNL_SIDECAR_PAYLOAD_PATH", "").strip()
 
 
@@ -132,6 +134,40 @@ def fetch_sonos() -> list:
     return rooms
 
 
+def fetch_lights() -> list:
+    lights = []
+    for eid in LIGHT_ENTITIES:
+        try:
+            e = fetch_entity(eid)
+            state = e["state"]
+            lights.append({
+                "label": e["attributes"].get("friendly_name", eid),
+                "state": state,
+                "on": state == "on",
+            })
+        except Exception as err:
+            print(f"Error fetching {eid}: {err}")
+            lights.append({"label": eid, "state": "unknown", "on": False})
+    return lights
+
+
+def fetch_energy() -> dict:
+    if not ENERGY_ENTITY:
+        return {}
+    try:
+        e = fetch_entity(ENERGY_ENTITY)
+        unit = e["attributes"].get("unit_of_measurement", "")
+        value = e["state"]
+        if value not in ("unknown", "unavailable"):
+            return {
+                "label": e["attributes"].get("friendly_name", "Energy"),
+                "value": f"{value} {unit}".strip(),
+            }
+    except Exception as err:
+        print(f"Error fetching energy: {err}")
+    return {}
+
+
 def fetch_home_status(cache: dict) -> dict:
     result = {}
     cached_home = cache.get("home", {})
@@ -219,6 +255,8 @@ def main() -> None:
             "people": fetch_people(),
             "weather": fetch_weather(),
             "sonos": fetch_sonos(),
+            "lights": fetch_lights(),
+            "energy": fetch_energy(),
             "home": home,
         }
     }

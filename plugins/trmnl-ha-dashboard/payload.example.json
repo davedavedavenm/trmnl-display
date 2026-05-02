@@ -27,6 +27,23 @@
         "state": "away"
       }
     ],
+    "lights": [
+      {
+        "label": "Living",
+        "state": "on",
+        "on": true
+      },
+      {
+        "label": "Bedroom",
+        "state": "off",
+        "on": false
+      },
+      {
+        "label": "Kitchen",
+        "state": "on",
+        "on": true
+      }
+    ],
     "sonos": [
       {
         "room": "Living Room",
@@ -35,7 +52,11 @@
         "artist": "",
         "picture": ""
       }
-    ]
+    ],
+    "energy": {
+      "label": "Energy",
+      "value": "8.2 kWh",
+      "bars": [18, 28, 24, 40, 56, 74]
+    }
   }
 }
-

@@ -1,7 +1,7 @@
 name: HA Dashboard
 description: A shareable TRMNL/LaraPaper Home Assistant dashboard with a Liquid compatibility template and optional indexed-colour sidecar renderer for Pimoroni Inky Impression Spectra panels.
 author: David
-version: 2.9.1
+version: 2.9.2
 no_screen_padding: 'yes'
 dark_mode: 'no'
 strategy: webhook
@@ -43,6 +43,11 @@ custom_fields:
     name: Sonos Media Players (comma-separated)
     default: ""
     placeholder: "media_player.living_room, media_player.kitchen"
+  - keyname: light_entities
+    field_type: multi_string
+    name: Light Entities (comma-separated)
+    default: ""
+    placeholder: "light.living_room, light.bedroom, light.kitchen"
   - keyname: person_entities
     field_type: multi_string
     name: Person Entities (comma-separated)
@@ -78,3 +83,8 @@ custom_fields:
     name: Thermostat Entity
     default: ""
     placeholder: "climate.thermostat"
+  - keyname: energy_entity
+    field_type: text
+    name: Energy Entity
+    default: ""
+    placeholder: "sensor.daily_energy"

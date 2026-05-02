@@ -12,17 +12,37 @@ LaraPaper remains valuable for BYOS device management, playlists, plugin storage
 
 ## Proven Result
 
-The proof script is:
+The canonical accepted proof image is:
+
+```text
+scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png
+```
+
+The RGB source reference is:
+
+```text
+scripts/tmp/sidecar_colour_dashboard_source_proof_2026-05-01.png
+```
+
+These files are tracked references and must not be overwritten by normal renderer runs. The proof was recreated from:
+
+```text
+git show 4d6d640:scripts/render_colour_dashboard.py
+```
+
+This proof defines the visual direction for the colour dashboard: strong seven-colour panel output, icon-led cards, black outlines, readable text, and clear Home Assistant status blocks. Do not regress this screen to the muted LaraPaper-style green/olive render; that path is retained only as compatibility context, not as the target colour dashboard design.
+
+The current renderer is:
 
 ```text
 scripts/render_colour_dashboard.py
 ```
 
-It reads the HA dashboard plugin payload contract (`merge_variables`) and generates:
+It consumes the HA dashboard plugin payload contract (`merge_variables`) and writes next-iteration files by default:
 
 ```text
-scripts/tmp/sidecar_colour_dashboard_source.png
-scripts/tmp/sidecar_colour_dashboard.png
+scripts/tmp/sidecar_colour_dashboard_source_next.png
+scripts/tmp/sidecar_colour_dashboard_next.png
 ```
 
 The output PNG is an indexed seven-colour image using:
@@ -38,8 +58,8 @@ The output PNG is an indexed seven-colour image using:
 Direct hardware test on `trmnl-pi`:
 
 ```sh
-scp scripts/tmp/sidecar_colour_dashboard.png trmnl-pi:/tmp/sidecar_colour_dashboard.png
-ssh trmnl-pi "sudo systemctl stop trmnl-display.service && /usr/local/bin/show_img.bin file=/tmp/sidecar_colour_dashboard.png invert=false mode=full"
+scp scripts/tmp/sidecar_colour_dashboard_next.png trmnl-pi:/tmp/sidecar_colour_dashboard_next.png
+ssh trmnl-pi "sudo systemctl stop trmnl-display.service && /usr/local/bin/show_img.bin file=/tmp/sidecar_colour_dashboard_next.png invert=false mode=full"
 ```
 
 Confirmed output:
@@ -115,4 +135,4 @@ Before it becomes the normal live path, it must honor the HA dashboard plugin co
 
 If the sidecar cannot support one of those plugin/recipe expectations, document the blocker and the fallback in the plugin README before shipping it.
 
-Current status: the sidecar renderer consumes the same `merge_variables` payload as `full.liquid`; BYOS image handoff through LaraPaper or a compatible sidecar endpoint remains the next integration step.
+Current status: the sidecar renderer consumes the same `merge_variables` payload shape as the plugin and preserves the accepted proof style. `scripts/trmnl_ha_dashboard.py` can write the live sidecar payload via `TRMNL_SIDECAR_PAYLOAD_PATH`; BYOS image handoff through LaraPaper or a compatible sidecar endpoint remains the next integration step.

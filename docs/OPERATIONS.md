@@ -103,8 +103,8 @@ Use this only while iterating on colour output. It bypasses LaraPaper for one ph
 
 ```bash
 python scripts/render_colour_dashboard.py
-scp scripts/tmp/sidecar_colour_dashboard.png trmnl-pi:/tmp/sidecar_colour_dashboard.png
-ssh trmnl-pi "sudo systemctl stop trmnl-display.service && /usr/local/bin/show_img.bin file=/tmp/sidecar_colour_dashboard.png invert=false mode=full"
+scp scripts/tmp/sidecar_colour_dashboard_next.png trmnl-pi:/tmp/sidecar_colour_dashboard_next.png
+ssh trmnl-pi "sudo systemctl stop trmnl-display.service && /usr/local/bin/show_img.bin file=/tmp/sidecar_colour_dashboard_next.png invert=false mode=full"
 ```
 
 To render the same payload contract used by the LaraPaper plugin:

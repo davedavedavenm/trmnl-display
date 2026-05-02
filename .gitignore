@@ -189,7 +189,9 @@ disable_ha.py
 trigger_ha.py
 ha_dash_new.png
 multi_cal_new.png
-/scripts/tmp/
+/scripts/tmp/*
+!/scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png
+!/scripts/tmp/sidecar_colour_dashboard_source_proof_2026-05-01.png
 
 # Agent cross-session memory (not committed)
 .agent-memory/
