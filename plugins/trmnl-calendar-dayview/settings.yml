@@ -1,0 +1,17 @@
+name: Calendar Day View
+no_screen_padding: 'no'
+dark_mode: 'no'
+strategy: webhook
+refresh_interval: 30
+id: trmnl-calendar-dayview
+custom_fields:
+  - keyname: nango_secret_key
+    name: Nango Secret Key
+    field_type: password
+    default: ""
+    description: Nango API secret key for live calendar fetching
+  - keyname: nango_base_url
+    name: Nango Base URL
+    field_type: string
+    default: "https://api.nango.dev"
+    description: Nango API base URL
