@@ -40,7 +40,7 @@
 - [x] Remove legacy Inky Impression 7.3 systemd service from Pi Zero
 - [x] Fix Home Assistant recipe URL (raspberrypi.local not resolvable from khpi5)
 - [x] Configure World Clock timezones
-- [ ] Fix bus departures Liquid template variable binding (workaround: hardcoded polling URL)
+- [x] Fix bus departures Liquid template variable binding (restored Liquid variables in polling URL template)
 
 ## Phase 7: Multi-Calendar Productization [IN PROGRESS]
 - [x] Build working webhook-driven multi-calendar proof of concept

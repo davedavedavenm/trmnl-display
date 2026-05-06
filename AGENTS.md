@@ -9,7 +9,8 @@ Maintain a Home Assistant-orchestrated e-paper display system that uses:
 - LaraPaper as the local TRMNL BYOS management server on `khpi5`
 - a repo-owned indexed colour renderer for colour-critical dashboards
 - a Pi Zero as a thin TRMNL display client on `trmnl-pi`
-- Home Assistant as the orchestration layer
+- Home Assistant as the orchestration layer (mode selection, state pushing, payload generation)
+- official TRMNL and LaraPaper documentation as the reference for plugin contracts, BYOS API, and playlist management
 - GitHub `main` as the durable source of truth
 
 ## Current Live Hosts
@@ -30,6 +31,7 @@ Maintain a Home Assistant-orchestrated e-paper display system that uses:
 6. ACeP colour output is required. Treat accidental grayscale, 1-bit output, or regression back to LaraPaper's limited colour buckets as a bug.
 7. The physical screen is a Pimoroni Inky Impression 7.3 / Spectra-class colour panel driven as `EP73_SPECTRA_800x480`, not a standard black-and-white TRMNL panel.
 8. Plugin/recipe portability is mandatory. Sidecar rendering must not turn a shareable plugin into a private hardcoded screen unless a documented exception explains why.
+9. Home Assistant decides *what* to show (mode selection, state pushing). LaraPaper playlists decide *when* and *how* to cycle content on the display. Do not bypass LaraPaper's playlist system for routine content rotation. Official TRMNL and LaraPaper documentation (plugin/recipe format, BYOS API contract, settings schema) is authoritative; custom integration patterns must preserve compatibility or document exceptions in the relevant plugin README.
 
 ## Managed Surfaces
 
@@ -41,6 +43,8 @@ Use `docs/SOURCE_OF_TRUTH.md` as the canonical mapping. Common paths:
 - `config/trmnl/` - Pi display config examples
 - `deploy/` - Docker Compose, systemd units, cron entries, host environment examples
 - `docs/` - operating model, deployment workflow, and plans
+- `config/lovelace/` - optional HA helper views and dashboard card sources
+- `plugins/trmnl-ha-dashboard/` - HA colour dashboard plugin contract (settings, schema, payload, README)
 - `scripts/render_colour_dashboard.py` - first proven sidecar colour renderer
 
 ## Correct Change Flow
@@ -69,7 +73,7 @@ Never leave live-only drift undocumented.
 Python syntax:
 
 ```bash
-python -m py_compile scripts/trmnl_calendar_multi.py scripts/trmnl_ha_dashboard.py scripts/trmnl_mode_bridge.py scripts/trmnl_sonos_local.py
+python -m py_compile scripts/trmnl_calendar_multi.py scripts/trmnl_ha_dashboard.py scripts/trmnl_mode_bridge.py scripts/trmnl_sonos_local.py scripts/render_colour_dashboard.py
 ```
 
 Home Assistant package check:

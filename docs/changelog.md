@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-06
+
+- Updated AGENTS.md with new architecture rule #9 formalising HA/LaraPaper playlist boundary, refreshed managed surfaces and validation commands.
+- Fixed UK Bus Departures Liquid template variable binding: restored `{{timespan}}`, `{{atco}}`, `{{app_id}}`, `{{app_key}}` in polling URL so LaraPaper resolves them at poll time via `Plugin::resolveLiquidVariables()` instead of using hardcoded values.
+- Added bus departure colour sidecar: `scripts/render_bus_departures.py` renders TransportAPI data as a full-screen 800x480 indexed 7-colour PNG with route-coloured badges and on-time/late status.
+- Created `scripts/trmnl_update_bus_sidecar_image.sh` for playlist-safe sidecar handoff into LaraPaper generated-image storage.
+- Created `scripts/trmnl_refresh_bus_sidecar.sh` as the combined refresh wrapper.
+- Created `plugins/trmnl-bus-departures/` plugin contract (settings, schema, payload, README).
+- Removed split-screen mashup from bus departures playlist item; bus now renders full-screen.
+
 ## 2026-05-02
 
 - Added a HA dashboard plugin contract validator to catch drift between `settings.yml`, `fields.schema.json`, and `payload.example.json`.

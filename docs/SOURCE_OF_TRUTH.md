@@ -21,6 +21,10 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 | playlist-safe LaraPaper HA sidecar plugin-image update | `scripts/trmnl_update_ha_sidecar_image.sh` |
 | accepted colour dashboard proof reference | `scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png` |
 | accepted colour dashboard source reference | `scripts/tmp/sidecar_colour_dashboard_source_proof_2026-05-01.png` |
+| `/home/dave/bin/trmnl-refresh-bus-sidecar` | `scripts/trmnl_refresh_bus_sidecar.sh` |
+| `/home/dave/bin/trmnl-update-bus-sidecar-image` | `scripts/trmnl_update_bus_sidecar_image.sh` |
+| bus colour sidecar renderer | `scripts/render_bus_departures.py` |
+| bus departure plugin contract | `plugins/trmnl-bus-departures/` |
 | `/home/dave/.env.trmnl-ha-dashboard` shape | `deploy/khpi5/trmnl-ha-dashboard.env.example` |
 | optional HA dashboard helper view | `config/lovelace/trmnl_ha_dashboard_control.yaml` |
 | generated sidecar iteration image on `trmnl-pi` | generated from `scripts/render_colour_dashboard.py`; do not hand-edit |

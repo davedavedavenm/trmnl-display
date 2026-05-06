@@ -1,0 +1,30 @@
+{
+  "merge_variables": {
+    "id": "https://transportapi.com/v3/uk/bus/stop_timetables/0100BRP90003.json",
+    "request_time": "2026-05-06T20:48:48+01:00",
+    "atcocode": "0100BRP90003",
+    "name": "Stokes Croft (N1)",
+    "stop_name": "Stokes Croft",
+    "locality": "Kingsdown, Bristol",
+    "departures": {
+      "all": [
+        {
+          "line_name": "70",
+          "direction": "UWE Frenchay",
+          "aimed_departure_time": "21:21",
+          "best_departure_estimate": "21:21",
+          "operator_name": "First Bristol, Bath & the West",
+          "status": "on_time"
+        },
+        {
+          "line_name": "76",
+          "direction": "Cribbs Causeway",
+          "aimed_departure_time": "21:24",
+          "best_departure_estimate": "21:29",
+          "operator_name": "First Bristol, Bath & the West",
+          "status": "late"
+        }
+      ]
+    }
+  }
+}
