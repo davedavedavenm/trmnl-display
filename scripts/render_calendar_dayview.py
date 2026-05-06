@@ -61,26 +61,17 @@ def draw_rounded(draw: ImageDraw, x1: int, y1: int, x2: int, y2: int, fill: tupl
     draw.rounded_rectangle([x1, y1, x2, y2], radius=radius, fill=fill)
 
 
-def hour_y(hour: int, start_hour: int, end_hour: int, top: int, height: int) -> int:
-    total_h = end_hour - start_hour
-    frac = (hour - start_hour) / total_h
-    return int(top + frac * height)
-
-
 def render(payload: dict) -> Image.Image:
-    bg = (30, 30, 30)
-    img = Image.new("RGB", (WIDTH, HEIGHT), bg)
+    img = Image.new("RGB", (WIDTH, HEIGHT), WHITE)
     draw = ImageDraw.Draw(img)
 
     font_title = font(28, bold=True)
-    font_day = font(20)
-    font_head = font(14, bold=True)
-    font_hour = font(13)
-    font_event_title = font(17, bold=True)
-    font_event_loc = font(12)
-    font_event_time = font(13)
-    font_empty = font(18)
-    font_footer = font(12)
+    font_date = font(18)
+    font_event_time = font(20, bold=True)
+    font_event_title = font(20)
+    font_event_loc = font(15)
+    font_empty = font(24, bold=True)
+    font_key = font(13)
 
     day_str = payload.get("date", "")
     day_name = payload.get("day_name", "")
@@ -94,23 +85,12 @@ def render(payload: dict) -> Image.Image:
         dt = datetime.now(timezone.utc)
 
     # Header
-    HEADER_H = 56
-    draw.rectangle([(0, 0), (WIDTH, HEADER_H)], fill=(20, 20, 20))
+    HEADER_H = 50
+    draw.rectangle([(0, 0), (WIDTH, HEADER_H)], fill=BLACK)
     draw.text((20, HEADER_H // 2), f"{day_name}", fill=WHITE, font=font_title, anchor="lm")
-    draw.text((20, HEADER_H - 8), display_date, fill=DIM, font=font_day, anchor="lm")
+    draw.text((WIDTH - 20, HEADER_H // 2), display_date, fill=WHITE, font=font_date, anchor="rm")
 
-    # Calendar key
-    key_x = 320
-    key_y = 12
-    for i, (cname, ccol) in enumerate(CALENDAR_COLORS):
-        any_from_cal = any(c.get("name") == cname for c in calendars)
-        if any_from_cal:
-            kx = key_x + (i % 3) * 160
-            ky = key_y + (i // 3) * 18
-            draw.rectangle([(kx, ky), (kx + 10, ky + 10)], fill=ccol)
-            draw.text((kx + 16, ky + 5), cname, fill=DIM, font=font_footer, anchor="lm")
-
-    # Collect all events
+    # Collect + sort events
     all_events = []
     for cal in calendars:
         cal_name = cal.get("name", "?")
@@ -132,10 +112,64 @@ def render(payload: dict) -> Image.Image:
             })
 
     if not all_events:
-        mid = (WIDTH // 2, HEIGHT // 2 + 20)
-        draw.text(mid, "No events today", fill=WHITE, font=font_empty, anchor="mm")
-        draw.text((WIDTH // 2, mid[1] + 28), "Enjoy your day", fill=DIM, font=font_empty, anchor="mm")
+        mid = (WIDTH // 2, HEIGHT // 2 - 10)
+        draw.text(mid, "No events today", fill=BLACK, font=font_empty, anchor="mm")
+        draw.text((WIDTH // 2, mid[1] + 30), "Enjoy your day", fill=NOON, font=font_date, anchor="mm")
         return img
+
+    all_day_events = [e for e in all_events if e["all_day"]]
+    timed_events = [e for e in all_events if not e["all_day"]]
+    timed_events.sort(key=lambda e: (e["start"] or dt, e["summary"]))
+
+    # All-day bar
+    row_y = HEADER_H + 4
+    if all_day_events:
+        draw.rectangle([(0, row_y), (WIDTH, row_y + 28)], fill=SOFT_YELLOW)
+        for i, ev in enumerate(all_day_events[:6]):
+            x = 16 + i * (WIDTH // 6)
+            draw_rounded(draw, x, row_y + 4, x + (WIDTH // 6) - 8, row_y + 24, ev["color"], 4)
+            draw.text((x + 6, row_y + 14), ev["summary"][:18], fill=WHITE, font=font_key, anchor="lm")
+        row_y += 34
+
+    # Calendar key stripe
+    active_cals = {c["name"]: tuple(c["color"]) for c in calendars if c.get("events")}
+    if active_cals:
+        kx = 16
+        for cname, ccol in active_cals.items():
+            draw.rectangle([(kx, row_y + 2), (kx + 8, row_y + 12)], fill=ccol)
+            draw.text((kx + 13, row_y + 7), cname, fill=BLACK, font=font_key, anchor="lm")
+            kx += 90
+        row_y += 18
+
+    ROW_H = 30
+    # Event list
+    for ev in timed_events:
+        ev_start = ev["start"].astimezone() if ev["start"] else None
+        ev_end = ev["end"].astimezone() if ev["end"] else None
+        time_label = ""
+        if ev_start and ev_end:
+            time_label = f"{ev_start.strftime('%H:%M')}-{ev_end.strftime('%H:%M')}"
+        elif ev_start:
+            time_label = ev_start.strftime('%H:%M')
+
+        # Colour dot
+        draw.rounded_rectangle([(14, row_y + 4), (20, row_y + ROW_H - 4)], 3, fill=ev["color"])
+
+        # Time
+        tw = draw.textlength(time_label, font=font_event_time)
+        draw.text((30, row_y + ROW_H // 2), time_label, fill=BLACK, font=font_event_time, anchor="lm")
+
+        # Title
+        tx = 30 + tw + 12
+        draw.text((tx, row_y + ROW_H // 2), ev["summary"][:50], fill=BLACK, font=font_event_title, anchor="lm")
+
+        # Location on second line if present
+        if ev.get("location"):
+            draw.text((30, row_y + ROW_H - 6), ev["location"][:55], fill=NOON, font=font_event_loc, anchor="lm")
+
+        row_y += ROW_H + 2
+        if row_y > HEIGHT - 10:
+            break
 
     all_day_events = [e for e in all_events if e["all_day"]]
     timed_events = [e for e in all_events if not e["all_day"]]
@@ -145,64 +179,51 @@ def render(payload: dict) -> Image.Image:
     CONTENT_TOP = HEADER_H + 4
     CONTENT_H = HEIGHT - CONTENT_TOP - 6
 
-    # All-day strip
-    ads_h = 0
+    row_y = HEADER_H + 4
+
+    # All-day bar
     if all_day_events:
-        ads_h = 34
-        draw.rectangle([(0, CONTENT_TOP), (WIDTH, CONTENT_TOP + ads_h)], fill=CARD_BG)
-        for i, ev in enumerate(all_day_events[:4]):
-            x = 14 + i * 195
-            draw.rectangle([(x, CONTENT_TOP + 8), (x + 4, CONTENT_TOP + ads_h - 8)], fill=ev["color"])
-            tw = draw.textlength(ev["summary"], font=font_event_loc)
-            draw.text((x + 10, CONTENT_TOP + ads_h // 2), ev["summary"][:22], fill=WHITE, font=font_event_loc, anchor="lm")
+        draw.rectangle([(0, row_y), (WIDTH, row_y + 28)], fill=SOFT_YELLOW)
+        for i, ev in enumerate(all_day_events[:6]):
+            x = 20 + i * 130
+            draw_rounded(draw, x, row_y + 4, x + 120, row_y + 24, ev["color"], 4)
+            draw.text((x + 8, row_y + 14), ev["summary"][:18], fill=WHITE, font=font_key, anchor="lm")
+        row_y += 34
 
-    # Timeline
-    tl_top = CONTENT_TOP + ads_h + 4
-    tl_h = CONTENT_H - ads_h - 4
-    start_h = 6
-    end_h = 23
-    total_hours = end_h - start_h
+    # Calendar key stripe
+    active_cals = [(c["name"], tuple(c["color"])) for c in calendars if c.get("events")]
+    if active_cals:
+        kx = 20
+        for cname, ccol in active_cals:
+            draw.rectangle([(kx, row_y + 2), (kx + 10, row_y + 14)], fill=ccol)
+            draw.text((kx + 16, row_y + 8), cname, fill=BLACK, font=font_key, anchor="lm")
+            kx += 100
+        row_y += 22
 
-    # Hour labels
-    for h in range(start_h, end_h + 1):
-        y = hour_y(h, start_h, end_h, tl_top, tl_h)
-        ampm = f"{h:02d}:00"
-        draw.text((8, y), ampm, fill=DIM, font=font_hour, anchor="rm")
-        draw.line([(50, y), (WIDTH - 10, y)], fill=(50, 50, 50), width=1)
-
-    # Current time line
-    now = datetime.now(timezone.utc)
-    if start_h <= now.hour < end_h:
-        cy = hour_y(now.hour + now.minute / 60, start_h, end_h, tl_top, tl_h)
-        draw.line([(50, cy), (WIDTH - 10, cy)], fill=RED, width=2)
-
-    # Event bars
+    # Event list
     for ev in timed_events:
-        if not ev["start"] or not ev["end"]:
-            continue
-        ev_start = ev["start"].astimezone()
-        ev_end = ev["end"].astimezone()
-        ev_day_start = dt.replace(hour=start_h, minute=0)
-        ev_day_end = dt.replace(hour=end_h, minute=0) + timedelta(hours=1)
+        ev_start = ev["start"].astimezone() if ev["start"] else None
+        ev_end = ev["end"].astimezone() if ev["end"] else None
+        time_label = ""
+        if ev_start and ev_end:
+            time_label = f"{ev_start.strftime('%H:%M')} - {ev_end.strftime('%H:%M')}"
+        elif ev_start:
+            time_label = ev_start.strftime('%H:%M')
 
-        clamp_s = max(ev_start, ev_day_start)
-        clamp_e = min(ev_end, ev_day_end)
-        if clamp_s >= clamp_e:
-            continue
+        ROW_H = 52
+        draw.rectangle([(0, row_y), (12, row_y + ROW_H)], fill=ev["color"])
 
-        y1 = hour_y(clamp_s.hour + clamp_s.minute / 60, start_h, end_h, tl_top, tl_h)
-        y2 = hour_y(clamp_e.hour + clamp_e.minute / 60, start_h, end_h, tl_top, tl_h)
-        bar_h = max(y2 - y1, 14)
+        draw.text((24, row_y + 18), time_label, fill=BLACK, font=font_event_time, anchor="lm")
 
-        draw.rectangle([(54, y1), (56, y1 + bar_h)], fill=ev["color"])
-        draw_rounded(draw, 62, y1, WIDTH - 14, y1 + bar_h, ev["color"], radius=4)
-        draw.text((72, y1 + bar_h // 2), ev["summary"][:40], fill=WHITE, font=font_event_title, anchor="lm")
+        tx = 180
+        draw.text((tx, row_y + 18), ev["summary"][:50], fill=BLACK, font=font_event_title, anchor="lm")
 
-        time_label = f"{ev_start.strftime('%H:%M')} - {ev_end.strftime('%H:%M')}"
-        draw.text((WIDTH - 24, y1 + bar_h // 2), time_label, fill=WHITE, font=font_event_time, anchor="rm")
+        if ev.get("location"):
+            draw.text((tx, row_y + 38), ev["location"][:55], fill=NOON, font=font_event_loc, anchor="lm")
 
-        if ev["location"]:
-            draw.text((72, y1 + bar_h // 2 + 14), ev["location"][:35], fill=DIM, font=font_event_loc, anchor="lm")
+        row_y += ROW_H + 4
+        if row_y > HEIGHT - 10:
+            break
 
     return img
 
@@ -211,7 +232,7 @@ def index_for_panel(img: Image.Image) -> Image.Image:
     palette_img = Image.new("P", (1, 1))
     flat = [c for rgb in PANEL_PALETTE for c in rgb]
     palette_img.putpalette(flat + [0] * (768 - len(flat)))
-    return img.quantize(palette=palette_img, dither=Image.Dither.FLOYDSTEINBERG)
+    return img.quantize(palette=palette_img, dither=Image.Dither.NONE)
 
 
 def main():
