@@ -1,0 +1,51 @@
+{
+  "merge_variables": {
+    "date": "2026-05-07",
+    "day_name": "Thursday",
+    "calendars": [
+      {
+        "name": "Dave",
+        "color": [0, 0, 255],
+        "events": [
+          {
+            "summary": "Ophthalmology Service appointment",
+            "start": "2026-05-07T14:45:00+01:00",
+            "end": "2026-05-07T15:45:00+01:00",
+            "all_day": false,
+            "location": "Bristol Eye Hospital, Lower Maudlin Street, Bristol"
+          },
+          {
+            "summary": "Home Insurance Renewal",
+            "start": "2026-05-08",
+            "end": "2026-05-09",
+            "all_day": true,
+            "location": ""
+          }
+        ]
+      },
+      {
+        "name": "Family",
+        "color": [0, 255, 0],
+        "events": [
+          {
+            "summary": "School pickup",
+            "start": "2026-05-07T15:00:00+01:00",
+            "end": "2026-05-07T15:30:00+01:00",
+            "all_day": false,
+            "location": "St Mary's School"
+          }
+        ]
+      },
+      {
+        "name": "Outlook",
+        "color": [255, 0, 0],
+        "events": []
+      },
+      {
+        "name": "Birthdays",
+        "color": [255, 255, 0],
+        "events": []
+      }
+    ]
+  }
+}

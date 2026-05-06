@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Calendar Day View",
+  "properties": {
+    "nango_secret_key": {
+      "type": "string",
+      "title": "Nango Secret Key",
+      "description": "Nango API secret key for live calendar fetching",
+      "ui:widget": "password"
+    },
+    "nango_base_url": {
+      "type": "string",
+      "title": "Nango Base URL",
+      "description": "Nango API base URL",
+      "default": "https://api.nango.dev"
+    }
+  }
+}
