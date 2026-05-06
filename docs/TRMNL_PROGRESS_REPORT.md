@@ -248,7 +248,7 @@
 - Next validation needed: repeat the same test with a real photograph, not just synthetic graphics.
 
 ### 20. Known Issues
-- **Bus departures:** Liquid template `timespan` variable not injected into polling URL. Workaround: hardcoded full URL.
+- **Bus departures:** Liquid template `timespan` variable not injected into polling URL. **Fixed:** restored `{{timespan}}`, `{{atco}}`, `{{app_id}}`, `{{app_key}}` variables in polling URL; LaraPaper resolves them at poll time via `Plugin::resolveLiquidVariables()`.
 - **Home Assistant:** URL `raspberrypi.local` not resolvable from khpi5 container. Needs correct IP.
 - **World Clock:** No timezone/city data configured.
 - **Duplicate device bug:** LaraPaper auto-assign creates ghost devices when `assign_new_devices=1` and Go client sends empty `ID` header. Fix: disabled auto-assign, set correct config.

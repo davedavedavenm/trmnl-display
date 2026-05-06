@@ -1,0 +1,36 @@
+name: UK Bus Departures (TransportAPI)
+no_screen_padding: 'no'
+dark_mode: 'no'
+strategy: polling
+refresh_interval: 2
+id: trmnl-bus-departures
+custom_fields:
+  - keyname: atco
+    name: ATCO Code
+    field_type: string
+    default: "0100BRP90003"
+    description: ATCO stop code (e.g. 0100BRP90003 for Stokes Croft)
+  - keyname: timespan
+    name: Timespan (hours)
+    field_type: number
+    default: "2"
+    options:
+      - "1 hour": "1"
+      - "2 hours": "2"
+      - "3 hours": "3"
+      - "4 hours": "4"
+  - keyname: app_id
+    name: TransportAPI App ID
+    field_type: string
+    default: ""
+    description: Your TransportAPI application ID
+  - keyname: app_key
+    name: TransportAPI API Key
+    field_type: password
+    default: ""
+    description: Your TransportAPI API key
+  - keyname: stop_name
+    name: Stop Display Name
+    field_type: string
+    default: "Bus Stop"
+    description: Friendly name shown on the colour sidecar display
