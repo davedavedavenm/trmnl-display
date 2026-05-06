@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -21,22 +21,7 @@ YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 ORANGE = (255, 128, 0)
-
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
-
-CALENDAR_COLORS = [
-    ("Dave", BLUE),
-    ("Family", GREEN),
-    ("Outlook", RED),
-    ("Birthdays", YELLOW),
-    ("Holidays", ORANGE),
-]
-
-NOON = (160, 160, 160)
-DARK_BG = (35, 35, 35)
-CARD_BG = (50, 50, 50)
-ACCENT_GREY = (70, 70, 70)
-DIM = (140, 140, 140)
 
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -51,122 +36,6 @@ def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.Im
     return ImageFont.load_default()
 
 
-def parse_iso(t: str) -> datetime:
-    if t.endswith("Z"):
-        t = t[:-1] + "+00:00"
-    return datetime.fromisoformat(t)
-
-
-def draw_rounded(draw: ImageDraw, x1: int, y1: int, x2: int, y2: int, fill: tuple, radius: int = 6):
-    draw.rounded_rectangle([x1, y1, x2, y2], radius=radius, fill=fill)
-
-
-def render(payload: dict) -> Image.Image:
-    img = Image.new("RGB", (WIDTH, HEIGHT), WHITE)
-    draw = ImageDraw.Draw(img)
-
-    font_title = font(28, bold=True)
-    font_date = font(18)
-    font_event_time = font(20, bold=True)
-    font_event_title = font(20)
-    font_event_loc = font(15)
-    font_empty = font(24, bold=True)
-    font_key = font(13)
-
-    day_str = payload.get("date", "")
-    day_name = payload.get("day_name", "")
-    calendars = payload.get("calendars", [])
-
-    try:
-        dt = datetime.strptime(day_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        display_date = dt.strftime("%-d %B %Y")
-    except (ValueError, TypeError):
-        display_date = day_str
-        dt = datetime.now(timezone.utc)
-
-    # Header
-    HEADER_H = 50
-    draw.rectangle([(0, 0), (WIDTH, HEADER_H)], fill=BLACK)
-    draw.text((20, HEADER_H // 2), f"{day_name}", fill=WHITE, font=font_title, anchor="lm")
-    draw.text((WIDTH - 20, HEADER_H // 2), display_date, fill=WHITE, font=font_date, anchor="rm")
-
-    # Collect + sort events
-    all_events = []
-    for cal in calendars:
-        cal_name = cal.get("name", "?")
-        cal_color = tuple(cal.get("color", [128, 128, 128]))
-        for ev in cal.get("events", []):
-            start_s = ev.get("start", "")
-            end_s = ev.get("end", "")
-            all_day = ev.get("all_day", False)
-            start_dt = parse_iso(start_s) if start_s and not all_day else None
-            end_dt = parse_iso(end_s) if end_s and not all_day else None
-            all_events.append({
-                "summary": ev.get("summary", ""),
-                "start": start_dt,
-                "end": end_dt,
-                "all_day": all_day,
-                "location": ev.get("location", ""),
-                "calendar": cal_name,
-                "color": cal_color,
-            })
-
-    if not all_events:
-        mid = (WIDTH // 2, HEIGHT // 2 - 10)
-        draw.text(mid, "No events today", fill=BLACK, font=font_empty, anchor="mm")
-        draw.text((WIDTH // 2, mid[1] + 30), "Enjoy your day", fill=BLACK, font=font_date, anchor="mm")
-        return img
-
-    all_day_events = [e for e in all_events if e["all_day"]]
-    timed_events = [e for e in all_events if not e["all_day"]]
-    timed_events.sort(key=lambda e: (e["start"] or dt, e["summary"]))
-
-    row_y = HEADER_H + 4
-
-    if all_day_events:
-        draw.rectangle([(0, row_y), (WIDTH, row_y + 28)], fill=SOFT_YELLOW)
-        for i, ev in enumerate(all_day_events[:6]):
-            x = 20 + i * 130
-            draw_rounded(draw, x, row_y + 4, x + 120, row_y + 24, ev["color"], 4)
-            draw.text((x + 8, row_y + 14), ev["summary"][:18], fill=WHITE, font=font_key, anchor="lm")
-        row_y += 34
-
-    active_cals = [(c["name"], tuple(c["color"])) for c in calendars if c.get("events")]
-    if active_cals:
-        kx = 20
-        for cname, ccol in active_cals:
-            draw.rectangle([(kx, row_y + 2), (kx + 10, row_y + 14)], fill=ccol)
-            draw.text((kx + 16, row_y + 8), cname, fill=BLACK, font=font_key, anchor="lm")
-            kx += 100
-        row_y += 22
-
-    for ev in timed_events:
-        ev_start = ev["start"].astimezone() if ev["start"] else None
-        ev_end = ev["end"].astimezone() if ev["end"] else None
-        time_label = ""
-        if ev_start and ev_end:
-            time_label = f"{ev_start.strftime('%H:%M')} - {ev_end.strftime('%H:%M')}"
-        elif ev_start:
-            time_label = ev_start.strftime('%H:%M')
-
-        ROW_H = 52
-        draw.rectangle([(0, row_y), (12, row_y + ROW_H)], fill=ev["color"])
-
-        draw.text((24, row_y + 18), time_label, fill=BLACK, font=font_event_time, anchor="lm")
-
-        tx = 210
-        draw.text((tx, row_y + 18), ev["summary"][:50], fill=BLACK, font=font_event_title, anchor="lm")
-
-        if ev.get("location"):
-            draw.text((tx, row_y + 38), ev["location"][:55], fill=BLACK, font=font_event_loc, anchor="lm")
-
-        row_y += ROW_H + 4
-        if row_y > HEIGHT - 10:
-            break
-
-    return img
-
-
 def index_for_panel(img: Image.Image) -> Image.Image:
     palette_img = Image.new("P", (1, 1))
     flat = [c for rgb in PANEL_PALETTE for c in rgb]
@@ -174,20 +43,97 @@ def index_for_panel(img: Image.Image) -> Image.Image:
     return img.quantize(palette=palette_img, dither=Image.Dither.NONE)
 
 
+def render(payload: dict) -> Image.Image:
+    img = Image.new("RGB", (WIDTH, HEIGHT), WHITE)
+    draw = ImageDraw.Draw(img)
+
+    f_title = font(24, bold=True)
+    f_day_h = font(15, bold=True)
+    f_time = font(16, bold=True)
+    f_event = font(16)
+    f_loc = font(13)
+    f_empty = font(20, bold=True)
+
+    days = payload.get("days", [])
+    if not days:
+        draw.text((WIDTH // 2, HEIGHT // 2), "No events this week", fill=BLACK, font=f_empty, anchor="mm")
+        return img
+
+    row_y = 0
+
+    HEADER_H = 46
+    draw.rectangle([(0, 0), (WIDTH, HEADER_H)], fill=BLACK)
+    draw.text((WIDTH // 2, HEADER_H // 2), "Week Ahead", fill=WHITE, font=f_title, anchor="mm")
+    row_y = HEADER_H + 4
+
+    for day in days:
+        day_name = day.get("day_name", "")
+        date_str = day.get("date", "")[-5:]
+        dt_str = f"{day_name} {date_str}"
+        calendars = day.get("calendars", [])
+
+        draw.text((16, row_y + 8), dt_str, fill=BLACK, font=f_day_h, anchor="lm")
+        draw.line([(16, row_y + 20), (WIDTH - 16, row_y + 20)], fill=BLACK, width=2)
+        row_y += 26
+
+        for cal in calendars:
+            cal_name = cal.get("name", "?")
+            cal_color = tuple(cal.get("color", [128, 128, 128]))
+            cal_events = cal.get("events", [])
+
+            for ev in cal_events:
+                start_s = ev.get("start", "")
+                end_s = ev.get("end", "")
+                all_day = ev.get("all_day", False)
+                location = ev.get("location", "")
+
+                if all_day:
+                    time_label = "ALL DAY"
+                else:
+                    try:
+                        st = datetime.fromisoformat(start_s.replace("Z", "+00:00"))
+                        et = datetime.fromisoformat(end_s.replace("Z", "+00:00"))
+                        time_label = f"{st.strftime('%H:%M')}-{et.strftime('%H:%M')}"
+                    except (ValueError, TypeError):
+                        time_label = ""
+
+                ROW_H = 34
+                draw.rectangle([(0, row_y), (14, row_y + ROW_H)], fill=cal_color)
+
+                draw.text((22, row_y + 10), time_label, fill=BLACK, font=f_time, anchor="lm")
+
+                tx = 130
+                draw.text((tx, row_y + 8), ev.get("summary", "")[:45], fill=BLACK, font=f_event, anchor="lm")
+
+                cal_pill_w = draw.textlength(cal_name, font=f_loc) + 12
+                draw.rounded_rectangle([(tx, row_y + 20), (tx + cal_pill_w, row_y + 30)], 4, fill=cal_color)
+                draw.text((tx + 6, row_y + 25), cal_name, fill=WHITE, font=f_loc, anchor="lm")
+
+                if location:
+                    lx = tx + cal_pill_w + 12
+                    draw.text((lx, row_y + 25), location[:40], fill=(120, 120, 120), font=f_loc, anchor="lm")
+
+                row_y += ROW_H + 3
+                if row_y > HEIGHT - 10:
+                    break
+            if row_y > HEIGHT - 10:
+                break
+        if row_y > HEIGHT - 10:
+            break
+
+    return img
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--payload", type=Path, default=None, help="Path to payload JSON")
+    parser.add_argument("--payload", type=Path, default=None)
     args = parser.parse_args()
 
     if args.payload:
         p = Path(args.payload)
         with p.open("r", encoding="utf-8") as f:
-            raw = json.load(f)
-        if isinstance(raw, dict) and isinstance(raw.get("merge_variables"), dict):
-            payload = raw["merge_variables"]
-        else:
-            payload = raw
+            payload = json.load(f)
     else:
         import sys
         sys.path.insert(0, str(ROOT / "scripts"))
