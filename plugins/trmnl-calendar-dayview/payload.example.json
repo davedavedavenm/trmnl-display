@@ -1,11 +1,12 @@
 {
+  "today": "2026-05-07",
   "days": [
     {
       "date": "2026-05-07",
       "day_name": "Thursday",
       "calendars": [
         {
-          "name": "Dave",
+          "name": "REDACTED-CONNECTION",
           "color": [0, 0, 255],
           "events": [
             {
@@ -13,31 +14,26 @@
               "start": "2026-05-07T14:45:00+01:00",
               "end": "2026-05-07T15:45:00+01:00",
               "all_day": false,
-              "location": "Bristol Eye Hospital, Lower Maudlin St"
+              "location": "Bristol Eye Hospital"
             }
           ]
-        }
-      ]
-    },
-    {
-      "date": "2026-05-08",
-      "day_name": "Friday",
-      "calendars": [
+        },
         {
-          "name": "Dave",
-          "color": [0, 0, 255],
-          "events": [
-            {
-              "summary": "Home Insurance Renewal",
-              "start": "2026-05-08",
-              "end": "2026-05-09",
-              "all_day": true,
-              "location": ""
-            }
-          ]
+          "name": "REDACTED-CONNECTION",
+          "color": [0, 255, 0],
+          "events": []
+        },
+        {
+          "name": "REDACTED-CONNECTION",
+          "color": [255, 0, 0],
+          "events": []
+        },
+        {
+          "name": "REDACTED-CONNECTION",
+          "color": [255, 128, 0],
+          "events": []
         }
       ]
     }
-  ],
-  "today": "2026-05-06"
+  ]
 }

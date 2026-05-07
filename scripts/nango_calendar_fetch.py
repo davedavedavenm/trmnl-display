@@ -11,13 +11,11 @@ import requests
 NANGO_BASE_URL = os.getenv("NANGO_BASE_URL", "https://nango.example.com")
 NANGO_SECRET_KEY = os.getenv("NANGO_SECRET_KEY", "")
 
-CONNECTIONS = [
-    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "label": "Dave", "color": [0, 0, 255]},
-    {"connection_id": "REDACTED-CONNECTION", "provider": "outlook", "label": "Outlook", "color": [255, 0, 0]},
-]
-GOOGLE_CALENDAR_IDS = [
-    ("REDACTED@example.com", "Dave", [0, 0, 255]),
-    ("REDACTED-GROUPCAL@group.calendar.google.com", "Family", [0, 255, 0]),
+PRIMARY_CALENDARS = [
+    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 0, 255]},
+    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 255, 0]},
+    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [255, 0, 0]},
+    {"connection_id": "REDACTED-CONNECTION", "provider": "outlook", "calendar_id": None, "color": [255, 128, 0]},
 ]
 
 
@@ -42,18 +40,17 @@ def nango_get_token(connection_id: str, provider: str) -> str:
     return data.get("credentials", {}).get("access_token") or data["access_token"]
 
 
-def fetch_google_events(cal_id: str, label: str, color: list, time_min: str, time_max: str) -> dict:
-    conn = CONNECTIONS[0]
+def fetch_google_events(cal: dict, time_min: str, time_max: str) -> dict:
     params = urllib.parse.urlencode({
         "timeMin": time_min,
         "timeMax": time_max,
         "singleEvents": "true",
         "orderBy": "startTime",
     })
-    path = f"calendar/v3/calendars/{urllib.parse.quote(cal_id, safe='')}/events?{params}"
+    path = f"calendar/v3/calendars/{urllib.parse.quote(cal['calendar_id'], safe='')}/events?{params}"
     events = []
     try:
-        result = nango_proxy_get(path, conn["connection_id"], conn["provider"])
+        result = nango_proxy_get(path, cal["connection_id"], cal["provider"])
         for item in result.get("items", []):
             start_raw = item.get("start", {})
             end_raw = item.get("end", {})
@@ -65,13 +62,13 @@ def fetch_google_events(cal_id: str, label: str, color: list, time_min: str, tim
                 "location": item.get("location", ""),
             })
     except requests.RequestException as e:
-        print(f"Warning: {label}: {e}")
-    return {"name": label, "color": color, "events": events}
+        print(f"Warning: {cal['connection_id']}: {e}")
+    return {"name": cal["connection_id"], "color": cal["color"], "events": events}
 
 
-def fetch_outlook_events(connection_id: str, provider: str, time_min: str, time_max: str) -> dict:
+def fetch_outlook_events(cal: dict, time_min: str, time_max: str) -> dict:
     try:
-        token = nango_get_token(connection_id, provider)
+        token = nango_get_token(cal["connection_id"], cal["provider"])
         params = urllib.parse.urlencode({
             "startDateTime": time_min,
             "endDateTime": time_max,
@@ -91,10 +88,10 @@ def fetch_outlook_events(connection_id: str, provider: str, time_min: str, time_
                 "all_day": False,
                 "location": (item.get("location") or {}).get("displayName", ""),
             })
-        return {"name": "Outlook", "color": [255, 0, 0], "events": events}
+        return {"name": cal["connection_id"], "color": cal["color"], "events": events}
     except requests.RequestException as e:
-        print(f"Warning: Outlook: {e}")
-        return {"name": "Outlook", "color": [255, 0, 0], "events": []}
+        print(f"Warning: {cal['connection_id']}: {e}")
+        return {"name": cal["connection_id"], "color": cal["color"], "events": []}
 
 
 def group_events_by_day(calendars: list[dict], start: datetime, days: int) -> list[dict]:
@@ -136,10 +133,11 @@ def fetch_payload() -> dict:
     time_max = week_end.isoformat()
 
     calendars = []
-    for cal_id, label, color in GOOGLE_CALENDAR_IDS:
-        calendars.append(fetch_google_events(cal_id, label, color, time_min, time_max))
-
-    calendars.append(fetch_outlook_events(CONNECTIONS[1]["connection_id"], CONNECTIONS[1]["provider"], time_min, time_max))
+    for cal in PRIMARY_CALENDARS:
+        if cal["provider"] == "google-calendar":
+            calendars.append(fetch_google_events(cal, time_min, time_max))
+        elif cal["provider"] == "outlook":
+            calendars.append(fetch_outlook_events(cal, time_min, time_max))
 
     days = group_events_by_day(calendars, week_start, 7)
 
