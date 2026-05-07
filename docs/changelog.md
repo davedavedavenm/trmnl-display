@@ -9,6 +9,7 @@
 - Created `scripts/trmnl_refresh_bus_sidecar.sh` as the combined refresh wrapper.
 - Created `plugins/trmnl-bus-departures/` plugin contract (settings, schema, payload, README).
 - Removed split-screen mashup from bus departures playlist item; bus now renders full-screen.
+- Added calendar colour sidecar: 7-day week agenda view with per-calendar colour bars (BLUE=Dave, GREEN=Family, RED=Outlook), calendar name pills, and clean list layout. Fetches live via Nango OAuth proxy.
 
 ## 2026-05-02
 
