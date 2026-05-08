@@ -1,0 +1,59 @@
+{
+  "plugin_id": "trmnl-hp-quotes",
+  "name": "Harry Potter Quotes",
+  "version": "1.0.0",
+  "sidecar": {
+    "supported": true,
+    "renderer": "scripts/render_hp_quotes.py",
+    "output": "indexed 7-colour PNG at 800x480",
+    "palette": ["BLACK", "WHITE", "RED", "YELLOW", "BLUE", "GREEN", "ORANGE"],
+    "canonical_proof": "scripts/tmp/sidecar_hp_quotes_proof.png"
+  },
+  "fields": [
+    {
+      "key": "layout_mode",
+      "type": "text",
+      "required": false,
+      "default": "full_screen",
+      "allowed_values": ["full_screen", "half_vertical"],
+      "description": "Layout mode: full_screen for standalone display, half_vertical for morning mashup with Jen Morning."
+    },
+    {
+      "key": "theme",
+      "type": "text",
+      "required": false,
+      "default": "parchment",
+      "allowed_values": ["parchment", "dark"],
+      "description": "Visual theme for the quote display. Parchment uses a warm cream background with serif quote text. Dark uses a black background with light text."
+    },
+    {
+      "key": "house_accent",
+      "type": "text",
+      "required": false,
+      "default": "auto",
+      "allowed_values": ["auto", "gryffindor", "slytherin", "ravenclaw", "hufflepuff", "none"],
+      "description": "House colour accent. Auto detects from quote metadata. Specific values force a house palette."
+    },
+    {
+      "key": "show_house_banner",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "When enabled and the quote has a known house association, show a house banner/stripe on the display."
+    },
+    {
+      "key": "show_source_book",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show the source book name in the attribution line."
+    },
+    {
+      "key": "screen_label",
+      "type": "text",
+      "required": false,
+      "default": "Harry Potter",
+      "description": "Label shown when display metadata is shown."
+    }
+  ]
+}

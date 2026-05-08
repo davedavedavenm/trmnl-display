@@ -1,0 +1,10 @@
+{
+  "merge_variables": {
+    "updated_at": "08 May 18:00",
+    "layout_mode": "full_screen",
+    "theme": "parchment",
+    "house_accent": "auto",
+    "show_house_banner": true,
+    "show_source_book": true
+  }
+}

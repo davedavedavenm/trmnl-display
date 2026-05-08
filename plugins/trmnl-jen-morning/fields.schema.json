@@ -1,0 +1,85 @@
+{
+  "plugin_id": "trmnl-jen-morning",
+  "name": "Jen Morning Commute",
+  "version": "2.0.0",
+  "sidecar": {
+    "supported": true,
+    "renderer": "scripts/render_morning_mashup.py",
+    "output": "indexed 7-colour PNG at 800x480",
+    "palette": ["BLACK", "WHITE", "RED", "YELLOW", "BLUE", "GREEN", "ORANGE"],
+    "canonical_proof": "scripts/tmp/sidecar_morning_mashup_source_next.png"
+  },
+  "fields": [
+    {
+      "key": "layout_mode",
+      "type": "text",
+      "required": false,
+      "default": "mashup",
+      "allowed_values": ["mashup", "standalone"],
+      "description": "Layout mode: mashup for split-screen with HP quote, standalone for full-screen commute display."
+    },
+    {
+      "key": "layout_variant",
+      "type": "text",
+      "required": false,
+      "default": "maps_style",
+      "allowed_values": ["maps_style", "editorial", "structured"],
+      "description": "Visual style for the commute display. maps_style uses a bold left/right split with gradient panels."
+    },
+    {
+      "key": "screen_label",
+      "type": "text",
+      "required": false,
+      "default": "Jen Morning",
+      "optional": true,
+      "description": "Header label shown at the top of the commute panel."
+    },
+    {
+      "key": "headline_fallback",
+      "type": "text",
+      "required": false,
+      "default": "Time To Work",
+      "optional": true,
+      "description": "Fallback headline used when the webhook payload does not provide one."
+    },
+    {
+      "key": "eta_label",
+      "type": "text",
+      "required": false,
+      "default": "DRIVE TIME",
+      "optional": true,
+      "description": "Label displayed below the ETA value."
+    },
+    {
+      "key": "eta_unit_label",
+      "type": "text",
+      "required": false,
+      "default": "min",
+      "optional": true,
+      "description": "Unit label shown beside the ETA value."
+    },
+    {
+      "key": "show_distance",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show the route distance in the route card."
+    },
+    {
+      "key": "distance_unit_label",
+      "type": "text",
+      "required": false,
+      "default": "km",
+      "optional": true,
+      "description": "Unit suffix displayed with the route distance."
+    },
+    {
+      "key": "colour_profile",
+      "type": "text",
+      "required": false,
+      "default": "navy_blue",
+      "allowed_values": ["navy_blue", "slate", "forest"],
+      "description": "Colour profile for the left commute panel. Controls the gradient background and accent colours."
+    }
+  ]
+}
