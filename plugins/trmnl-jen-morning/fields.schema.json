@@ -43,6 +43,14 @@
       "description": "Fallback headline used when the webhook payload does not provide one."
     },
     {
+      "key": "colour_profile",
+      "type": "text",
+      "required": false,
+      "default": "navy_blue",
+      "allowed_values": ["navy_blue", "slate", "forest"],
+      "description": "Colour profile for the left commute panel. Controls the gradient background and accent colours."
+    },
+    {
       "key": "eta_label",
       "type": "text",
       "required": false,
@@ -72,14 +80,6 @@
       "default": "km",
       "optional": true,
       "description": "Unit suffix displayed with the route distance."
-    },
-    {
-      "key": "colour_profile",
-      "type": "text",
-      "required": false,
-      "default": "navy_blue",
-      "allowed_values": ["navy_blue", "slate", "forest"],
-      "description": "Colour profile for the left commute panel. Controls the gradient background and accent colours."
     }
   ]
 }

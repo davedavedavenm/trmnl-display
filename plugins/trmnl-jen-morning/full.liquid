@@ -1,9 +1,10 @@
 {% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
+{% assign colour_profile = trmnl.plugin_settings.custom_fields_values.colour_profile | default: 'navy_blue' %}
 {% assign layout_variant = trmnl.plugin_settings.custom_fields_values.layout_variant | default: 'editorial' %}
 {% assign screen_label = trmnl.plugin_settings.custom_fields_values.screen_label | default: 'Jen Morning' %}
 {% assign headline_fallback = trmnl.plugin_settings.custom_fields_values.headline_fallback | default: 'Time To Work' %}
-{% assign eta_label = trmnl.plugin_settings.custom_fields_values.eta_label | default: 'ETA' %}
-{% assign eta_unit_label = trmnl.plugin_settings.custom_fields_values.eta_unit_label | default: 'Minutes' %}
+{% assign eta_label = trmnl.plugin_settings.custom_fields_values.eta_label | default: 'DRIVE TIME' %}
+{% assign eta_unit_label = trmnl.plugin_settings.custom_fields_values.eta_unit_label | default: 'min' %}
 {% assign route_section_label = trmnl.plugin_settings.custom_fields_values.route_label | default: 'Route' %}
 {% assign show_distance = trmnl.plugin_settings.custom_fields_values.show_distance | default: true %}
 {% assign distance_unit_label = trmnl.plugin_settings.custom_fields_values.distance_unit_label | default: 'km' %}
@@ -11,7 +12,12 @@
 {% assign route_value = route_label | default: 'Direct route' %}
 {% assign distance_value = distance_km | default: '' %}
 
-{% if theme_mode == 'dark' %}
+{% if layout_variant == 'maps_style' %}
+  {% comment %}Maps Style is rendered by the colour sidecar. Liquid fallback uses editorial layout. {% endcomment %}
+  {% assign layout_variant = 'editorial' %}
+{% endif %}
+
+{% if theme_mode == 'dark' or colour_profile == 'slate' %}
   {% assign bg = '#111111' %}
   {% assign fg = '#fffdf8' %}
   {% assign soft = '#d8c9a2' %}
@@ -20,6 +26,16 @@
   {% assign panel_alt = '#24211d' %}
   {% assign border = '#fffdf8' %}
   {% assign accent = '#ffa500' %}
+  {% assign accent_text = '#000000' %}
+{% elsif colour_profile == 'forest' %}
+  {% assign bg = '#0a1f0a' %}
+  {% assign fg = '#e8f5e8' %}
+  {% assign soft = '#a8d5a8' %}
+  {% assign soft_2 = '#6b9e6b' %}
+  {% assign panel = '#142814' %}
+  {% assign panel_alt = '#1e3a1e' %}
+  {% assign border = '#e8f5e8' %}
+  {% assign accent = '#4caf50' %}
   {% assign accent_text = '#000000' %}
 {% else %}
   {% assign bg = '#f6f1e8' %}

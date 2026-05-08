@@ -2,61 +2,100 @@
 
 Scheduled morning commute screen for LaraPaper/TRMNL BYOS.
 
-This recipe is intended for a predictable weekday morning window such as `07:00-07:30`.
-It is separate from the main Jen commute automation/state machine and should not alter that logic.
-It is designed to work either as a standalone morning screen or as the left side of a LaraPaper mashup.
+This recipe is intended for a predictable weekday morning window such as `06:45-07:30`. It is separate from the main Jen commute automation/state machine and should not alter that logic.
 
-Recipe files:
-- `plugins/trmnl-jen-morning/settings.yml`
-- `plugins/trmnl-jen-morning/full.liquid`
-- `plugins/trmnl-jen-morning/half_vertical.liquid`
+## Rendering Paths
 
-Expected payload fields:
-- required:
-  - `updated_at`
-  - `headline`
-  - `eta_minutes`
-  - `route_label`
-- optional:
-  - `distance_km`
+### Colour Sidecar (Primary for Spectra Panels)
 
-Example payload:
+The recommended path for colour-capable TRMNL panels (Inky Impression 7.3 / Spectra-class) is the **Maps Style** colour sidecar renderer. This produces a rich, high-fidelity left/right split display with gradient panels, bold typography, and a companion HP quote on the right half.
+
+- Renderer: `scripts/render_morning_mashup.py`
+- Output: indexed 7-colour PNG at 800x480
+- Proof: `scripts/tmp/sidecar_morning_mashup_source_next.png`
+
+### Liquid Templates (Fallback)
+
+For standard monochrome TRMNL panels or when the sidecar is unavailable, the plugin falls back to LaraPaper's Liquid rendering using `full.liquid` (standalone) or `half_vertical.liquid` (mashup). These use the `editorial` and `structured` layout variants.
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `settings.yml` | Shareable plugin fields for LaraPaper import |
+| `fields.schema.json` | Field contract and sidecar metadata |
+| `payload.example.json` | Example webhook payload shape |
+| `full.liquid` | Standalone Liquid template (editorial/structured layouts) |
+| `half_vertical.liquid` | Half-width Liquid template for mashup compositing |
+| `README.md` | This file |
+
+## Expected Payload Fields
 
 ```json
 {
   "merge_variables": {
-    "updated_at": "30 Mar 07:10",
+    "updated_at": "08 May 07:15",
     "headline": "Time To Work",
-    "eta_minutes": "42",
-    "route_label": "Woollard Ln",
-    "distance_km": "29.4"
+    "eta_minutes": 42,
+    "route_label": "Via A13",
+    "distance_km": 28.5
   }
 }
 ```
 
-User-editable settings:
-- `Layout Variant`: switch between `Editorial` and `Structured`
-- `Screen Label`: small chip above the headline
-- `Headline Fallback`: used if the webhook payload omits `headline`
-- `Theme`: light or dark
-- `ETA Label`: small label above the ETA number
-- `ETA Unit Label`: text beside or below the ETA number
-- `Route Label`: small label above the route name
-- `Show Distance`: hides or shows distance when present in the payload
-- `Distance Unit`: suffix used when rendering distance
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `updated_at` | string | yes | Timestamp shown in header |
+| `headline` | string | yes | Destination or commute headline |
+| `eta_minutes` | number | yes | Drive time in minutes |
+| `route_label` | string | yes | Route name (e.g., "Via A13") |
+| `distance_km` | number | no | Route distance |
 
-Suggested LaraPaper setup:
+## User-Editable Settings
+
+| Setting | Type | Default | Description |
+|---|---|---|---|
+| `Layout Mode` | select | `mashup` | `mashup` for split-screen with HP quote, `standalone` for full-screen |
+| `Layout Variant` | select | `maps_style` | `maps_style`, `editorial`, or `structured` |
+| `Screen Label` | string | `Jen Morning` | Header label at top of commute panel |
+| `Headline Fallback` | string | `Time To Work` | Used when payload omits `headline` |
+| `Colour Profile` | select | `navy_blue` | `navy_blue`, `slate`, or `forest` gradient for left panel |
+| `ETA Label` | string | `DRIVE TIME` | Label below the ETA number |
+| `ETA Unit Label` | string | `min` | Unit beside the ETA value |
+| `Show Distance` | boolean | `true` | Show route distance in card |
+| `Distance Unit` | string | `km` | Unit suffix for distance |
+
+## Setup
+
+1. Import `settings.yml` into your TRMNL/LaraPaper instance as a new custom plugin.
+2. Note the Webhook URL.
+3. For colour sidecar rendering, run:
+   ```bash
+   python scripts/render_morning_mashup.py --payload /path/to/payload.json
+   ```
+4. For standard Liquid rendering, point a webhook sender (e.g., Home Assistant) at the plugin's custom-plugin endpoint.
+
+## Suggested LaraPaper Setup
+
+### Morning Mashup (Weekday 06:45-07:30)
+
 1. Create the `Jen Morning` custom plugin from this folder.
-2. Point a webhook sender such as Home Assistant at the plugin's custom-plugin endpoint.
-3. For the split-screen version, create a LaraPaper mashup playlist item using:
-   - `Jen Morning` on the left
-   - a quote recipe such as `Potter Quotes` on the right
-   - layout `1Lx1R`
-4. For the currently used playlist-level wiring, see `docs/JEN_MORNING_MASHUP.md` and `scripts/larapaper_manage_mashup.sh`.
+2. Create the `Harry Potter Quotes` plugin from `plugins/trmnl-hp-quotes`.
+3. Create a LaraPaper mashup playlist item using:
+   - `Jen Morning` on the left (layout mode: `mashup`)
+   - `Harry Potter Quotes` on the right (layout mode: `half_vertical`)
+   - Layout: `1Lx1R`
+4. Point a webhook sender at the Jen Morning plugin endpoint during the morning window.
 
-Notes:
+### Standalone Full-Screen
+
+- Layout mode: `standalone`
+- Layout variant: `editorial` or `structured`
+- Uses Liquid templates for monochrome panels
+
+## Notes
+
 - This is a separate morning screen, not a replacement for the main `Jen Commute` recipe.
 - The intended Home Assistant pattern is: a dedicated TRMNL package pushes payloads and temporarily sets a TRMNL manual override during the configured morning window.
-- The intended quote/content split should come from a LaraPaper mashup with a separate quote recipe, not from embedding quotes inside this plugin.
 - Keep the recipe reusable by leaving commute-specific decision logic in Home Assistant or another upstream orchestrator. The plugin should stay focused on presentation and small user-configurable labels.
-- LaraPaper standalone preview renders the plugin `full` layout, while the live split-screen playlist renders `half_vertical`. They should now share the same visual family and settings, but they will not be pixel-identical because they are different layout sizes.
+- For the currently used playlist-level wiring, see `docs/JEN_MORNING_MASHUP.md` and `scripts/larapaper_manage_mashup.sh`.

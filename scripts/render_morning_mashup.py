@@ -81,11 +81,8 @@ def font(size: int, bold: bool = False, italic: bool = False) -> ImageFont.FreeT
 
 def font_sans(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     candidates = [
-        "C:/Windows/Fonts/segoeui.ttf",
-        "C:/Windows/Fonts/segoeuib.ttf" if bold else "C:/Windows/Fonts/segoeui.ttf",
-        "C:/Windows/Fonts/arial.ttf",
         "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "C:/Windows/Fonts/segoeuib.ttf" if bold else "C:/Windows/Fonts/segoeui.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
     for c in candidates:
@@ -176,77 +173,73 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any]) -> None:
     updated = data.get("updated_at") or ""
 
     panel_w = WIDTH // 2
-    draw_gradient(draw, 0, 0, panel_w, HEIGHT, (30, 60, 120), (20, 40, 90))
+    draw_gradient(draw, 0, 0, panel_w, HEIGHT, (10, 25, 60), (5, 12, 35))
 
-    header_h = 44
-    draw_gradient(draw, 0, 0, panel_w, header_h, (40, 80, 160), (25, 55, 130))
-    label_font = font_sans(13, bold=True)
-    draw.text((16, (header_h - 16) // 2), "JEN MORNING", fill=WHITE, font=label_font)
+    header_h = 36
+    draw_gradient(draw, 0, 0, panel_w, header_h, (20, 50, 120), (10, 25, 60))
+    label_font = font_sans(14, bold=True)
+    draw.text((16, (header_h - 18) // 2), "JEN MORNING", fill=WHITE, font=label_font)
 
     if updated:
-        upd_font = font_sans(11)
+        upd_font = font_sans(12, bold=True)
         bbox = draw.textbbox((0, 0), updated, font=upd_font)
-        draw.text((panel_w - bbox[2] - 16, (header_h - bbox[3]) // 2), updated, fill=(180, 200, 240), font=upd_font)
+        draw.text((panel_w - bbox[2] - 16, (header_h - bbox[3]) // 2), updated, fill=(220, 230, 250), font=upd_font)
 
-    eta_font = font_sans(80, bold=True)
+    eta_font = font_sans(60, bold=True)
     bbox = draw.textbbox((0, 0), str(eta), font=eta_font)
     eta_w = bbox[2] - bbox[0]
     eta_x = (panel_w - eta_w) // 2
-    draw.text((eta_x, 80), str(eta), fill=(100, 180, 255), font=eta_font)
+    eta_y = header_h + 30
+    draw.text((eta_x, eta_y), str(eta), fill=WHITE, font=eta_font)
 
-    unit_font = font_sans(22, bold=True)
+    unit_font = font_sans(20, bold=True)
     unit_bbox = draw.textbbox((0, 0), "min", font=unit_font)
     unit_w = unit_bbox[2] - unit_bbox[0]
-    draw.text((eta_x + eta_w + 10, 100), "min", fill=(100, 180, 255), font=unit_font)
+    draw.text((eta_x + eta_w + 8, eta_y + 8), "min", fill=WHITE, font=unit_font)
 
-    label_font2 = font_sans(12, bold=True)
-    label_bbox = draw.textbbox((0, 0), "DRIVE TIME", font=label_font2)
-    label_x = (panel_w - label_bbox[2]) // 2
-    draw.text((label_x, 140), "DRIVE TIME", fill=(150, 180, 220), font=label_font2)
+    card_y = eta_y + 72
+    card_x = 14
+    card_w = panel_w - 28
+    card_h = 68
+    draw_rounded_rect(draw, [card_x, card_y, card_x + card_w, card_y + card_h], radius=14, fill=WHITE)
 
-    card_y = 180
-    card_x = 20
-    card_w = panel_w - 40
-    card_h = 56
-    draw_rounded_rect(draw, [card_x, card_y, card_x + card_w, card_y + card_h], radius=12, fill=(255, 255, 255))
-
-    route_font = font_sans(18, bold=True)
-    draw.text((card_x + 16, card_y + 10), f"via {route}", fill=(30, 60, 120), font=route_font)
+    route_font = font_sans(24, bold=True)
+    draw.text((card_x + 18, card_y + 6), f"via {route}", fill=(5, 15, 40), font=route_font)
 
     if distance is not None and str(distance).strip() not in ("", "?", "unknown"):
-        dist_font = font_sans(14)
+        dist_font = font_sans(18, bold=True)
         bbox = draw.textbbox((0, 0), f"{distance} km", font=dist_font)
-        draw.text((card_x + card_w - bbox[2] - 16, card_y + 18), f"{distance} km", fill=(100, 100, 100), font=dist_font)
+        draw.text((card_x + card_w - bbox[2] - 18, card_y + 22), f"{distance} km", fill=(50, 50, 50), font=dist_font)
 
-    dest_font = font_sans(13)
-    draw.text((card_x + 16, card_y + 34), headline, fill=(80, 80, 80), font=dest_font)
+    dest_font = font_sans(16, bold=True)
+    draw.text((card_x + 18, card_y + 38), headline, fill=(30, 30, 30), font=dest_font)
 
-    status_y = card_y + card_h + 20
-    status_h = 48
-    draw_rounded_rect(draw, [card_x, status_y, card_x + card_w, status_y + status_h], radius=12, fill=(40, 100, 60))
+    status_y = card_y + card_h + 14
+    status_h = 60
+    draw_rounded_rect(draw, [card_x, status_y, card_x + card_w, status_y + status_h], radius=14, fill=(20, 80, 40))
 
-    status_font = font_sans(16, bold=True)
+    status_font = font_sans(22, bold=True)
     status_text = "LEAVE BY 7:15 AM"
     bbox = draw.textbbox((0, 0), status_text, font=status_font)
-    draw.text((card_x + (card_w - bbox[2]) // 2, status_y + 14), status_text, fill=WHITE, font=status_font)
+    draw.text((card_x + (card_w - bbox[2]) // 2, status_y + 8), status_text, fill=WHITE, font=status_font)
 
-    sub_font = font_sans(11)
+    sub_font = font_sans(15, bold=True)
     sub_text = "On-time arrival expected"
     bbox = draw.textbbox((0, 0), sub_text, font=sub_font)
-    draw.text((card_x + (card_w - bbox[2]) // 2, status_y + 32), sub_text, fill=(180, 220, 200), font=sub_font)
+    draw.text((card_x + (card_w - bbox[2]) // 2, status_y + 34), sub_text, fill=(210, 240, 220), font=sub_font)
 
-    bottom_y = status_y + status_h + 16
-    draw.line([(card_x, bottom_y), (card_x + card_w, bottom_y)], fill=(60, 100, 160), width=1)
+    bottom_y = status_y + status_h + 12
+    draw.line([(card_x, bottom_y), (card_x + card_w, bottom_y)], fill=(40, 80, 140), width=2)
 
-    traffic_font = font_sans(12, bold=True)
+    traffic_font = font_sans(18, bold=True)
     traffic_text = "TRAFFIC: LIGHT"
     bbox = draw.textbbox((0, 0), traffic_text, font=traffic_font)
-    draw.text((card_x + (card_w - bbox[2]) // 2, bottom_y + 10), traffic_text, fill=(100, 180, 255), font=traffic_font)
+    draw.text((card_x + (card_w - bbox[2]) // 2, bottom_y + 6), traffic_text, fill=WHITE, font=traffic_font)
 
-    weather_font = font_sans(11)
-    weather_text = "12°C  Partly Cloudy"
+    weather_font = font_sans(16, bold=True)
+    weather_text = "12C  Partly Cloudy"
     bbox = draw.textbbox((0, 0), weather_text, font=weather_font)
-    draw.text((card_x + (card_w - bbox[2]) // 2, bottom_y + 28), weather_text, fill=(150, 180, 220), font=weather_font)
+    draw.text((card_x + (card_w - bbox[2]) // 2, bottom_y + 28), weather_text, fill=(200, 215, 240), font=weather_font)
 
 
 def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: str, book: str | None, house: str | None, show_book: bool) -> None:
@@ -255,10 +248,10 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
     start_x = WIDTH // 2
     draw_gradient(draw, start_x, 0, WIDTH, HEIGHT, h["bg"], h["primary_dark"])
 
-    banner_h = 48
+    banner_h = 44
     draw_gradient(draw, start_x, 0, WIDTH, banner_h, h["primary"], h["primary_dark"])
 
-    name_font = font_sans(14, bold=True)
+    name_font = font_sans(16, bold=True)
     house_name = HOUSE_LABELS.get(house, "Wizarding World") if house else "Wizarding World"
     bbox = draw.textbbox((0, 0), house_name, font=name_font)
     name_w = bbox[2] - bbox[0]
@@ -266,24 +259,24 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
 
     draw.line([(start_x, banner_h), (WIDTH, banner_h)], fill=h["secondary"], width=2)
 
-    margin_x = 20
-    margin_y = 16
+    margin_x = 24
+    margin_y = 20
     text_area_x = start_x + margin_x
     text_area_w = WIDTH - start_x - margin_x * 2
     text_area_y = banner_h + margin_y
-    text_area_h = HEIGHT - text_area_y - 50
+    text_area_h = HEIGHT - text_area_y - 55
 
-    quote_font_size = 28
+    quote_font_size = 32
     qf_quote = font(quote_font_size, italic=True)
     max_text_width = text_area_w
 
     wrapped = wrap_text(quote_text, qf_quote, max_text_width, draw)
-    while len(wrapped) > 5 and quote_font_size > 18:
+    while len(wrapped) > 5 and quote_font_size > 20:
         quote_font_size -= 2
         qf_quote = font(quote_font_size, italic=True)
         wrapped = wrap_text(quote_text, qf_quote, max_text_width, draw)
 
-    line_height = quote_font_size + 6
+    line_height = quote_font_size + 8
     total_text_height = len(wrapped) * line_height
     quote_start_y = text_area_y + (text_area_h - total_text_height) // 3
 
@@ -293,11 +286,11 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
         lx = text_area_x + (max_text_width - line_w) // 2
         draw.text((lx, quote_start_y + i * line_height), line, fill=h["text"], font=qf_quote)
 
-    attr_bar_h = 40
+    attr_bar_h = 44
     attr_y = HEIGHT - attr_bar_h
-    draw.line([(start_x, attr_y), (WIDTH, attr_y)], fill=h["secondary"], width=1)
+    draw.line([(start_x, attr_y), (WIDTH, attr_y)], fill=h["secondary"], width=2)
 
-    attr_font = font_sans(12, bold=True)
+    attr_font = font_sans(14, bold=True)
     short_book = {"Philosopher's Stone": "PS", "Chamber of Secrets": "CS", "Prisoner of Azkaban": "PA", "Goblet of Fire": "GF", "Order of the Phoenix": "OP", "Half-Blood Prince": "HBP", "Deathly Hallows": "DH"}.get(book, book) if show_book else None
     attr_text = f"\u2014 {character}"
     if short_book:
