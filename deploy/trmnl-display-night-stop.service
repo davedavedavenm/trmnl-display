@@ -1,0 +1,6 @@
+[Unit]
+Description=TRMNL Display Night Stop
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl stop trmnl-display.service

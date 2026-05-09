@@ -1,0 +1,6 @@
+[Unit]
+Description=TRMNL Display Morning Start
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl start trmnl-display.service
