@@ -77,6 +77,20 @@ DARK_THEME = Theme(BLACK, WHITE, DIM)
 LIGHT_THEME = Theme(WHITE, BLACK, LIGHT_DIM, WHITE)
 
 
+def render_empty(draw: ImageDraw.ImageDraw, theme: Theme) -> None:
+    f_clock = font(64, bold=True)
+    f_date = font(24, bold=True)
+    f_msg = font(20)
+
+    now = datetime.now(timezone.utc)
+    now_str = now.strftime("%H:%M")
+    date_str = now.strftime("%A %d %B %Y")
+
+    draw.text((WIDTH // 2, HEIGHT // 2 - 50), now_str, fill=theme.fg, font=f_clock, anchor="mm")
+    draw.text((WIDTH // 2, HEIGHT // 2 + 15), date_str, fill=theme.dim, font=f_date, anchor="mm")
+    draw.text((WIDTH // 2, HEIGHT // 2 + 55), "No events this week", fill=theme.dim, font=f_msg, anchor="mm")
+
+
 def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_str: str, theme: Theme) -> None:
     today_day = None
     for d in days:
@@ -95,7 +109,7 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
     f_footer = font(16)
 
     if not days:
-        draw.text((WIDTH // 2, HEIGHT // 2 - 10), "No events this week", fill=theme.fg, font=f_empty, anchor="mm")
+        render_empty(draw, theme)
         return
 
     # TOP BAR
@@ -201,7 +215,7 @@ def render_agenda(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_s
     f_day = font(16, bold=True)
 
     if not days:
-        draw.text((WIDTH // 2, HEIGHT // 2 - 10), "No events this week", fill=theme.fg, font=f_empty, anchor="mm")
+        render_empty(draw, theme)
         return
 
     # TOP BAR
@@ -287,7 +301,7 @@ def render_weekstrip(draw: ImageDraw.ImageDraw, days: list[dict], today: str, no
     f_empty = font(28, bold=True)
 
     if not days:
-        draw.text((WIDTH // 2, HEIGHT // 2 - 10), "No events this week", fill=theme.fg, font=f_empty, anchor="mm")
+        render_empty(draw, theme)
         return
 
     # TOP BAR
