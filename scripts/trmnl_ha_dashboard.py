@@ -165,6 +165,22 @@ def fetch_weather() -> dict:
         return {}
 
 
+def _download_album_art(picture_url: str, room: str) -> str:
+    cache_dir = Path(os.getenv("TRMNL_ALBUM_ART_DIR", "/home/dave/tmp/album_art"))
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    safe_room = "".join(c for c in room if c.isalnum() or c in " _-").rstrip().replace(" ", "_")
+    cache_path = cache_dir / f"{safe_room}_art.png"
+
+    try:
+        resp = requests.get(picture_url, headers={"Authorization": f"Bearer {HA_TOKEN}"}, timeout=10)
+        resp.raise_for_status()
+        cache_path.write_bytes(resp.content)
+        return str(cache_path)
+    except Exception as e:
+        print(f"Album art download failed for {room}: {e}")
+        return ""
+
+
 def fetch_sonos() -> list:
     rooms = []
     for eid in SONOS_ENTITIES:
@@ -177,12 +193,18 @@ def fetch_sonos() -> list:
             if picture and picture.startswith("/"):
                 picture = f"{HA_URL}{picture}"
 
+            room_name = e["attributes"].get("friendly_name", eid)
+            album_art_local = ""
+            if picture:
+                album_art_local = _download_album_art(picture, room_name)
+
             rooms.append({
-                "room": e["attributes"].get("friendly_name", eid),
+                "room": room_name,
                 "state": e["state"],
                 "title": e["attributes"].get("media_title", ""),
                 "artist": e["attributes"].get("media_artist", ""),
                 "picture": picture,
+                "album_art_local": album_art_local,
             })
         except Exception:
             continue

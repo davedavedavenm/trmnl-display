@@ -804,26 +804,50 @@ def render_bento_dashboard(data: dict[str, Any]) -> Image.Image:
         # Sonos block
         _section(draw, (sonos_sx, bottom_y, WIDTH, HEIGHT), BLUE)
 
-        if media.get("picture"):
-            # Album art placeholder - would need to download from HA
+        # Try to load album art from local cache
+        album_art = None
+        art_local = media.get("album_art_local", "")
+        if art_local:
+            try:
+                art_img = Image.open(art_local)
+                art_size = 160
+                art_img = art_img.resize((art_size, art_size), Image.LANCZOS)
+                album_art = art_img
+            except Exception:
+                pass
+
+        if album_art:
+            # Album art + track info layout
+            art_x = sonos_sx + 16
+            art_y = bottom_y + (bottom_h - 160) // 2
+            img.paste(album_art, (art_x, art_y))
+
+            text_x = art_x + 180
+            _section_text(draw, text_x, bottom_y + 14, "NOW PLAYING", 16, WHITE, True)
+            _section_text(draw, text_x, bottom_y + 44, media_artist, 24, WHITE, True)
+            _section_text(draw, text_x, bottom_y + 76, media_title, 22, WHITE)
+            _section_text(draw, text_x, bottom_y + 110, media_room, 18, WHITE)
+            _section_text(draw, text_x, bottom_y + 134, media_state, 16, WHITE)
+
+            # Now playing bars
+            bar_x = text_x + 340
+            bar_y = bottom_y + 28
+            for bi, bh in enumerate([20, 34, 14, 42, 24, 32]):
+                bx = bar_x + bi * 12
+                draw.rectangle((bx, bar_y + 42 - bh, bx + 8, bar_y + 42), fill=WHITE if bi % 2 == 0 else YELLOW)
+
+        elif media.get("picture"):
+            # Has picture URL but local art failed — fallback to text
             _section_text(draw, sonos_sx + 20, bottom_y + 12, "NOW PLAYING", 16, WHITE, True)
             _section_text(draw, sonos_sx + 20, bottom_y + 40, media_artist, 24, WHITE, True)
             _section_text(draw, sonos_sx + 20, bottom_y + 72, media_title, 28, WHITE, True)
             _section_text(draw, sonos_sx + 20, bottom_y + 110, f"{media_room} \u2022 {media_state}", 16, WHITE)
         else:
-            # Text-only now playing
             _section_text(draw, sonos_sx + 20, bottom_y + 18, "NOW PLAYING", 16, WHITE, True)
             _section_text(draw, sonos_sx + 20, bottom_y + 46, media_room, 22, WHITE, True)
             _section_text(draw, sonos_sx + 20, bottom_y + 76, media_title or "--", 32, WHITE, True)
             _section_text(draw, sonos_sx + 20, bottom_y + 118, media_artist or "", 20, WHITE)
             _section_text(draw, sonos_sx + 20, bottom_y + 148, media_state, 18, WHITE)
-
-        # Now playing indicator bars
-        bar_sx = sonos_sx + 340
-        bar_y = bottom_y + 36
-        for bi, bh in enumerate([24, 40, 16, 48, 28, 38, 20, 30]):
-            bx = bar_sx + bi * 12
-            draw.rectangle((bx, bar_y + 44 - bh, bx + 8, bar_y + 44), fill=WHITE if bi % 2 == 0 else YELLOW)
 
     else:
         # Sonos idle: people takes full width
