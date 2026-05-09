@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Calendar Day View — Bold Block Layout
+Calendar Day View — Featured Event Layout
 7-color ACeP e-ink, 800x480
-Design direction: Solid colored blocks, not thin strips. High contrast. Editorial feel.
 """
 from __future__ import annotations
 
@@ -25,7 +24,7 @@ YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 ORANGE = (255, 128, 0)
-DIM = (70, 70, 70)
+DIM = (80, 80, 80)
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
 
 SOURCE_COLORS = {
@@ -66,18 +65,13 @@ def render(payload: dict) -> Image.Image:
     img = Image.new("RGB", (WIDTH, HEIGHT), BLACK)
     draw = ImageDraw.Draw(img)
 
-    f_mast = font(16, bold=True)
-    f_clock = font(20, bold=True)
-    f_day_name = font(28, bold=True)
-    f_day_num = font(100, bold=True)
-    f_month = font(22)
-    f_time = font(24, bold=True)
-    f_event = font(26)
-    f_source = font(14, bold=True)
-    f_empty = font(24, bold=True)
-    f_upcoming = font(18, bold=True)
-    f_day_small = font(22, bold=True)
-    f_day_num_small = font(44, bold=True)
+    f_mast = font(18, bold=True)
+    f_clock = font(24, bold=True)
+    f_time = font(48, bold=True)
+    f_event = font(52)
+    f_source = font(20, bold=True)
+    f_empty = font(32, bold=True)
+    f_footer = font(16)
 
     days = payload.get("days", [])
     today = payload.get("today", "")
@@ -87,20 +81,6 @@ def render(payload: dict) -> Image.Image:
         draw.text((WIDTH // 2, HEIGHT // 2 - 10), "No events this week", fill=WHITE, font=f_empty, anchor="mm")
         return img
 
-    # ═══════════════════════════════════════════════════════
-    # TOP BAR: Colored block header
-    # ═══════════════════════════════════════════════════════
-    draw.rectangle([(0, 0), (WIDTH, 48)], fill=BLUE)
-    draw.text((20, 24), "AGENDA", fill=WHITE, font=f_mast, anchor="lm")
-    draw.text((WIDTH - 20, 24), now_str, fill=WHITE, font=f_clock, anchor="rm")
-
-    # ═══════════════════════════════════════════════════════
-    # LAYOUT: Left date hero (280px) | Right events (520px)
-    # ═══════════════════════════════════════════════════════
-    rail_w = 280
-    event_x = rail_w + 16
-
-    # Find today
     today_day = None
     for d in days:
         if d.get("date") == today:
@@ -109,6 +89,12 @@ def render(payload: dict) -> Image.Image:
     if not today_day and days:
         today_day = days[0]
 
+    # ═══════════════════════════════════════════════════════
+    # TOP BAR: Clock left, date info right
+    # ═══════════════════════════════════════════════════════
+    header_y = 22
+    draw.text((24, header_y), now_str, fill=WHITE, font=f_clock, anchor="lm")
+    
     if today_day:
         day_name = today_day.get("day_name", "")
         date_str = today_day.get("date", "")
@@ -119,22 +105,22 @@ def render(payload: dict) -> Image.Image:
         except (ValueError, TypeError):
             day_num = date_str[-2:]
             month_abbr = ""
+        
+        # Date info on right side of header
+        date_text = f"{day_name.upper()} {day_num} {month_abbr}"
+        draw.text((WIDTH - 24, header_y), date_text, fill=DIM, font=f_mast, anchor="rm")
+    
+    # Separator line
+    draw.line([(24, 50), (WIDTH - 24, 50)], fill=DIM, width=1)
 
-        # ── LEFT: Date hero ──
-        # Day name in colored block
-        draw.rectangle([(16, 64), (rail_w - 16, 104)], fill=BLUE)
-        draw.text((rail_w // 2, 84), day_name.upper(), fill=WHITE, font=f_day_name, anchor="mm")
-
-        # Giant date number
-        draw.text((rail_w // 2, 110), day_num, fill=WHITE, font=f_day_num, anchor="mm")
-
-        # Month label
-        draw.text((rail_w // 2, 200), month_abbr, fill=DIM, font=f_month, anchor="mm")
-
-        # ── RIGHT: Events as solid colored blocks ──
-        ev_y = 64
+    # ═══════════════════════════════════════════════════════
+    # MAIN: Featured event cards (large, full-width)
+    # ═══════════════════════════════════════════════════════
+    ev_y = 66
+    
+    if today_day:
         calendars = today_day.get("calendars", [])
-        max_events = 4
+        max_events = 3
 
         for cal in calendars:
             cal_name_raw = cal.get("name", "?")
@@ -143,12 +129,12 @@ def render(payload: dict) -> Image.Image:
             cal_events = cal.get("events", [])[:max_events]
 
             for ev in cal_events:
-                if ev_y > HEIGHT - 70:
+                if ev_y > HEIGHT - 80:
                     break
 
                 start_s = ev.get("start", "")
                 all_day = ev.get("all_day", False)
-                summary = ev.get("summary", "")[:42]
+                summary = ev.get("summary", "")[:35]
 
                 if all_day:
                     time_label = "ALL DAY"
@@ -159,27 +145,34 @@ def render(payload: dict) -> Image.Image:
                     except (ValueError, TypeError):
                         time_label = ""
 
-                # Solid colored event block
-                block_h = 60
-                draw.rectangle([(event_x, ev_y), (WIDTH - 16, ev_y + block_h)], fill=cal_color)
+                # Large colored block
+                block_h = 120
+                draw.rectangle([(24, ev_y), (WIDTH - 24, ev_y + block_h)], fill=cal_color)
 
-                # Time (white, bold)
-                draw.text((event_x + 12, ev_y + 8), time_label, fill=WHITE, font=f_time, anchor="lm")
+                # Time (top-left)
+                draw.text((44, ev_y + 16), time_label, fill=WHITE, font=f_time, anchor="lm")
 
-                # Event summary (white)
-                draw.text((event_x + 12, ev_y + 32), summary, fill=WHITE, font=f_event, anchor="lm")
+                # Event summary (below time)
+                draw.text((44, ev_y + 72), summary, fill=WHITE, font=f_event, anchor="lm")
 
-                ev_y += block_h + 8
+                # Source badge (top-right)
+                badge_w = draw.textlength(cal_label, font=f_source) + 24
+                badge_h = 32
+                badge_x = WIDTH - 44 - badge_w
+                badge_y = ev_y + 16
+                draw.rounded_rectangle([(badge_x, badge_y), (badge_x + badge_w, badge_y + badge_h)], 6, fill=BLACK)
+                draw.text((badge_x + 12, badge_y + 8), cal_label, fill=WHITE, font=f_source, anchor="lm")
+
+                ev_y += block_h + 16
 
     # ═══════════════════════════════════════════════════════
     # BOTTOM: Upcoming days strip
     # ═══════════════════════════════════════════════════════
-    footer_y = HEIGHT - 56
-    draw.rectangle([(0, footer_y), (WIDTH, HEIGHT)], fill=BLACK)
-    draw.line([(0, footer_y), (WIDTH, footer_y)], fill=DIM, width=1)
+    footer_y = HEIGHT - 50
+    draw.line([(24, footer_y - 6), (WIDTH - 24, footer_y - 6)], fill=DIM, width=1)
 
     upcoming_days = [d for d in days if d.get("date") != today]
-    x_up = 20
+    x_up = 24
 
     for day in upcoming_days[:3]:
         if x_up > WIDTH - 100:
@@ -193,16 +186,13 @@ def render(payload: dict) -> Image.Image:
         except (ValueError, TypeError):
             day_num = date_str[-2:]
 
-        # Day name
-        draw.text((x_up, footer_y + 6), day_name[:3].upper(), fill=DIM, font=font(14, bold=True), anchor="lm")
-        # Date number
-        draw.text((x_up, footer_y + 22), day_num, fill=WHITE, font=f_day_small, anchor="lm")
+        draw.text((x_up, footer_y + 2), day_name[:3].upper(), fill=DIM, font=font(16, bold=True), anchor="lm")
+        draw.text((x_up, footer_y + 22), day_num, fill=WHITE, font=font(28, bold=True), anchor="lm")
 
-        x_up += 120
+        x_up += 90
 
-    # Event count footer
     total = sum(len(c.get("events", [])) for d in days for c in d.get("calendars", []))
-    draw.text((WIDTH - 20, footer_y + 20), f"{total} EVENTS", fill=DIM, font=font(14, bold=True), anchor="rm")
+    draw.text((WIDTH - 24, footer_y + 18), f"{total} EVENTS", fill=DIM, font=f_footer, anchor="rm")
 
     return img
 
