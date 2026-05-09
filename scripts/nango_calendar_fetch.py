@@ -141,7 +141,12 @@ def fetch_payload() -> dict:
 
     days = group_events_by_day(calendars, week_start, 7)
 
-    return {"days": days, "today": now.strftime("%Y-%m-%d")}
+    return {
+        "days": days,
+        "today": now.strftime("%Y-%m-%d"),
+        "theme": os.getenv("TRMNL_CALENDAR_THEME", "dark"),
+        "layout": os.getenv("TRMNL_CALENDAR_LAYOUT", "featured"),
+    }
 
 
 def main():

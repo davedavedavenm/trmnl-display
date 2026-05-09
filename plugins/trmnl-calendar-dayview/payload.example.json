@@ -1,4 +1,6 @@
 {
+  "theme": "dark",
+  "layout": "featured",
   "today": "2026-05-07",
   "days": [
     {
@@ -21,7 +23,15 @@
         {
           "name": "REDACTED-CONNECTION",
           "color": [0, 255, 0],
-          "events": []
+          "events": [
+            {
+              "summary": "Team standup",
+              "start": "2026-05-07T09:00:00+01:00",
+              "end": "2026-05-07T09:30:00+01:00",
+              "all_day": false,
+              "location": ""
+            }
+          ]
         },
         {
           "name": "REDACTED-CONNECTION",

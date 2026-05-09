@@ -3,12 +3,23 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ENV_FILE="${NANGO_ENV_FILE:-/home/dave/.env.nango}"
+SETTINGS_FILE="${TRMNL_CALENDAR_SETTINGS_FILE:-${SCRIPT_DIR}/.env.calendar}"
 
 if [[ -f "${ENV_FILE}" ]]; then
   set -a
   source "${ENV_FILE}"
   set +a
 fi
+
+if [[ -f "${SETTINGS_FILE}" ]]; then
+  set -a
+  source "${SETTINGS_FILE}"
+  set +a
+fi
+
+# Defaults
+export TRMNL_CALENDAR_THEME="${TRMNL_CALENDAR_THEME:-dark}"
+export TRMNL_CALENDAR_LAYOUT="${TRMNL_CALENDAR_LAYOUT:-featured}"
 
 python3 "${SCRIPT_DIR}/nango_calendar_fetch.py"
 
