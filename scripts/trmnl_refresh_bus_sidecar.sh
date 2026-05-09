@@ -16,6 +16,9 @@ rm /tmp/lp_bus_refresh.sqlite
 # Wait briefly for LaraPaper to process
 sleep 3
 
+# Copy live DB to where the renderer reads it
+docker cp "${LARAPAPER_CONTAINER}:/var/www/html/database/storage/database.sqlite" "${HOME}/tmp/larapaper.sqlite"
+
 # Render the colour PNG
 python3 "${SCRIPT_DIR}/render_bus_departures.py"
 
