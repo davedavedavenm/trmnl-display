@@ -891,7 +891,7 @@ def remap_to_panel_palette(img: Image.Image) -> Image.Image:
 
 def build(payload_path: Path = DEFAULT_PAYLOAD) -> Image.Image:
     data = load_payload(payload_path)
-    layout = as_text(data.get("layout_variant"), "compact_grid").lower()
+    layout = as_text(data.get("layout_variant"), "bento").lower()
     if layout == "bento":
         return render_bento_dashboard(data)
     return render_dashboard(data)

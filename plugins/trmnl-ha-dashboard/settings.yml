@@ -21,8 +21,8 @@ custom_fields:
   - keyname: layout_variant
     field_type: text
     name: Layout Variant
-    default: "compact_grid"
-    placeholder: "compact_grid or bento"
+    default: "bento"
+    placeholder: "bento or compact_grid"
   - keyname: colour_profile
     field_type: text
     name: Colour Profile
