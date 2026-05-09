@@ -683,8 +683,9 @@ def render_bento_dashboard(data: dict[str, Any]) -> Image.Image:
     temp = as_float(weather.get("temperature"))
     humidity = as_float(weather.get("humidity"))
     wind = as_float(weather.get("wind_speed"))
+    condition = as_text(weather.get("condition"), "")
     condition_label = fit_text(
-        weather.get("condition_label") or as_text(weather.get("condition"), "").replace("-", " ").title(),
+        weather.get("condition_label") or condition.replace("-", " ").title(),
         24,
         "Weather",
     )
@@ -712,7 +713,8 @@ def render_bento_dashboard(data: dict[str, Any]) -> Image.Image:
 
     # Large temperature + condition on left
     _section_text(draw, 20, 6, f"{format_temp(temp, with_unit=True)}", 36, BLACK, True)
-    _section_text(draw, 180, 10, condition_label, 22, BLACK, True)
+    icon_sun_cloud_compact(draw, 140, 10, condition)
+    _section_text(draw, 220, 10, condition_label, 22, BLACK, True)
 
     # Humidity + wind on right
     if humidity is not None:
