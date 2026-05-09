@@ -634,6 +634,225 @@ def render_dashboard(data: dict[str, Any]) -> Image.Image:
     return img
 
 
+# ── Bento-box layout ──────────────────────────────────────────
+# Solid coloured blocks, no thin borders, conditional Sonos,
+# strong ACeP palette usage.
+
+def _section(
+    draw: ImageDraw.ImageDraw,
+    box: tuple[int, int, int, int],
+    fill: tuple[int, int, int],
+) -> None:
+    draw.rectangle(box, fill=fill)
+
+
+def _section_text(
+    draw: ImageDraw.ImageDraw,
+    x: int, y: int,
+    value: str,
+    size: int,
+    fill: tuple[int, int, int] = WHITE,
+    bold: bool = False,
+    max_chars: int = 0,
+) -> None:
+    text_value = value[:max_chars] if max_chars else value
+    draw.text((x, y), text_value, font=font(size, bold), fill=fill)
+
+
+def _sonos_active(sonos: Any) -> dict[str, Any]:
+    """Return the first actively playing or paused Sonos, or empty dict."""
+    if not isinstance(sonos, list):
+        return {}
+    for state in ("playing", "paused"):
+        for item in sonos:
+            if isinstance(item, dict) and item.get("state") == state:
+                return item
+    return {}
+
+
+def render_bento_dashboard(data: dict[str, Any]) -> Image.Image:
+    img = Image.new("RGB", (WIDTH, HEIGHT), BLACK)
+    draw = ImageDraw.Draw(img)
+
+    weather = data.get("weather") if isinstance(data.get("weather"), dict) else {}
+    home = data.get("home") if isinstance(data.get("home"), dict) else {}
+    people = data.get("people") if isinstance(data.get("people"), list) else []
+    sonos = data.get("sonos") if isinstance(data.get("sonos"), list) else []
+    labels = data.get("labels") if isinstance(data.get("labels"), dict) else {}
+
+    temp = as_float(weather.get("temperature"))
+    humidity = as_float(weather.get("humidity"))
+    wind = as_float(weather.get("wind_speed"))
+    condition_label = fit_text(
+        weather.get("condition_label") or as_text(weather.get("condition"), "").replace("-", " ").title(),
+        24,
+        "Weather",
+    )
+
+    thermostat = as_float(home.get("thermostat_temp"))
+    locked = as_bool(home.get("door_locked"))
+    washer_running = as_bool(home.get("washer_running"))
+    blind_pos = as_float(home.get("blind_position"))
+    blinds_open = as_bool(home.get("blinds_open"))
+    if blinds_open is None and blind_pos is not None:
+        blinds_open = blind_pos > 0
+
+    media = _sonos_active(sonos)
+    media_playing = bool(media)
+    media_room = fit_text(media.get("room"), 20, "")
+    media_title = fit_text(media.get("title") or "", 30, "")
+    media_artist = fit_text(media.get("artist") or "", 24, "")
+    media_state = as_text(media.get("state"), "").title()
+
+    # ── 1. WEATHER SECTION ──
+    # Full-width solid yellow block at top
+    wx_h = 80
+    wx_bg = YELLOW
+    _section(draw, (0, 0, WIDTH, wx_h), wx_bg)
+
+    # Large temperature + condition on left
+    _section_text(draw, 20, 6, f"{format_temp(temp, with_unit=True)}", 36, BLACK, True)
+    _section_text(draw, 180, 10, condition_label, 22, BLACK, True)
+
+    # Humidity + wind on right
+    if humidity is not None:
+        _section_text(draw, WIDTH - 260, 8, "Humidity", 16, BLACK, True)
+        _section_text(draw, WIDTH - 260, 28, f"{humidity:.0f}%", 32, BLACK, True)
+    if wind is not None:
+        _section_text(draw, WIDTH - 140, 8, "Wind", 16, BLACK, True)
+        _section_text(draw, WIDTH - 140, 28, f"{wind:.0f} km/h", 32, BLACK, True)
+
+    # ── 2. CLIMATE + STATUS ROW ──
+    # Indoor climate (left, blue bg) + door/blinds/washer (right, stacked)
+    row2_y = wx_h + 2
+    row2_h = 136
+
+    # Climate block (left)
+    climate_w = 260
+    _section(draw, (0, row2_y, climate_w, row2_y + row2_h), BLUE)
+    _section_text(draw, 16, row2_y + 8, "Indoor", 20, WHITE, True)
+    if thermostat is not None:
+        _section_text(draw, 16, row2_y + 38, f"{thermostat:.1f}C", 42, WHITE, True)
+    else:
+        _section_text(draw, 16, row2_y + 38, "--C", 42, WHITE, True)
+    if humidity is not None:
+        _section_text(draw, 16, row2_y + 90, f"Humidity {humidity:.0f}%", 18, WHITE)
+
+    # Status triple (right side)
+    status_x = climate_w + 2
+    status_w = (WIDTH - status_x) // 3
+
+    for idx, (label, value, detail, bg, locked_state) in enumerate([
+        ("DOOR", "LOCKED" if locked else "OPEN" if locked is False else "--", "Secure", GREEN, locked),
+        ("BLINDS", "OPEN" if blinds_open else "CLOSED" if blinds_open is False else "--", f"{blind_pos:.0f}%" if blind_pos is not None else "--", ORANGE, blinds_open),
+        ("WASHER", "ON" if washer_running else "OFF" if washer_running is False else "--", "Utility", RED, washer_running),
+    ]):
+        sx = status_x + idx * (status_w + 2)
+        sb = (sx, row2_y, sx + status_w, row2_y + row2_h)
+        _section(draw, sb, bg)
+
+        # Icon placeholder (fill the top portion)
+        icon_y = row2_y + 14
+        icon_h = 50
+        if label == "DOOR":
+            # Simple lock icon using rectangles
+            shackle_y = icon_y + 6
+            shackle_x = sx + status_w // 2
+            draw.arc((shackle_x - 18, shackle_y, shackle_x + 18, shackle_y + 30), 180, 360, fill=WHITE, width=5)
+            draw.rectangle((shackle_x - 20, shackle_y + 20, shackle_x + 20, shackle_y + 50), fill=WHITE)
+            draw.ellipse((shackle_x - 4, shackle_y + 28, shackle_x + 4, shackle_y + 36), fill=BLACK)
+        elif label == "BLINDS":
+            # Horizontal slats
+            for row_o in (4, 16, 28, 40):
+                draw.rectangle((sx + status_w // 2 - 24, icon_y + row_o, sx + status_w // 2 + 24, icon_y + row_o + 6), fill=WHITE)
+        elif label == "WASHER":
+            # Circle with inner circle if running
+            cx = sx + status_w // 2
+            draw.ellipse((cx - 22, icon_y, cx + 22, icon_y + 44), fill=WHITE, outline=BLACK, width=4)
+            if washer_running:
+                draw.ellipse((cx - 12, icon_y + 10, cx + 12, icon_y + 34), fill=BLUE)
+
+        _section_text(draw, sx + 10, row2_y + 70, label, 16, WHITE, True)
+        _section_text(draw, sx + 10, row2_y + 90, value, 22, WHITE, True)
+
+    # ── 3. BOTTOM: People + Sonos ──
+    bottom_y = row2_y + row2_h + 2
+    bottom_h = HEIGHT - bottom_y
+
+    if media_playing:
+        # Two-column: people left, sonos right
+        people_w = 260
+        sonos_sx = people_w + 2
+        sonos_sw = WIDTH - sonos_sx
+
+        _section(draw, (0, bottom_y, people_w, HEIGHT), GREEN)
+        _section_text(draw, 16, bottom_y + 10, "People", 20, WHITE, True)
+
+        for i, p in enumerate(people[:2]):
+            if not isinstance(p, dict):
+                continue
+            name = fit_text(p.get("name"), 16, "?")
+            state = as_text(p.get("state"), "").lower()
+            at_home = state == "home"
+            py = bottom_y + 42 + i * 56
+
+            dot_color = GREEN if at_home else ORANGE
+            draw.ellipse((30, py + 8, 50, py + 28), fill=dot_color)
+            _section_text(draw, 62, py + 4, name, 22, WHITE, True)
+            _section_text(draw, 62, py + 28, "Home" if at_home else "Away", 14, WHITE)
+
+        # Sonos block
+        _section(draw, (sonos_sx, bottom_y, WIDTH, HEIGHT), BLUE)
+
+        if media.get("picture"):
+            # Album art placeholder - would need to download from HA
+            _section_text(draw, sonos_sx + 20, bottom_y + 12, "NOW PLAYING", 16, WHITE, True)
+            _section_text(draw, sonos_sx + 20, bottom_y + 40, media_artist, 24, WHITE, True)
+            _section_text(draw, sonos_sx + 20, bottom_y + 72, media_title, 28, WHITE, True)
+            _section_text(draw, sonos_sx + 20, bottom_y + 110, f"{media_room} \u2022 {media_state}", 16, WHITE)
+        else:
+            # Text-only now playing
+            _section_text(draw, sonos_sx + 20, bottom_y + 18, "NOW PLAYING", 16, WHITE, True)
+            _section_text(draw, sonos_sx + 20, bottom_y + 46, media_room, 22, WHITE, True)
+            _section_text(draw, sonos_sx + 20, bottom_y + 76, media_title or "--", 32, WHITE, True)
+            _section_text(draw, sonos_sx + 20, bottom_y + 118, media_artist or "", 20, WHITE)
+            _section_text(draw, sonos_sx + 20, bottom_y + 148, media_state, 18, WHITE)
+
+        # Now playing indicator bars
+        bar_sx = sonos_sx + 340
+        bar_y = bottom_y + 36
+        for bi, bh in enumerate([24, 40, 16, 48, 28, 38, 20, 30]):
+            bx = bar_sx + bi * 12
+            draw.rectangle((bx, bar_y + 44 - bh, bx + 8, bar_y + 44), fill=WHITE if bi % 2 == 0 else YELLOW)
+
+    else:
+        # Sonos idle: people takes full width
+        people_w = 522
+        _section(draw, (0, bottom_y, people_w, HEIGHT), GREEN)
+        _section_text(draw, 16, bottom_y + 10, "People", 20, WHITE, True)
+
+        for i, p in enumerate(people[:3]):
+            if not isinstance(p, dict):
+                continue
+            name = fit_text(p.get("name"), 16, "?")
+            state = as_text(p.get("state"), "").lower()
+            at_home = state == "home"
+            py = bottom_y + 42 + i * 56
+
+            dot_color = GREEN if at_home else ORANGE
+            draw.ellipse((30, py + 8, 50, py + 28), fill=dot_color)
+            _section_text(draw, 62, py + 4, name, 22, WHITE, True)
+            _section_text(draw, 62, py + 28, "Home" if at_home else "Away", 14, WHITE)
+
+        # Idle Sonos placeholder (thin strip)
+        idle_x = people_w + 2
+        _section(draw, (idle_x, bottom_y, WIDTH, HEIGHT), BLACK)
+        _section_text(draw, idle_x + 20, bottom_y + 40, "Media", 16, (80, 80, 80))
+        _section_text(draw, idle_x + 20, bottom_y + 64, "No active playback", 18, (100, 100, 100))
+
+    return img
+
+
 def remap_to_panel_palette(img: Image.Image) -> Image.Image:
     palette = Image.new("P", (1, 1))
     flat: list[int] = []
@@ -645,7 +864,11 @@ def remap_to_panel_palette(img: Image.Image) -> Image.Image:
 
 
 def build(payload_path: Path = DEFAULT_PAYLOAD) -> Image.Image:
-    return render_dashboard(load_payload(payload_path))
+    data = load_payload(payload_path)
+    layout = as_text(data.get("layout_variant"), "compact_grid").lower()
+    if layout == "bento":
+        return render_bento_dashboard(data)
+    return render_dashboard(data)
 
 
 def parse_args() -> argparse.Namespace:

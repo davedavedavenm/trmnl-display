@@ -22,7 +22,7 @@
       "type": "text",
       "required": false,
       "default": "compact_grid",
-      "allowed_values": ["compact_grid"],
+      "allowed_values": ["compact_grid", "bento"],
       "description": "Layout family. The current colour sidecar compact_grid has no top bar, no bottom navigation, no visible lights, a combined climate/humidity card, grouped people, and no energy card."
     },
     {
