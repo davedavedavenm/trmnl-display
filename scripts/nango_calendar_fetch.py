@@ -54,12 +54,23 @@ def fetch_google_events(cal: dict, time_min: str, time_max: str) -> dict:
         for item in result.get("items", []):
             start_raw = item.get("start", {})
             end_raw = item.get("end", {})
+            attendees = []
+            for a in item.get("attendees", []) or []:
+                attendees.append({
+                    "email": a.get("email", ""),
+                    "name": a.get("displayName", ""),
+                    "status": a.get("responseStatus", "needsAction"),
+                })
+
             events.append({
                 "summary": item.get("summary", "(no title)"),
                 "start": start_raw.get("dateTime", start_raw.get("date", "")),
                 "end": end_raw.get("dateTime", end_raw.get("date", "")),
                 "all_day": "date" in start_raw and "dateTime" not in start_raw,
                 "location": item.get("location", ""),
+                "description": item.get("description", ""),
+                "status": item.get("status", "confirmed"),
+                "attendees": attendees,
             })
     except requests.RequestException as e:
         print(f"Warning: {cal['connection_id']}: {e}")

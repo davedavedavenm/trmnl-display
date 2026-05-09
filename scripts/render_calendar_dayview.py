@@ -152,6 +152,10 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
                 start_s = ev.get("start", "")
                 all_day = ev.get("all_day", False)
                 summary = ev.get("summary", "")[:35]
+                description = ev.get("description", "")[:50]
+                status = ev.get("status", "confirmed")
+                attendees = ev.get("attendees", [])
+                attendee_count = len([a for a in attendees if a.get("status") == "accepted"])
 
                 if all_day:
                     time_label = "ALL DAY"
@@ -168,12 +172,28 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
                 draw.text((44, ev_y + 16), time_label, fill=WHITE, font=f_time, anchor="lm")
                 draw.text((44, ev_y + 72), summary, fill=WHITE, font=f_event, anchor="lm")
 
+                # Source badge (top-right)
                 badge_w = draw.textlength(cal_label, font=f_source) + 24
                 badge_h = 32
                 badge_x = WIDTH - 44 - badge_w
                 badge_y = ev_y + 16
                 draw.rounded_rectangle([(badge_x, badge_y), (badge_x + badge_w, badge_y + badge_h)], 6, fill=BLACK)
                 draw.text((badge_x + 12, badge_y + 8), cal_label, fill=WHITE, font=f_source, anchor="lm")
+
+                # Attendee count badge (below source badge)
+                if attendee_count > 0:
+                    attend_text = f"{attendee_count}p"
+                    f_attend = font(16, bold=True)
+                    a_w = draw.textlength(attend_text, font=f_attend) + 20
+                    a_x = WIDTH - 44 - a_w
+                    a_y = badge_y + badge_h + 4
+                    draw.rounded_rectangle([(a_x, a_y), (a_x + a_w, a_y + 24)], 5, fill=BLACK)
+                    draw.text((a_x + 10, a_y + 5), attend_text, fill=WHITE, font=f_attend, anchor="lm")
+
+                # Cancelled indicator
+                if status == "cancelled":
+                    draw.line((44, ev_y + 16, 44 + draw.textlength(time_label, font=f_time), ev_y + 16 + 48), fill=BLACK, width=3)
+                    draw.line((44, ev_y + 16 + 48, 44 + draw.textlength(time_label, font=f_time), ev_y + 16), fill=BLACK, width=3)
 
                 ev_y += block_h + 16
 

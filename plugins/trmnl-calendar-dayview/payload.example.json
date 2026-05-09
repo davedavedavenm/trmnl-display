@@ -16,7 +16,13 @@
               "start": "2026-05-07T14:45:00+01:00",
               "end": "2026-05-07T15:45:00+01:00",
               "all_day": false,
-              "location": "Bristol Eye Hospital"
+              "location": "Bristol Eye Hospital",
+              "description": "Annual checkup - bring referral letter",
+              "status": "confirmed",
+              "attendees": [
+                {"email": "REDACTED@example.com", "name": "Dave", "status": "accepted"},
+                {"email": "REDACTED@example.com", "name": "Jen", "status": "accepted"}
+              ]
             }
           ]
         },
