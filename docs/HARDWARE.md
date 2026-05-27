@@ -1,6 +1,6 @@
 # Hardware Inventory
 
-Last live scan: `2026-04-30`
+Last live scan: `2026-05-19`
 
 ## Conclusion
 
@@ -88,6 +88,17 @@ image specs: 800 x 480, 4-bpp
 Preparing image for EPD as 4-bpp
 Writing data to EPD...
 Refresh complete
+```
+
+The 2026-05-19 read-only check and post-LaraPaper-update forced poll showed the active sidecar path rendering:
+
+```text
+panel1bit = 37 (EP73_SPECTRA_800x480)
+image specs: 800 x 480, 8-bpp
+Preparing image for EPD as 4-bpp
+Writing data to EPD...
+Refresh complete
+Cycle complete, sleeping 600s...
 ```
 
 The `show_img --help` text mentions generic automatic conversion to 2-bit grayscale for some paths. Do not use that generic help text to override the live panel identity: the active config and service logs show the Spectra `800x480` path and 4-bpp prepared output.

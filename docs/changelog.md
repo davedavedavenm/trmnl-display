@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-19
+
+- Recorded a read-only live baseline: LaraPaper healthy on image label `0.34.0`, HA core check passing, mode bridge active, active playlist `ha_dashboard`, and Pi sidecar renders flowing as indexed `800x480` images prepared as `4-bpp`.
+- Documented upstream LaraPaper `0.35.0` relevance: webhook `merge_strategy` support and the native fix for the recipe webhook route parameter patch.
+- Updated plugin contract notes for TRMNL webhook `GET`, `deep_merge`, and `stream` usage.
+- Updated live LaraPaper to `0.35.0` without pinning the compose image reference, after backing up compose, `.env`, and SQLite database files on `khpi5`.
+- Verified post-update LaraPaper health, active `ha_dashboard` playlist, Home Assistant config check, playlist-safe sidecar refresh, local generated-image serving, and a forced Pi BYOS display refresh.
+- Confirmed the recipe webhook route patch is no longer needed on `0.35.0`; reapplied the relative preview image URL patch.
+
 ## 2026-05-06
 
 - Updated AGENTS.md with new architecture rule #9 formalising HA/LaraPaper playlist boundary, refreshed managed surfaces and validation commands.

@@ -33,6 +33,20 @@ ssh home-assistant "ha core info"
 ssh home-assistant "grep -RIn 'trmnl' /config/packages | head -120"
 ```
 
+## Current Read-Only Baseline
+
+Last read-only baseline and update: `2026-05-19`.
+
+- LaraPaper container before update: healthy, image label version `0.34.0`, image created `2026-04-30T15:29:33Z`
+- LaraPaper container after update: healthy, image label version `0.35.0`, revision `dc77b56f68b0858349fe733e64ce6f72343eabb6`
+- Latest LaraPaper release observed upstream: `0.35.0`, published `2026-05-13`
+- Active LaraPaper playlist: `TRMNL Mode: ha_dashboard`, `refresh_time: 600`
+- Mode bridge: `trmnl-mode-bridge.service` active
+- Home Assistant: `ha core check` completed successfully
+- Pi display client: active and rendering indexed `800 x 480, 8-bpp` sidecar PNGs, then preparing for EPD as `4-bpp`; forced post-update poll at `18:03` completed successfully
+
+Managed script/config checksums matched the repo for the mode bridge, mode setter, HA sidecar refresh/update wrappers, calendar and HA companion scripts, Sonos script, Pi display shell, Pi `show_img.json`, and both TRMNL systemd units.
+
 ## Normal Refresh Flow
 
 1. Companion scripts push plugin payloads into LaraPaper.
@@ -215,6 +229,16 @@ If using an ad hoc query, verify:
 - height `480`
 - bit depth greater than `1`
 - palette is the ACeP colour palette, not black/white
+
+### Reviewing LaraPaper Updates
+
+The live deployment uses `ghcr.io/usetrmnl/larapaper:latest`, so a pull can move across LaraPaper releases. Check the live image label before and after updates:
+
+```bash
+ssh khpi5 "docker inspect larapaper-app-1 --format 'Version={{index .Config.Labels \"org.opencontainers.image.version\"}} Revision={{index .Config.Labels \"org.opencontainers.image.revision\"}} Created={{index .Config.Labels \"org.opencontainers.image.created\"}}'"
+```
+
+LaraPaper `0.35.0` adds TRMNL webhook merge strategy support and fixes the recipe webhook route parameter. After the 2026-05-19 update, the recipe route generated a valid `api/custom_plugins/<uuid>` URL without the old route-parameter patch. The relative preview image URL patch was still needed and was reapplied.
 
 ### Home Assistant mode changes are ignored
 

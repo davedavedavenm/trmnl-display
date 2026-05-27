@@ -31,6 +31,20 @@ ssh khpi5 "cd /home/dave/larapaper && docker compose up -d"
 
 Live secrets belong in the deployment environment. Do not commit a real Laravel `APP_KEY`.
 
+### Upstream Version Notes
+
+Read-only check on `2026-05-19` found the live container running `ghcr.io/usetrmnl/larapaper:latest` with image label version `0.34.0`. The latest upstream release observed that day was `0.35.0`, published `2026-05-13`.
+
+The live container was then updated in place to `0.35.0` on `2026-05-19` without pinning the image reference. Backups were written on `khpi5` under `/home/dave/larapaper/backups/` before the update.
+
+Before pulling a newer LaraPaper image:
+
+- verify `/home/dave/larapaper/.env` contains `LARAPAPER_APP_KEY`
+- review `deploy/larapaper/patches/` because container-local patches may be lost
+- specifically re-check `deploy/larapaper/patches/recipe-webhook-route-parameter.md`; upstream `0.35.0` includes a fix for the recipe webhook route parameter, so that patch was not reapplied after the 2026-05-19 update
+- reapply `deploy/larapaper/patches/relative-preview-image-urls.md` if LAN device previews still need relative image URLs
+- re-run the post-deploy checks and confirm the Pi still renders `800x480` colour output as `4-bpp`
+
 ## khpi5 Companion Scripts
 
 Repo files:

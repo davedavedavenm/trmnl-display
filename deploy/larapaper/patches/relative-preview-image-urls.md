@@ -8,7 +8,7 @@ Storage::disk('public')->url('images/generated/' . $current_image_uuid . '.' . $
 
 In this deployment, `APP_URL` is `https://trmnl.magnusfamily.co.uk`, so that call renders preview images as absolute proxied URLs. When the UI is opened at `http://192.168.1.143:4567`, the page loads from the LAN origin but the preview image is requested through Pangolin. Pangolin can redirect the image request to auth, which leaves the LaraPaper device screen preview broken even though the generated PNG exists locally.
 
-Live patch applied on `2026-05-01`:
+Live patch applied on `2026-05-01` and reapplied after the LaraPaper `0.35.0` update on `2026-05-19`:
 
 ```php
 '/storage/images/generated/' . $current_image_uuid . '.' . $file_extension

@@ -1,6 +1,6 @@
 # Plugin And Recipe Contract
 
-Date: 2026-05-01
+Date: 2026-05-19
 
 This repo must preserve TRMNL/LaraPaper plugin and recipe portability.
 
@@ -75,7 +75,9 @@ Each plugin must document:
 - optional fields
 - fallback behavior when a field is missing
 
-Payload examples must stay small enough to reflect TRMNL webhook limits. Larger payloads should use documented summarization, `deep_merge`, stream, or sidecar-hosted data as appropriate.
+Payload examples must stay small enough to reflect TRMNL webhook limits. Larger payloads should use documented summarization, `deep_merge`, `stream`, or sidecar-hosted data as appropriate.
+
+As of the current TRMNL webhook documentation, the same custom plugin webhook endpoint can also be read with `GET` to inspect existing `merge_variables`. Incremental payload updates can use `merge_strategy: "deep_merge"` for nested object updates or `merge_strategy: "stream"` with `stream_limit` for bounded top-level arrays. LaraPaper `0.35.0` adds support for these webhook merge strategies; the live stack was updated to `0.35.0` on 2026-05-19, but any production use should still be tested against the local LaraPaper endpoint before changing existing payload flows.
 
 ## Sidecar Requirements
 

@@ -195,3 +195,7 @@ multi_cal_new.png
 
 # Agent cross-session memory (not committed)
 .agent-memory/
+
+# Local scratch and proof images
+/tmp/
+sidecar_calendar_day_source_next.png
