@@ -13,3 +13,6 @@
 # Pull Home Assistant state, render the accepted colour sidecar image, and update only
 # the HA plugin image so normal LaraPaper playlists remain in control.
 */10 * * * * /home/dave/bin/trmnl-refresh-ha-sidecar 2>&1 | logger -t trmnl-ha-dashboard
+
+# Daily restore of correct colour settings in LaraPaper SQLite DB
+0 5 * * * sudo python3 /home/dave/restore_color_model.py 2>&1 | logger -t trmnl-db-restore
