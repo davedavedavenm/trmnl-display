@@ -20,27 +20,24 @@ BUS_PLUGIN_ID = 11
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-YELLOW = (255, 255, 0)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-ORANGE = (255, 128, 0)
+RED = (204, 51, 51)      # High contrast red
+YELLOW = (204, 204, 0)   # High contrast yellow
+BLUE = (0, 102, 204)     # High contrast blue
+GREEN = (0, 153, 76)     # High contrast green
+ORANGE = (204, 102, 0)   # High contrast orange
 
 SOFT_GREY = (235, 235, 235)
-SOFT_YELLOW = (255, 232, 96)
-SOFT_GREEN = (170, 255, 170)
-SOFT_RED = (255, 180, 180)
-SOFT_BLUE = (160, 205, 255)
 DARK_GREY = (80, 80, 80)
-MED_GREY = (160, 160, 160)
+BG_COLOR = (248, 245, 237)    # Off-white background
+BORDER_COLOR = (111, 111, 111) # Card borders
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
 
 ROUTE_COLORS: dict[str, tuple] = {
-    "70": (0, 102, 204),
-    "74": (0, 153, 76),
-    "75": (204, 102, 0),
-    "76": (204, 51, 51),
-    "77": (204, 204, 0),
+    "70": BLUE,
+    "74": GREEN,
+    "75": ORANGE,
+    "76": RED,
+    "77": YELLOW,
     "1": (102, 51, 153),
     "2": (0, 153, 153),
     "3": (153, 102, 51),
@@ -77,11 +74,20 @@ def load_data() -> dict:
             row = db.execute("SELECT data_payload FROM plugins WHERE id = ?", (BUS_PLUGIN_ID,)).fetchone()
             db.close()
             if row and row[0]:
-                return json.loads(row[0])
-    msg = (
-        "Could not find LaraPaper database. "
-        "Run locally: cp the database.sqlite from the container to ~/tmp/larapaper.sqlite"
-    )
+                payload = json.loads(row[0])
+                if "merge_variables" in payload:
+                    return payload["merge_variables"]
+                return payload
+
+    example_path = ROOT / "plugins" / "trmnl-bus-departures" / "payload.example.json"
+    if example_path.exists():
+        with open(example_path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+            if "merge_variables" in payload:
+                return payload["merge_variables"]
+            return payload
+
+    msg = "Could not find LaraPaper database or example payload."
     raise FileNotFoundError(msg)
 
 
@@ -95,27 +101,24 @@ def minutes_diff(a: str, b: str) -> int:
 
 
 def route_color(line_name: str) -> tuple:
-    return ROUTE_COLORS.get(line_name, (100, 100, 100))
-
-
-def draw_rounded_rect(draw: ImageDraw, x1: int, y1: int, x2: int, y2: int, fill: tuple, radius: int = 6):
-    draw.rounded_rectangle([x1, y1, x2, y2], radius=radius, fill=fill)
+    return ROUTE_COLORS.get(line_name, DARK_GREY)
 
 
 def render(data: dict) -> Image.Image:
-    img = Image.new("RGB", (WIDTH, HEIGHT), BLACK)
+    # Set base background to off-white
+    img = Image.new("RGB", (WIDTH, HEIGHT), BG_COLOR)
     draw = ImageDraw.Draw(img)
 
-    font_bus = font(46, bold=True)
-    font_dest = font(32)
-    font_time = font(36, bold=True)
-    font_header = font(20, bold=True)
+    font_bus = font(30, bold=True)
+    font_dest = font(26, bold=True)
+    font_time = font(30, bold=True)
+    font_header = font(18, bold=True)
     font_small = font(16)
     font_title = font(22, bold=True)
-    font_status = font(28, bold=True)
-    font_stop = font(32, bold=True)
+    font_status = font(24, bold=True)
+    font_stop = font(28, bold=True)
 
-    stop_name = data.get("name", "Bus Stop")
+    stop_name = data.get("stop_name") or data.get("name") or "Bus Stop"
     request_time = data.get("request_time", "")
     try:
         dt = datetime.fromisoformat(request_time)
@@ -128,25 +131,28 @@ def render(data: dict) -> Image.Image:
 
     departures = (data.get("departures") or {}).get("all", [])
     if not departures:
-        draw.text((WIDTH // 2, HEIGHT // 2), "No departures available", fill=WHITE, font=font_bus, anchor="mm")
-        draw.text((WIDTH // 2, HEIGHT // 2 + 30), f"Last updated: {time_str} {date_str}", fill=WHITE, font=font_small, anchor="mm")
+        draw.text((WIDTH // 2, HEIGHT // 2), "No departures available", fill=BLACK, font=font_bus, anchor="mm")
+        draw.text((WIDTH // 2, HEIGHT // 2 + 30), f"Last updated: {time_str} {date_str}", fill=DARK_GREY, font=font_small, anchor="mm")
         return img
 
-    HEADER_H = 60
-    draw.rectangle([(0, 0), (WIDTH, HEADER_H)], fill=BLACK)
-    draw.text((20, HEADER_H // 2), f"Bus Departures", fill=WHITE, font=font_stop, anchor="lm")
-    draw.text((WIDTH - 20, HEADER_H // 2 - 8), time_str, fill=WHITE, font=font_title, anchor="rm")
-    draw.text((WIDTH - 20, HEADER_H // 2 + 14), stop_name, fill=WHITE, font=font_small, anchor="rm")
+    # Header section
+    draw.text((20, 32), "Bus Departures", fill=BLACK, font=font_stop, anchor="lm")
+    draw.text((WIDTH - 20, 22), stop_name, fill=DARK_GREY, font=font_small, anchor="rm")
+    draw.text((WIDTH - 20, 46), time_str, fill=BLACK, font=font_title, anchor="rm")
 
-    COL_H = 38
-    col_y = HEADER_H + 8
-    draw.text((24, col_y + COL_H // 2), "Route", fill=WHITE, font=font_header, anchor="lm")
-    draw.text((130, col_y + COL_H // 2), "Destination", fill=WHITE, font=font_header, anchor="lm")
-    draw.text((470, col_y + COL_H // 2), "Time", fill=WHITE, font=font_header, anchor="lm")
-    draw.text((610, col_y + COL_H // 2), "Status", fill=WHITE, font=font_header, anchor="lm")
+    # Separator
+    draw.line([(20, 64), (WIDTH - 20, 64)], fill=BORDER_COLOR, width=2)
 
-    row_y = col_y + COL_H
-    ROW_H = 78
+    # Column headers
+    col_y = 72
+    COL_H = 28
+    draw.text((32, col_y + COL_H // 2), "Route", fill=DARK_GREY, font=font_header, anchor="lm")
+    draw.text((120, col_y + COL_H // 2), "Destination", fill=DARK_GREY, font=font_header, anchor="lm")
+    draw.text((470, col_y + COL_H // 2), "Time", fill=DARK_GREY, font=font_header, anchor="lm")
+    draw.text((610, col_y + COL_H // 2), "Status", fill=DARK_GREY, font=font_header, anchor="lm")
+
+    row_y = col_y + COL_H + 4
+    ROW_H = 82
     visible = departures[:4]
 
     for i, dep in enumerate(visible):
@@ -157,14 +163,22 @@ def render(data: dict) -> Image.Image:
 
         r_color = route_color(line)
 
-        draw.rectangle([(0, row_y), (12, row_y + ROW_H)], fill=r_color)
+        # Draw rounded card container
+        card_box = [20, row_y, WIDTH - 20, row_y + 74]
+        draw.rounded_rectangle(card_box, radius=8, fill=WHITE, outline=BORDER_COLOR, width=2)
 
-        draw.text((28, row_y + ROW_H // 2), line, fill=WHITE, font=font_bus, anchor="lm")
+        # Draw route badge on left
+        badge_box = [32, row_y + 12, 102, row_y + 62]
+        draw.rounded_rectangle(badge_box, radius=6, fill=r_color)
+        draw.text(((32 + 102) // 2, (row_y + 12 + row_y + 62) // 2), line, fill=WHITE, font=font_bus, anchor="mm")
 
-        draw.text((130, row_y + ROW_H // 2), direction, fill=WHITE, font=font_dest, anchor="lm")
+        # Draw destination
+        draw.text((120, row_y + 37), direction, fill=BLACK, font=font_dest, anchor="lm")
 
-        draw.text((470, row_y + ROW_H // 2), aimed, fill=WHITE, font=font_time, anchor="lm")
+        # Draw aimed time
+        draw.text((470, row_y + 37), aimed, fill=BLACK, font=font_time, anchor="lm")
 
+        # Status badge calculations
         if estimated and aimed:
             diff = minutes_diff(estimated, aimed)
             on_time = diff <= NOT_ON_TIME_MINUTES
@@ -179,19 +193,19 @@ def render(data: dict) -> Image.Image:
                 status_fill = RED
         else:
             status_text = "--"
-            status_fill = (80, 80, 80)
+            status_fill = DARK_GREY
 
-        sx, sy = 610, row_y + 8
+        sx, sy = 610, row_y + 15
         sw = draw.textlength(status_text, font=font_status) + 20
-        sh = ROW_H - 16
-        draw_rounded_rect(draw, sx, sy, sx + sw, sy + sh, status_fill)
+        sh = 44
+        draw.rounded_rectangle([sx, sy, sx + sw, sy + sh], radius=6, fill=status_fill)
         draw.text((sx + sw // 2, sy + sh // 2), status_text, fill=WHITE, font=font_status, anchor="mm")
 
         row_y += ROW_H
 
-    footer_y = max(row_y + 4, HEIGHT - 20)
+    footer_y = HEIGHT - 20
     if len(departures) > 4:
-        draw.text((WIDTH - 20, footer_y), f"Showing 4 of {len(departures)}", fill=WHITE, font=font_small, anchor="rm")
+        draw.text((WIDTH - 20, footer_y), f"Showing 4 of {len(departures)}", fill=DARK_GREY, font=font_small, anchor="rm")
 
     return img
 

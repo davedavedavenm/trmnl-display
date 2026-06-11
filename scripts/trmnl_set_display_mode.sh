@@ -26,6 +26,7 @@ plugin_name_for_mode() {
     jen_morning) echo "${TRMNL_MODE_PLUGIN_JEN_MORNING:-Jen Morning}" ;;
     dave_commute) echo "${TRMNL_MODE_PLUGIN_DAVE_COMMUTE:-}" ;;
     alert) echo "${TRMNL_MODE_PLUGIN_ALERT:-Alert}" ;;
+    bus) echo "${TRMNL_MODE_PLUGIN_BUS:-UK Bus Departures (TransportAPI)}" ;;
     *) return 1 ;;
   esac
 }

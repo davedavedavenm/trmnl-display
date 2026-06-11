@@ -1,40 +1,49 @@
-{% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'dark' %}
+{% assign theme_mode = trmnl.plugin_settings.custom_fields_values.theme | default: 'light' %}
 {% assign album_art_mode = trmnl.plugin_settings.custom_fields_values.album_art_mode | default: 'raw' %}
 {% assign show_album = trmnl.plugin_settings.custom_fields_values.show_album | default: true %}
 {% assign show_album_art = trmnl.plugin_settings.custom_fields_values.show_album_art | default: true %}
 {% assign show_next_tracks = trmnl.plugin_settings.custom_fields_values.show_next_tracks | default: true %}
+
 {% if theme_mode == 'light' %}
-  {% assign bg = '#f6f1e8' %}
-  {% assign fg = '#141414' %}
-  {% assign soft = '#6f6558' %}
+  {% assign bg = '#f8f5ed' %}
+  {% assign card_bg = '#ffffff' %}
+  {% assign fg = '#111111' %}
+  {% assign soft = '#555555' %}
+  {% assign border = '#6f6f6f' %}
   {% assign accent = '#FF0000' %}
   {% assign accent_soft = '#FFA500' %}
-  {% assign accent_alt = '#FFFF00' %}
   {% assign accent_cool = '#0000FF' %}
 {% else %}
   {% assign bg = '#111111' %}
+  {% assign card_bg = '#1a1a1a' %}
   {% assign fg = '#fffdf8' %}
   {% assign soft = '#d8c9a2' %}
+  {% assign border = '#3b352d' %}
   {% assign accent = '#FF0000' %}
   {% assign accent_soft = '#FFA500' %}
-  {% assign accent_alt = '#FFFF00' %}
   {% assign accent_cool = '#0000FF' %}
 {% endif %}
-<div class="layout layout--col h--full w--full" style="padding:10px 16px 10px; background:{{ bg }}; color:{{ fg }}; overflow:hidden;">
-  <div style="display:grid; grid-template-columns: 1fr auto; gap:14px; align-items:end; border-bottom:2px solid {{ fg }}; padding-bottom:8px; margin-bottom:10px;">
-    <div style="display:flex; flex-direction:column; gap:4px;">
-      <div style="display:inline-flex; align-self:flex-start; padding:5px 10px; border-radius:999px; background:{{ accent_soft }}; color:#000000; font-size:11px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; font-weight:900;">{{ room_name }}</div>
-      <div style="font-size:30px; line-height:0.92; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{% if state == 'PLAYING' %}Now Playing{% else %}Recently Played{% endif %}</div>
+
+<div class="layout layout--col h--full w--full" style="padding:16px 20px 14px; background:{{ bg }}; color:{{ fg }}; overflow:hidden; font-family:'Helvetica Neue','Segoe UI',Arial,sans-serif;">
+
+  <!-- Header Card -->
+  <div style="display:grid; grid-template-columns: 1fr auto; gap:14px; align-items:center; border: 1px solid {{ border }}; border-radius: 8px; background: {{ card_bg }}; padding: 10px 16px; margin-bottom:12px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div style="width:20px; height:20px; border-radius:50%; background:{{ accent_soft }}; display:flex; align-items:center; justify-content:center;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+      </div>
+      <div style="font-size:16px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;">{{ room_name }}</div>
     </div>
-    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-      <div style="padding:5px 10px; border-radius:999px; background:{{ accent_alt }}; color:#000000; font-size:12px; line-height:1; letter-spacing:0.18em; text-transform:uppercase; font-weight:900;">{{ state }}</div>
-      <div style="font-size:10px; line-height:1.2; letter-spacing:0.12em; text-transform:uppercase; color:{{ soft }}; font-weight:800; text-align:right;">Updated {{ updated_at }}</div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div style="padding:4px 8px; border-radius:4px; background:{{ accent }}; color:#FFFFFF; font-size:11px; font-weight:900; letter-spacing:0.1em; text-transform:uppercase;">{{ state }}</div>
+      <div style="font-size:10px; font-weight:800; color:{{ soft }};">Updated {{ updated_at }}</div>
     </div>
   </div>
 
-  <div style="display:grid; grid-template-columns:{% if show_album_art == true or show_album_art == 'true' %}230px minmax(0, 1fr){% else %}1fr{% endif %}; gap:18px; flex:1; align-items:start; min-height:0;">
+  <div style="display:grid; grid-template-columns:{% if show_album_art == true or show_album_art == 'true' %}210px minmax(0, 1fr){% else %}1fr{% endif %}; gap:16px; flex:1; align-items:start; min-height:0;">
     {% if show_album_art == true or show_album_art == 'true' %}
-    <div style="height:230px; border:none; border-radius:22px; overflow:hidden; background:transparent; display:flex; align-items:center; justify-content:center; box-shadow:none;">
+    <!-- Album Art Card -->
+    <div style="height:210px; border: 1px solid {{ border }}; border-radius:8px; overflow:hidden; background:{{ card_bg }}; display:flex; align-items:center; justify-content:center;">
       {% if album_art_mode == 'mono' and album_art_mono_data_uri %}
       <img class="image" src="{{ album_art_mono_data_uri }}" style="width:100%; height:100%; object-fit:cover;">
       {% elsif album_art_mode == 'balanced' and album_art_balanced_data_uri %}
@@ -50,38 +59,38 @@
       {% elsif album_art_url %}
       <img class="image" src="{{ album_art_url }}" style="width:100%; height:100%; object-fit:cover;">
       {% else %}
-      <div style="width:100%; height:100%; display:grid; grid-template-rows:1fr 1fr; border-radius:22px; overflow:hidden;">
-        <div style="display:flex; align-items:center; justify-content:center; background:{{ accent }}; color:#FFFFFF; font-size:22px; line-height:1; letter-spacing:0.14em; text-transform:uppercase; font-weight:900;">Sonos</div>
-        <div style="display:flex; align-items:center; justify-content:center; background:{{ accent_cool }}; color:#FFFFFF; font-size:18px; line-height:1; letter-spacing:0.12em; text-transform:uppercase; font-weight:900;">No Art</div>
+      <div style="width:100%; height:100%; display:grid; grid-template-rows:1fr 1fr;">
+        <div style="display:flex; align-items:center; justify-content:center; background:{{ accent }}; color:#FFFFFF; font-size:22px; text-transform:uppercase; font-weight:900;">Sonos</div>
+        <div style="display:flex; align-items:center; justify-content:center; background:{{ accent_cool }}; color:#FFFFFF; font-size:18px; text-transform:uppercase; font-weight:900;">No Art</div>
       </div>
       {% endif %}
     </div>
     {% endif %}
-    <div style="display:flex; flex-direction:column; justify-content:flex-start; gap:8px; min-width:0; padding-top:0; min-height:0;">
-      <div style="font-size:40px; line-height:0.92; letter-spacing:-0.05em; font-weight:900; color:{{ fg }};">{{ title | default: 'Nothing Playing' }}</div>
-      <div style="font-size:22px; line-height:1; letter-spacing:-0.02em; font-weight:800; color:{{ soft }};">{{ artist | default: 'Unknown Artist' }}</div>
-      {% if show_album == true or show_album == 'true' %}
-      <div style="font-size:13px; line-height:1.2; text-transform:uppercase; letter-spacing:0.12em; color:{{ soft }}; font-weight:800;">{{ album }}</div>
-      {% endif %}
 
-      {% if group_size and group_size > 1 %}
-      <div style="font-size:11px; line-height:1.2; text-transform:uppercase; letter-spacing:0.1em; color:{{ soft }}; font-weight:800;">Grouped: {{ group_rooms | join: ', ' }}</div>
-      {% endif %}
-      {% if same_content_rooms and same_content_rooms.size > 0 %}
-      <div style="font-size:11px; line-height:1.2; text-transform:uppercase; letter-spacing:0.1em; color:{{ soft }}; font-weight:800;">Also playing in: {{ same_content_rooms | join: ', ' }}</div>
-      {% elsif multiple_active == true or multiple_active == 'true' %}
-      <div style="font-size:11px; line-height:1.2; text-transform:uppercase; letter-spacing:0.1em; color:{{ soft }}; font-weight:800;">Other active rooms: {{ other_active_rooms | join: ', ' }}</div>
-      {% endif %}
+    <!-- Info Column -->
+    <div style="display:flex; flex-direction:column; justify-content:flex-start; gap:10px; min-width:0; min-height:0;">
+      <!-- Title & Artist -->
+      <div style="display:flex; flex-direction:column; gap:4px; padding-bottom:6px;">
+        <div style="font-size:32px; line-height:0.95; letter-spacing:-0.04em; font-weight:900; color:{{ fg }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ title | default: 'Nothing Playing' }}</div>
+        <div style="font-size:18px; line-height:1; font-weight:800; color:{{ soft }};">{{ artist | default: 'Unknown Artist' }}</div>
+        {% if show_album == true or show_album == 'true' %}
+        <div style="font-size:11px; line-height:1.2; text-transform:uppercase; letter-spacing:0.08em; color:{{ soft }}; font-weight:800; margin-top:2px;">{{ album }}</div>
+        {% endif %}
+      </div>
 
-      <div style="display:grid; grid-template-columns:{% if group_size and group_size > 1 or same_content_rooms and same_content_rooms.size > 0 or multiple_active == true or multiple_active == 'true' %} repeat(2, minmax(0, 1fr)) {% else %}1fr{% endif %}; gap:8px 12px; padding-top:4px; max-width:520px;">
-        <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:none; border-radius:18px; background:{{ accent_soft }};">
-          <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#000000; font-weight:900;">Source</div>
-          <div style="font-size:18px; line-height:1; letter-spacing:-0.02em; font-weight:900; color:#000000;">{{ source | default: 'Unknown' }}</div>
+      <!-- Metadata Cards -->
+      <div style="display:grid; grid-template-columns:{% if group_size and group_size > 1 or same_content_rooms and same_content_rooms.size > 0 or multiple_active == true or multiple_active == 'true' %} repeat(2, minmax(0, 1fr)) {% else %}1fr{% endif %}; gap:10px; max-width:520px;">
+        <!-- Source Card -->
+        <div style="display:flex; flex-direction:column; gap:2px; padding:8px 12px; border:1px solid {{ border }}; border-left: 4px solid {{ accent_soft }}; border-radius:6px; background:{{ card_bg }};">
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:{{ soft }}; font-weight:900;">Source</div>
+          <div style="font-size:14px; font-weight:900; color:{{ fg }};">{{ source | default: 'Unknown' }}</div>
         </div>
+
+        <!-- Rooms Card -->
         {% if group_size and group_size > 1 or same_content_rooms and same_content_rooms.size > 0 or multiple_active == true or multiple_active == 'true' %}
-        <div style="display:flex; flex-direction:column; gap:3px; padding:12px 14px; border:none; border-radius:18px; background:{{ accent_cool }};">
-          <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.12em; color:#FFFFFF; font-weight:900;">Rooms</div>
-          <div style="font-size:16px; line-height:1.15; letter-spacing:-0.02em; font-weight:900; color:#FFFFFF;">
+        <div style="display:flex; flex-direction:column; gap:2px; padding:8px 12px; border:1px solid {{ border }}; border-left: 4px solid {{ accent_cool }}; border-radius:6px; background:{{ card_bg }};">
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:{{ soft }}; font-weight:900;">Rooms</div>
+          <div style="font-size:13px; line-height:1.15; font-weight:900; color:{{ fg }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
             {% if same_content_rooms and same_content_rooms.size > 0 %}
               Also: {{ same_content_rooms | join: ', ' }}
             {% elsif multiple_active == true or multiple_active == 'true' %}
@@ -94,20 +103,24 @@
         {% endif %}
       </div>
 
+      <!-- Up Next Card -->
       {% assign next_tracks_enabled = false %}
       {% if show_next_tracks == true or show_next_tracks == 'true' %}
         {% assign next_tracks_enabled = true %}
       {% endif %}
       {% if next_tracks_enabled and next_tracks and next_tracks.size > 0 %}
-      <div style="padding-top:6px; display:flex; flex-direction:column; gap:5px; max-width:560px; min-height:0;">
-        <div style="display:inline-flex; align-self:flex-start; padding:4px 10px; border-radius:999px; background:{{ accent }}; color:#FFFFFF; font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.14em; font-weight:900;">Up Next</div>
-        {% for item in next_tracks limit:3 %}
-        <div style="display:grid; grid-template-columns:20px minmax(0, 1fr); gap:8px; align-items:start; padding:6px 0; border-top:1px solid {{ fg }};">
-          <div style="font-size:16px; line-height:1; font-weight:900; color:{{ accent_soft }};">{{ forloop.index }}</div>
-          <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
-            <div style="font-size:16px; line-height:0.95; letter-spacing:-0.02em; font-weight:900; color:{{ fg }};">{{ item.title }}</div>
+      <div style="border: 1px solid {{ border }}; border-radius: 8px; background: {{ card_bg }}; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; max-width:520px; min-height:0; margin-top:2px;">
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
+          <div style="width:3px; height:12px; background:{{ accent }}; border-radius:1px;"></div>
+          <div style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; color:{{ fg }};">Up Next</div>
+        </div>
+        {% for item in next_tracks limit:2 %}
+        <div style="display:grid; grid-template-columns:16px minmax(0, 1fr); gap:8px; align-items:center; padding:4px 0; {% if forloop.first == false %}border-top:1px solid #e2e8f0;{% endif %}">
+          <div style="font-size:13px; font-weight:900; color:{{ accent_soft }};">{{ forloop.index }}</div>
+          <div style="display:flex; flex-direction:column; min-width:0;">
+            <div style="font-size:13px; font-weight:900; color:{{ fg }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ item.title }}</div>
             {% if item.artist %}
-            <div style="font-size:10px; line-height:1; text-transform:uppercase; letter-spacing:0.08em; color:{{ soft }}; font-weight:800;">{{ item.artist }}</div>
+            <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.05em; color:{{ soft }}; font-weight:800;">{{ item.artist }}</div>
             {% endif %}
           </div>
         </div>
