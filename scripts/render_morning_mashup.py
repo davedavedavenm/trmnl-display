@@ -199,6 +199,111 @@ def wrap_text(text: str, font_obj: ImageFont.FreeTypeFont | ImageFont.ImageFont,
     return lines
 
 
+# ==========================================
+# DRAWING HELPERS FOR PREMIUM LOOK
+# ==========================================
+
+def draw_clock_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, r: int, color: tuple) -> None:
+    draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=color, width=2)
+    draw.ellipse((cx - 2, cy - 2, cx + 2, cy + 2), fill=color)
+    draw.line((cx, cy, cx, cy - r + 3), fill=color, width=2)
+    draw.line((cx, cy, cx + r - 4, cy), fill=color, width=2)
+
+
+def draw_pin_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, r: int, color: tuple) -> None:
+    draw.ellipse((cx - r, cy - r - 2, cx + r, cy + r - 2), fill=color)
+    draw.polygon([(cx - r + 1, cy - 1), (cx, cy + r + 2), (cx + r - 1, cy - 1)], fill=color)
+    draw.ellipse((cx - r // 3, cy - r - 2 + r // 3, cx + r // 3, cy - r - 2 + r // 3 * 3), fill=WHITE)
+
+
+def draw_alert_icon(draw: ImageDraw.ImageDraw, cx: int, cy: int, r: int, color: tuple) -> None:
+    draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=color)
+    draw.line((cx - r + 4, cy, cx - 1, cy + r - 4), fill=WHITE, width=2)
+    draw.line((cx - 1, cy + r - 4, cx + r - 3, cy - r + 4), fill=WHITE, width=2)
+
+
+def draw_route_diagram(draw: ImageDraw.ImageDraw, x0: int, y: int, w: int, color: tuple, secondary_color: tuple) -> None:
+    draw.line((x0, y, x0 + w, y), fill=(210, 210, 210), width=2)
+    draw.ellipse((x0 - 5, y - 5, x0 + 5, y + 5), fill=color, outline=BLACK, width=1)
+    draw.ellipse((x0 + w - 5, y - 5, x0 + w + 5, y + 5), fill=secondary_color, outline=BLACK, width=1)
+    
+    # Draw a cute little car at 45% along the way
+    car_x = x0 + int(w * 0.45)
+    # Wheels
+    draw.ellipse((car_x - 8, y + 3, car_x - 4, y + 7), fill=BLACK)
+    draw.ellipse((car_x + 4, y + 3, car_x + 8, y + 7), fill=BLACK)
+    # Car body (horizontal pill)
+    draw.rounded_rectangle([(car_x - 12, y - 4), (car_x + 12, y + 3)], radius=2, fill=color, outline=BLACK, width=1)
+    # Car cabin (top part)
+    draw.rounded_rectangle([(car_x - 6, y - 8), (car_x + 6, y - 3)], radius=1, fill=color, outline=BLACK, width=1)
+
+
+def draw_corner_ornaments(draw: ImageDraw.ImageDraw, box: tuple, size: int, color: tuple) -> None:
+    x0, y0, x1, y1 = box
+    # Top-left
+    draw.line([(x0, y0), (x0 + size, y0)], fill=color, width=2)
+    draw.line([(x0, y0), (x0, y0 + size)], fill=color, width=2)
+    # Top-right
+    draw.line([(x1, y0), (x1 - size, y0)], fill=color, width=2)
+    draw.line([(x1, y0), (x1, y0 + size)], fill=color, width=2)
+    # Bottom-left
+    draw.line([(x0, y1), (x0 + size, y1)], fill=color, width=2)
+    draw.line([(x0, y1), (x0, y1 - size)], fill=color, width=2)
+    # Bottom-right
+    draw.line([(x1, y1), (x1 - size, y1)], fill=color, width=2)
+    draw.line([(x1, y1), (x1, y1 - size)], fill=color, width=2)
+
+
+def draw_shield_watermark(draw: ImageDraw.ImageDraw, cx: int, cy: int, w: int, h: int, color: tuple, dark_mode: int) -> None:
+    sx = cx - w // 2
+    sy = cy - h // 2
+    pts = [
+        (sx, sy),
+        (sx + w, sy),
+        (sx + w, sy + h * 0.55),
+        (cx, sy + h),
+        (sx, sy + h * 0.55),
+    ]
+    draw.polygon(pts, fill=color)
+    line_color = BLACK if dark_mode == 1 else WHITE
+    draw.line([(cx, sy), (cx, sy + h)], fill=line_color, width=1)
+    draw.line([(sx, cy), (sx + w, cy)], fill=line_color, width=1)
+
+
+def draw_star(draw: ImageDraw.ImageDraw, cx: int, cy: int, r: int, color: tuple) -> None:
+    points = []
+    for i in range(8):
+        angle = i * math.pi / 4 - math.pi / 2
+        dist = r if i % 2 == 0 else r // 2
+        points.append((cx + dist * math.cos(angle), cy + dist * math.sin(angle)))
+    draw.polygon(points, fill=color)
+
+
+def draw_house_stripes(draw: ImageDraw.ImageDraw, start_x: int, y: int, width: int, house: str) -> None:
+    if house == "gryffindor":
+        colors = [RED, YELLOW, RED, YELLOW, RED, YELLOW, RED, YELLOW, RED]
+    elif house == "slytherin":
+        colors = [GREEN, WHITE, GREEN, WHITE, GREEN, WHITE, GREEN, WHITE, GREEN]
+    elif house == "ravenclaw":
+        colors = [BLUE, ORANGE, BLUE, ORANGE, BLUE, ORANGE, BLUE, ORANGE, BLUE]
+    elif house == "hufflepuff":
+        colors = [YELLOW, BLACK, YELLOW, BLACK, YELLOW, BLACK, YELLOW, BLACK, YELLOW]
+    else:
+        colors = [BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK]
+        
+    stripe_w = width // len(colors)
+    for i, col in enumerate(colors):
+        x0 = start_x + i * stripe_w
+        x1 = x0 + stripe_w
+        if i == len(colors) - 1:
+            x1 = start_x + width
+        draw.rectangle([x0, y, x1, y + 4], fill=closest_panel_color(col))
+
+
+# ==========================================
+# MAIN PANEL RENDERERS
+# ==========================================
+
 def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> None:
     eta = data.get("eta_minutes") or "?"
     route = data.get("route_label") or "Direct"
@@ -229,19 +334,21 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
         bg_panel = BLACK
         fg_primary = WHITE
         fg_secondary = (180, 180, 180)
+        card_bg = (20, 20, 20)
         card_border = WHITE
         status_green = (50, 220, 100)
     else:
-        bg_panel = WHITE
+        bg_panel = (250, 248, 244)  # Premium off-white bento background
         fg_primary = BLACK
-        fg_secondary = (120, 120, 120)
-        card_border = BLACK
+        fg_secondary = (110, 110, 110)
+        card_bg = WHITE             # Pure white cards
+        card_border = (0, 0, 0)
         status_green = (0, 120, 50)
 
     # 1. Background
     draw.rectangle([0, 0, WIDTH // 2, HEIGHT], fill=bg_panel)
 
-    # 2. Header
+    # 2. Header (Screen Label Pill + Updated Time)
     badge_font = font(14, bold=True)
     badge_w = int(draw.textlength(screen_label, font=badge_font))
     pill_x0, pill_y0 = 18, 16
@@ -258,7 +365,7 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
         pill_fg = BLACK
 
     draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x1, pill_y1)], radius=12, fill=closest_panel_color(pill_bg))
-    draw.text((pill_x0 + 10, pill_y0 + 4), screen_label, fill=closest_panel_color(pill_fg), font=badge_font)
+    draw.text((pill_x0 + 10, pill_y0 + 4), screen_label.upper(), fill=closest_panel_color(pill_fg), font=badge_font)
 
     if updated:
         upd_font = font(12, bold=True)
@@ -268,54 +375,87 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
     draw.line([(18, divider_y), (WIDTH // 2 - 18, divider_y)], fill=closest_panel_color(fg_secondary), width=1)
 
     # 3. ETA Card (Card 1)
-    card1_y0, card1_y1 = 68, 198
-    draw.rounded_rectangle([(18, card1_y0), (WIDTH // 2 - 18, card1_y1)], radius=10, fill=bg_panel, outline=closest_panel_color(card_border), width=2)
+    card1_y0, card1_y1 = 62, 182
+    draw.rounded_rectangle([(18, card1_y0), (WIDTH // 2 - 18, card1_y1)], radius=10, fill=card_bg, outline=closest_panel_color(card_border), width=2)
     draw.rounded_rectangle([(20, card1_y0 + 2), (28, card1_y1 - 2)], radius=3, fill=closest_panel_color(primary_accent))
 
-    eta_font = font(64, bold=True)
+    # Header section inside card (Clock Icon + uppercase Label)
+    draw_clock_icon(draw, 44, card1_y0 + 18, 7, closest_panel_color(fg_secondary))
+    lbl_font = font(12, bold=True)
+    draw.text((58, card1_y0 + 11), eta_lbl.upper(), fill=closest_panel_color(fg_secondary), font=lbl_font)
+
+    # Large Drive Time Number
+    eta_font = font(54, bold=True)
     eta_str = str(eta)
-    draw.text((44, card1_y0 + 10), eta_str, fill=closest_panel_color(fg_primary), font=eta_font)
+    draw.text((44, card1_y0 + 36), eta_str, fill=closest_panel_color(fg_primary), font=eta_font)
     eta_w = int(draw.textlength(eta_str, font=eta_font))
 
-    unit_font = font(20, bold=True)
-    draw.text((44 + eta_w + 8, card1_y0 + 44), eta_unit, fill=closest_panel_color(fg_secondary), font=unit_font)
+    # Unit text next to the number
+    unit_font = font(18, bold=True)
+    draw.text((44 + eta_w + 6, card1_y0 + 64), eta_unit, fill=closest_panel_color(fg_secondary), font=unit_font)
 
-    lbl_font = font(14, bold=True)
-    draw.text((44, card1_y0 + 90), eta_lbl.upper(), fill=closest_panel_color(fg_secondary), font=lbl_font)
+    # Right-side Traffic Badge
+    traffic_bg = GREEN
+    traffic_fg = WHITE
+    traffic_text = "LIGHT TRAFFIC"
+    try:
+        eta_m = int(eta)
+        if eta_m > 55:
+            traffic_bg = RED
+            traffic_text = "HEAVY TRAFFIC"
+        elif eta_m > 45:
+            traffic_bg = ORANGE
+            traffic_text = "MODERATE TRAFFIC"
+    except ValueError:
+        pass
+        
+    t_font = font(11, bold=True)
+    t_w = int(draw.textlength(traffic_text, font=t_font))
+    t_badge_x0 = 382 - 20 - t_w - 12
+    t_badge_y0 = card1_y0 + 44
+    draw.rounded_rectangle([(t_badge_x0, t_badge_y0), (t_badge_x0 + t_w + 12, t_badge_y0 + 24)], radius=6, fill=closest_panel_color(traffic_bg))
+    draw.text((t_badge_x0 + 6, t_badge_y0 + 4), traffic_text, fill=closest_panel_color(traffic_fg), font=t_font)
 
     # 4. Route Card (Card 2)
-    card2_y0, card2_y1 = 212, 338
-    draw.rounded_rectangle([(18, card2_y0), (WIDTH // 2 - 18, card2_y1)], radius=10, fill=bg_panel, outline=closest_panel_color(card_border), width=2)
+    card2_y0, card2_y1 = 196, 326
+    draw.rounded_rectangle([(18, card2_y0), (WIDTH // 2 - 18, card2_y1)], radius=10, fill=card_bg, outline=closest_panel_color(card_border), width=2)
     draw.rounded_rectangle([(20, card2_y0 + 2), (28, card2_y1 - 2)], radius=3, fill=closest_panel_color(secondary_accent))
 
-    sec_font = font(12, bold=True)
-    draw.text((44, card2_y0 + 10), "ROUTE", fill=closest_panel_color(fg_secondary), font=sec_font)
+    # Header inside card (Map Pin Icon + label)
+    draw_pin_icon(draw, 44, card2_y0 + 18, 6, closest_panel_color(fg_secondary))
+    draw.text((58, card2_y0 + 11), "OPTIMAL ROUTE", fill=closest_panel_color(fg_secondary), font=lbl_font)
 
+    # Route Name
     route_text = f"via {route}"
-    if len(route_text) > 24:
-        route_text = route_text[:22] + "..."
-    route_font = font(18 if len(route_text) > 20 else 22, bold=True)
-    draw.text((44, card2_y0 + 26), route_text, fill=closest_panel_color(fg_primary), font=route_font)
+    if len(route_text) > 28:
+        route_text = route_text[:25] + "..."
+    route_font = font(16 if len(route_text) > 22 else 20, bold=True)
+    draw.text((44, card2_y0 + 32), route_text, fill=closest_panel_color(fg_primary), font=route_font)
 
+    # Distance Badge
     if show_dist and distance is not None and str(distance).strip() not in ("", "?", "unknown"):
         dist_text = f"{distance} {dist_unit}"
-        dist_font = font(14, bold=True)
-        draw.text((44, card2_y0 + 64), dist_text, fill=closest_panel_color(fg_secondary), font=dist_font)
+        dist_font = font(13, bold=True)
+        draw.text((44, card2_y0 + 58), dist_text, fill=closest_panel_color(fg_secondary), font=dist_font)
 
-    headline_font = font(16, bold=True)
-    draw.text((44, card2_y0 + 90), headline, fill=closest_panel_color(fg_primary), font=headline_font)
+    # Cute Visual Timeline (Home -> Car -> Work)
+    draw_route_diagram(draw, 44, card2_y0 + 96, 310, closest_panel_color(primary_accent), closest_panel_color(secondary_accent))
 
     # 5. Status Card (Card 3)
-    card3_y0, card3_y1 = 352, 464
-    draw.rounded_rectangle([(18, card3_y0), (WIDTH // 2 - 18, card3_y1)], radius=10, fill=bg_panel, outline=closest_panel_color(card_border), width=2)
+    card3_y0, card3_y1 = 340, 464
+    draw.rounded_rectangle([(18, card3_y0), (WIDTH // 2 - 18, card3_y1)], radius=10, fill=card_bg, outline=closest_panel_color(card_border), width=2)
     draw.rounded_rectangle([(20, card3_y0 + 2), (28, card3_y1 - 2)], radius=3, fill=closest_panel_color(GREEN))
 
-    draw.text((44, card3_y0 + 10), "COMMUTE STATUS", fill=closest_panel_color(fg_secondary), font=sec_font)
+    # Header (Check/Badge Icon + Label)
+    draw_alert_icon(draw, 44, card3_y0 + 18, 7, closest_panel_color(GREEN))
+    draw.text((58, card3_y0 + 11), "RECOMMENDED ACTION", fill=closest_panel_color(fg_secondary), font=lbl_font)
 
+    # Recommended action text
     status_text = "LEAVE BY 7:15 AM"
-    status_font = font(20, bold=True)
-    draw.text((44, card3_y0 + 26), status_text, fill=closest_panel_color(fg_primary), font=status_font)
+    status_font = font(18, bold=True)
+    draw.text((44, card3_y0 + 32), status_text, fill=closest_panel_color(fg_primary), font=status_font)
 
+    # Status Pill indicator
     sub_text = "On-time arrival expected"
     try:
         eta_m = int(eta)
@@ -324,8 +464,15 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
             status_green = RED
     except ValueError:
         pass
-    sub_font = font(14, bold=True)
-    draw.text((44, card3_y0 + 64), sub_text, fill=closest_panel_color(status_green), font=sub_font)
+        
+    s_font = font(12, bold=True)
+    s_w = int(draw.textlength(sub_text, font=s_font))
+    s_badge_x0 = 44
+    s_badge_y0 = card3_y0 + 62
+    
+    # White check icon inside status pill
+    draw.rounded_rectangle([(s_badge_x0, s_badge_y0), (s_badge_x0 + s_w + 20, s_badge_y0 + 24)], radius=6, fill=closest_panel_color(status_green))
+    draw.text((s_badge_x0 + 10, s_badge_y0 + 4), sub_text, fill=closest_panel_color(WHITE), font=s_font)
 
 
 def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: str, book: str | None, house: str | None, show_book: bool, dark_mode: int) -> None:
@@ -338,9 +485,11 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
         accent_color = h["secondary"]
         banner_bg = h["primary"]
         banner_fg = h["secondary"]
+        watermark_color = (bg_color[0] + 8, bg_color[1] + 8, bg_color[2] + 8)
     else:
-        bg_color = (253, 250, 242)
-        quote_color = (30, 25, 20)
+        bg_color = (253, 250, 242)  # Elegant light parchment
+        quote_color = (30, 25, 20)  # Calligraphy ink
+        watermark_color = (244, 238, 226) # Watermark shield color (subtle cream)
         
         # Map house names to vibrant panel colors for light mode
         if house == "gryffindor":
@@ -364,30 +513,47 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
             banner_fg = WHITE
             accent_color = BLACK
 
+    # 1. Base parchment background
     draw.rectangle([start_x, 0, WIDTH, HEIGHT], fill=bg_color)
 
-    banner_h = 44
+    # 2. Watermark shield in background center
+    draw_shield_watermark(draw, start_x + 200, 240, 140, 180, closest_panel_color(watermark_color), dark_mode)
+
+    # 3. Top Banner & House Tie Stripes
+    banner_h = 36
     draw.rectangle([start_x, 0, WIDTH, banner_h], fill=closest_panel_color(banner_bg))
-
+    
+    # House Title
     house_name = HOUSE_LABELS.get(house, "Wizarding World") if house else "Wizarding World"
-    name_font = font(16, bold=True)
+    name_font = font(15, bold=True)
     name_w = int(draw.textlength(house_name, font=name_font))
-    draw.text((start_x + (WIDTH - start_x - name_w) // 2, (banner_h - 18) // 2), house_name.upper(), fill=closest_panel_color(banner_fg), font=name_font)
+    draw.text((start_x + (WIDTH - start_x - name_w) // 2, (banner_h - 18) // 2 + 1), house_name.upper(), fill=closest_panel_color(banner_fg), font=name_font)
 
-    draw.line([(start_x, banner_h), (WIDTH, banner_h)], fill=closest_panel_color(accent_color), width=2)
+    # Draw the tie stripes under the banner
+    draw_house_stripes(draw, start_x, banner_h, WIDTH - start_x, house or "gryffindor")
 
-    draw.rectangle([start_x + 10, banner_h + 10, WIDTH - 10, HEIGHT - 10], outline=closest_panel_color(accent_color), width=2)
+    # 4. Ornate Inner Card Border (Thin line with corner brackets)
+    card_box = (start_x + 16, banner_h + 16, WIDTH - 16, HEIGHT - 16)
+    draw.rectangle(card_box, outline=closest_panel_color((220, 215, 205) if dark_mode == 0 else (60, 50, 40)), width=1)
+    # Bold corner brackets
+    draw_corner_ornaments(draw, card_box, 16, closest_panel_color(accent_color))
 
-    text_area_x = start_x + 24
-    text_area_w = WIDTH - start_x - 48
-    text_area_y = banner_h + 20
-    text_area_h = HEIGHT - text_area_y - 54
+    # 5. Large Quote Marks
+    q_mark_font = font(64, bold=True)
+    draw.text((start_x + 28, banner_h + 24), "“", fill=closest_panel_color(accent_color), font=q_mark_font)
+    draw.text((WIDTH - 54, HEIGHT - 92), "”", fill=closest_panel_color(accent_color), font=q_mark_font)
 
-    quote_font_size = 28
+    # 6. Quote Text
+    text_area_x = start_x + 36
+    text_area_w = WIDTH - start_x - 72
+    text_area_y = banner_h + 36
+    text_area_h = HEIGHT - text_area_y - 84
+
+    quote_font_size = 24
     qf_quote = font(quote_font_size)
     wrapped = wrap_text(quote_text, qf_quote, text_area_w, draw)
 
-    while len(wrapped) > 6 and quote_font_size > 16:
+    while len(wrapped) > 6 and quote_font_size > 14:
         quote_font_size -= 2
         qf_quote = font(quote_font_size)
         wrapped = wrap_text(quote_text, qf_quote, text_area_w, draw)
@@ -396,22 +562,33 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
     total_text_height = len(wrapped) * line_height
     quote_start_y = text_area_y + (text_area_h - total_text_height) // 2
 
+    # Draw centered quote lines
     for i, line in enumerate(wrapped):
         line_w = int(draw.textlength(line, font=qf_quote))
         lx = text_area_x + (text_area_w - line_w) // 2
         draw.text((lx, quote_start_y + i * line_height), line, fill=closest_panel_color(quote_color), font=qf_quote)
 
-    attr_bar_h = 36
-    attr_y = HEIGHT - attr_bar_h
-    draw.line([(start_x + 10, attr_y), (WIDTH - 10, attr_y)], fill=closest_panel_color(accent_color), width=2)
+    # 7. Ornate Divider (Line + Star)
+    divider_y = quote_start_y + total_text_height + 14
+    if divider_y < HEIGHT - 64:
+        draw.line([(start_x + 120, divider_y), (WIDTH - 120, divider_y)], fill=closest_panel_color(accent_color), width=1)
+        draw_star(draw, start_x + 200, divider_y, 6, closest_panel_color(accent_color))
 
-    attr_font = font(13, bold=True)
+    # 8. Footer & Attribution
+    attr_bar_h = 32
+    attr_y = HEIGHT - attr_bar_h
+    
+    # Gold stripe above footer banner
+    draw_house_stripes(draw, start_x, attr_y - 4, WIDTH - start_x, house or "gryffindor")
+    draw.rectangle([start_x, attr_y, WIDTH, HEIGHT], fill=closest_panel_color(banner_bg))
+
+    attr_font = font(12, bold=True)
     short_book = {"Philosopher's Stone": "PS", "Chamber of Secrets": "CS", "Prisoner of Azkaban": "PA", "Goblet of Fire": "GF", "Order of the Phoenix": "OP", "Half-Blood Prince": "HBP", "Deathly Hallows": "DH"}.get(book, book) if show_book else None
-    attr_text = f"\u2014 {character}"
+    attr_text = f"— {character}"
     if short_book:
         attr_text += f", {short_book}"
     attr_w = int(draw.textlength(attr_text, font=attr_font))
-    draw.text((start_x + (WIDTH - start_x - attr_w) // 2, attr_y + (attr_bar_h - 15) // 2), attr_text, fill=closest_panel_color(quote_color), font=attr_font)
+    draw.text((start_x + (WIDTH - start_x - attr_w) // 2, attr_y + (attr_bar_h - 15) // 2), attr_text.upper(), fill=closest_panel_color(banner_fg), font=attr_font)
 
 
 def render_morning_mashup(jen_data: dict[str, Any], quotes: list[dict[str, Any]], config: dict[str, Any], dark_mode: int) -> Image.Image:
@@ -422,7 +599,7 @@ def render_morning_mashup(jen_data: dict[str, Any], quotes: list[dict[str, Any]]
     draw_left_panel(draw, jen_data, config, dark_mode)
 
     divider_x = WIDTH // 2
-    divider_color = (100, 100, 100) if dark_mode == 1 else (200, 200, 200)
+    divider_color = (100, 100, 100) if dark_mode == 1 else (0, 0, 0)
     draw.line([(divider_x, 0), (divider_x, HEIGHT)], fill=divider_color, width=2)
 
     quote_data = pick_random_quote(quotes)
