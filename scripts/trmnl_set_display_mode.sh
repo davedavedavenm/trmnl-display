@@ -12,7 +12,7 @@ DEVICE_ID="${TRMNL_DEVICE_ID:-1}"
 PLAYLIST_PREFIX="${TRMNL_PLAYLIST_PREFIX:-TRMNL Mode}"
 # Determine refresh time dynamically based on mode
 if [[ "${MODE}" == "bus" ]]; then
-  REFRESH_TIME=120
+  REFRESH_TIME=300
 elif [[ "${MODE}" == "sonos" ]]; then
   REFRESH_TIME=60
 else
