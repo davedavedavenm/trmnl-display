@@ -15,6 +15,8 @@ if [[ "${MODE}" == "bus" ]]; then
   REFRESH_TIME=300
 elif [[ "${MODE}" == "sonos" ]]; then
   REFRESH_TIME=60
+elif [[ "${MODE}" == "calendar" || "${MODE}" == "idle" ]]; then
+  REFRESH_TIME=7200
 else
   REFRESH_TIME="${TRMNL_MODE_REFRESH_TIME:-600}"
 fi
