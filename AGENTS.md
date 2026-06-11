@@ -153,7 +153,9 @@ Key rules:
 
 The mandatory plugin/recipe portability rules are documented in `docs/PLUGIN_RECIPE_CONTRACT.md`.
 
-Every user-facing screen must remain installable/configurable like a normal TRMNL/LaraPaper plugin or recipe unless a README section documents why that is technically impossible. The colour sidecar is an implementation detail for better panel output; it must not be the only place where user configuration lives.
+Every user-facing screen must remain installable/configurable like a normal TRMNL/LaraPaper plugin or recipe. The colour sidecar is an implementation detail for better panel output; it must not be the only place where user configuration lives.
+
+CRITICAL: Every single plugin/recipe MUST be fully configurable and editable via the TRMNL/LaraPaper Web UI. Sidecar renderers and sync scripts must read settings (like themes, layouts, layout variants, preferences, entity mappings, credentials) from the plugin's payload or database configurations, NOT from hardcoded values or private `.env` files. This ensures that any plugin or recipe is immediately shareable with the community.
 
 Every user-facing screen should include these files:
 

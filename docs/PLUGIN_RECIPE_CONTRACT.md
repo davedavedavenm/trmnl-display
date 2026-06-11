@@ -8,7 +8,9 @@ The colour sidecar path is allowed because the live Inky/Spectra panel needs bet
 
 ## Mandatory Rule
 
-Every user-facing screen must have a shareable plugin/recipe contract unless a clear technical blocker is documented in the screen's README.
+Every user-facing screen must have a shareable plugin/recipe contract.
+
+CRITICAL: Every single plugin/recipe MUST be fully configurable and editable via the TRMNL/LaraPaper Web UI. Sidecar renderers and sync scripts must read settings (like themes, layouts, layout variants, preferences, entity mappings, credentials) from the plugin's payload or database configurations, NOT from hardcoded values or private `.env` files. This ensures that any plugin or recipe is immediately shareable with the community.
 
 That contract must include:
 
