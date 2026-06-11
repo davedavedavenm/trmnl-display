@@ -482,8 +482,8 @@ def render_weekstrip(draw: ImageDraw.ImageDraw, days: list[dict], today: str, no
 
 
 def render(payload: dict) -> Image.Image:
-    theme_name = os.getenv("TRMNL_CALENDAR_THEME", payload.get("theme", "dark")).lower()
-    layout = os.getenv("TRMNL_CALENDAR_LAYOUT", payload.get("layout", "featured")).lower()
+    theme_name = (payload.get("theme") or os.getenv("TRMNL_CALENDAR_THEME") or "dark").lower()
+    layout = (payload.get("layout") or os.getenv("TRMNL_CALENDAR_LAYOUT") or "featured").lower()
 
     theme = LIGHT_THEME if theme_name == "light" else DARK_THEME
 

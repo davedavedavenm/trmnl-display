@@ -235,8 +235,8 @@ def fetch_payload() -> dict:
         NANGO_SECRET_KEY = config.get("nango_secret_key", "")
     NANGO_BASE_URL = config.get("nango_base_url", NANGO_BASE_URL)
 
-    theme = os.getenv("TRMNL_CALENDAR_THEME", config.get("theme", "dark"))
-    layout = os.getenv("TRMNL_CALENDAR_LAYOUT", config.get("layout", "featured"))
+    theme = config.get("theme") or os.getenv("TRMNL_CALENDAR_THEME") or "dark"
+    layout = config.get("layout") or os.getenv("TRMNL_CALENDAR_LAYOUT") or "featured"
 
     active_calendars = get_calendars_from_config(config)
     if not active_calendars:
