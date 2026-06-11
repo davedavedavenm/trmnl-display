@@ -230,3 +230,8 @@ if [[ "${MODE}" == "bus" ]]; then
   echo "Bus mode activated. Triggering immediate refresh..."
   /home/dave/bin/trmnl-refresh-bus-sidecar --force || true
 fi
+
+if [[ "${MODE}" == "jen_morning" ]]; then
+  echo "Jen Morning mode activated. Triggering immediate refresh..."
+  /home/dave/bin/trmnl-refresh-morning-mashup --force || true
+fi
