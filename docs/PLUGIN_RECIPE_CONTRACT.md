@@ -99,6 +99,17 @@ For the HA dashboard, the accepted sidecar details live in `docs/COLOUR_SIDECAR_
 
 The accepted colour-dashboard visual reference is `scripts/tmp/sidecar_colour_dashboard_proof_2026-05-01.png`. Sidecar implementations for this plugin should preserve that seven-colour, icon-led style unless a later accepted reference supersedes it in the same document. Normal renderer runs must write separate iteration files and must not overwrite the tracked proof reference.
 
+## Color Screen Usage
+
+Whenever possible, layouts, rendering templates, and sidecars must make full, deliberate use of the physical 7-color Spectra screen. Do not fallback to monochrome or grayscale designs when color-coded accents, status badges, or colored iconography can be used to improve readability and aesthetics. The palette must consist of the full ACeP spectrum:
+- Black
+- White
+- Red
+- Green
+- Blue
+- Yellow
+- Orange
+
 ## Exception Process
 
 If a screen cannot be packaged as a normal plugin/recipe, its README must include:
