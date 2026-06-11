@@ -16,3 +16,6 @@
 
 # Daily restore of correct colour settings in LaraPaper SQLite DB
 0 5 * * * sudo python3 /home/dave/restore_color_model.py 2>&1 | logger -t trmnl-db-restore
+
+# Push UK Bus Departures TransportAPI colour sidecar payload
+*/2 * * * * /home/dave/bin/trmnl-refresh-bus-sidecar 2>&1 | logger -t trmnl-bus-departures

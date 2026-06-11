@@ -10,7 +10,14 @@ fi
 LARAPAPER_CONTAINER="${TRMNL_LARAPAPER_CONTAINER:-larapaper-app-1}"
 DEVICE_ID="${TRMNL_DEVICE_ID:-1}"
 PLAYLIST_PREFIX="${TRMNL_PLAYLIST_PREFIX:-TRMNL Mode}"
-REFRESH_TIME="${TRMNL_MODE_REFRESH_TIME:-600}"
+# Determine refresh time dynamically based on mode
+if [[ "${MODE}" == "bus" ]]; then
+  REFRESH_TIME=120
+elif [[ "${MODE}" == "sonos" ]]; then
+  REFRESH_TIME=60
+else
+  REFRESH_TIME="${TRMNL_MODE_REFRESH_TIME:-600}"
+fi
 SIDECAR_HANDOFF_ENABLED="${TRMNL_SIDECAR_HANDOFF_ENABLED:-1}"
 SIDECAR_IMAGE_PATH="${TRMNL_SIDECAR_IMAGE_PATH:-/home/dave/sidecar_colour_dashboard_next.png}"
 SIDECAR_IMAGE_NAME="${TRMNL_SIDECAR_IMAGE_NAME:-sidecar_colour_dashboard_next}"
