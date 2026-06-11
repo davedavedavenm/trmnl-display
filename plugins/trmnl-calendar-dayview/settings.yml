@@ -1,7 +1,7 @@
 name: Calendar Week Ahead
 no_screen_padding: 'no'
 dark_mode: 'no'
-strategy: webhook
+strategy: polling
 refresh_interval: 60
 id: trmnl-calendar-weekahead
 custom_fields:

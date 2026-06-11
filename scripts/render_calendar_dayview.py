@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Calendar Day View — Multi-Layout Renderer
-7-color ACeP e-ink, 800x480
+Optimized for 7-color ACeP e-ink (Spectra), 800x480
 Layouts: featured, agenda, weekstrip
 Themes:  dark, light
 """
@@ -27,8 +27,9 @@ YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 ORANGE = (255, 128, 0)
-DIM = (80, 80, 80)
-LIGHT_DIM = (180, 180, 180)
+DIM = (128, 128, 128)
+LIGHT_DIM = (160, 160, 160)
+
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
 
 SOURCE_COLORS = {
@@ -46,7 +47,28 @@ SOURCE_LABELS = {
 }
 
 
+def closest_panel_color(rgb: tuple[int, int, int] | list[int]) -> tuple[int, int, int]:
+    if not rgb or len(rgb) < 3:
+        return BLACK
+    min_dist = float("inf")
+    best_color = BLACK
+    for p_color in PANEL_PALETTE:
+        dist = sum((c1 - c2) ** 2 for c1, c2 in zip(rgb, p_color))
+        if dist < min_dist:
+            min_dist = dist
+            best_color = p_color
+    return best_color
+
+
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    base_dir = Path(__file__).resolve().parent
+    local_path = base_dir / "fonts" / ("Outfit-Bold.ttf" if bold else "Outfit-Regular.ttf")
+    if local_path.exists():
+        try:
+            return ImageFont.truetype(str(local_path), size)
+        except OSError:
+            pass
+
     candidates = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
@@ -73,7 +95,7 @@ class Theme:
         self.bg_card = bg_card or bg
 
 
-DARK_THEME = Theme(BLACK, WHITE, DIM)
+DARK_THEME = Theme(BLACK, WHITE, DIM, BLACK)
 LIGHT_THEME = Theme(WHITE, BLACK, LIGHT_DIM, WHITE)
 
 
@@ -102,10 +124,6 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
 
     f_mast = font(18, bold=True)
     f_clock = font(24, bold=True)
-    f_time = font(48, bold=True)
-    f_event = font(52)
-    f_source = font(20, bold=True)
-    f_empty = font(32, bold=True)
     f_footer = font(16)
 
     if not days:
@@ -130,29 +148,37 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
         date_text = f"{day_name.upper()} {day_num} {month_abbr}"
         draw.text((WIDTH - 24, header_y), date_text, fill=theme.dim, font=f_mast, anchor="rm")
 
-    draw.line([(24, 50), (WIDTH - 24, 50)], fill=theme.dim, width=1)
+    draw.line([(24, 45), (WIDTH - 24, 45)], fill=theme.dim, width=1)
 
     # EVENT CARDS
-    ev_y = 66
+    ev_y = 60
+    block_h = 108
+    gap = 14
 
     if today_day:
         calendars = today_day.get("calendars", [])
         max_events = 3
+        rendered_count = 0
 
         for cal in calendars:
+            if rendered_count >= max_events:
+                break
+
             cal_name_raw = cal.get("name", "?")
-            cal_color = tuple(cal.get("color", [128, 128, 128]))
+            cal_color = closest_panel_color(cal.get("color", [128, 128, 128]))
             cal_label = cal.get("label") or SOURCE_LABELS.get(cal_name_raw, cal_name_raw.split("-")[-1].capitalize()[:10])
-            cal_events = cal.get("events", [])[:max_events]
+            cal_events = cal.get("events", [])
 
             for ev in cal_events:
-                if ev_y > HEIGHT - 80:
+                if rendered_count >= max_events or ev_y > HEIGHT - 120:
                     break
 
                 start_s = ev.get("start", "")
+                end_s = ev.get("end", "")
                 all_day = ev.get("all_day", False)
-                summary = ev.get("summary", "")[:35]
-                description = ev.get("description", "")[:50]
+                summary = ev.get("summary", "")[:45]
+                location = ev.get("location", "").strip()
+                desc = ev.get("description", "").strip()
                 status = ev.get("status", "confirmed")
                 attendees = ev.get("attendees", [])
                 attendee_count = len([a for a in attendees if a.get("status") == "accepted"])
@@ -163,49 +189,71 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
                     try:
                         st = datetime.fromisoformat(start_s.replace("Z", "+00:00"))
                         time_label = st.strftime("%H:%M")
+                        if end_s:
+                            et = datetime.fromisoformat(end_s.replace("Z", "+00:00"))
+                            time_label += f" - {et.strftime('%H:%M')}"
                     except (ValueError, TypeError):
                         time_label = ""
 
-                block_h = 120
-                draw.rectangle([(24, ev_y), (WIDTH - 24, ev_y + block_h)], fill=cal_color)
+                # Card Outer Box
+                draw.rounded_rectangle([(24, ev_y), (WIDTH - 24, ev_y + block_h)], radius=10, fill=theme.bg_card, outline=theme.dim, width=2)
 
-                draw.text((44, ev_y + 16), time_label, fill=WHITE, font=f_time, anchor="lm")
-                draw.text((44, ev_y + 72), summary, fill=WHITE, font=f_event, anchor="lm")
+                # Left Accent Bar
+                draw.rounded_rectangle([(26, ev_y + 2), (34, ev_y + block_h - 2)], radius=3, fill=cal_color)
 
-                # Source badge (top-right)
-                badge_w = draw.textlength(cal_label, font=f_source) + 24
-                badge_h = 32
-                badge_x = WIDTH - 44 - badge_w
-                badge_y = ev_y + 16
-                draw.rounded_rectangle([(badge_x, badge_y), (badge_x + badge_w, badge_y + badge_h)], 6, fill=BLACK)
-                draw.text((badge_x + 12, badge_y + 8), cal_label, fill=WHITE, font=f_source, anchor="lm")
+                # Render Time
+                draw.text((46, ev_y + 14), time_label, fill=theme.fg, font=font(18, bold=True))
 
-                # Attendee count badge (below source badge)
-                if attendee_count > 0:
-                    attend_text = f"{attendee_count}p"
-                    f_attend = font(16, bold=True)
-                    a_w = draw.textlength(attend_text, font=f_attend) + 20
-                    a_x = WIDTH - 44 - a_w
-                    a_y = badge_y + badge_h + 4
-                    draw.rounded_rectangle([(a_x, a_y), (a_x + a_w, a_y + 24)], 5, fill=BLACK)
-                    draw.text((a_x + 10, a_y + 5), attend_text, fill=WHITE, font=f_attend, anchor="lm")
+                # Render Summary
+                display_summary = f"[CANCELLED] {summary}" if status == "cancelled" else summary
+                draw.text((46, ev_y + 42), display_summary, fill=theme.fg, font=font(22, bold=True))
 
-                # Cancelled indicator
+                # Cancelled Strike-through
                 if status == "cancelled":
-                    draw.line((44, ev_y + 16, 44 + draw.textlength(time_label, font=f_time), ev_y + 16 + 48), fill=BLACK, width=3)
-                    draw.line((44, ev_y + 16 + 48, 44 + draw.textlength(time_label, font=f_time), ev_y + 16), fill=BLACK, width=3)
+                    text_w = draw.textlength(display_summary, font=font(22, bold=True))
+                    draw.line([(46, ev_y + 42 + 13), (46 + text_w, ev_y + 42 + 13)], fill=RED, width=3)
 
-                ev_y += block_h + 16
+                # Render Location or Description
+                subtext = ""
+                if location:
+                    subtext = f"📍 {location[:55]}"
+                elif desc:
+                    subtext = desc.replace("\n", " ").replace("\r", " ")[:60]
+
+                if subtext:
+                    draw.text((46, ev_y + 74), subtext, fill=theme.dim, font=font(15))
+
+                # Source Badge (top-right of card)
+                badge_w = draw.textlength(cal_label, font=font(12, bold=True)) + 16
+                badge_h = 24
+                badge_x = WIDTH - 24 - 12 - badge_w
+                badge_y = ev_y + 14
+
+                badge_fg = BLACK if cal_color in (YELLOW, WHITE) else WHITE
+                draw.rounded_rectangle([(badge_x, badge_y), (badge_x + badge_w, badge_y + badge_h)], radius=5, fill=cal_color)
+                draw.text((badge_x + badge_w // 2, badge_y + badge_h // 2), cal_label, fill=badge_fg, font=font(12, bold=True), anchor="mm")
+
+                # Attendee Count Badge
+                if attendee_count > 0:
+                    attend_text = f"👥 {attendee_count}"
+                    a_w = draw.textlength(attend_text, font=font(11, bold=True)) + 12
+                    a_x = badge_x - 8 - a_w
+                    a_y = badge_y
+                    draw.rounded_rectangle([(a_x, a_y), (a_x + a_w, a_y + badge_h)], radius=5, outline=theme.dim, width=1)
+                    draw.text((a_x + a_w // 2, a_y + badge_h // 2), attend_text, fill=theme.fg, font=font(11, bold=True), anchor="mm")
+
+                ev_y += block_h + gap
+                rendered_count += 1
 
     # FOOTER: upcoming days
-    footer_y = HEIGHT - 50
+    footer_y = HEIGHT - 45
     draw.line([(24, footer_y - 6), (WIDTH - 24, footer_y - 6)], fill=theme.dim, width=1)
 
     upcoming_days = [d for d in days if d.get("date") != today]
     x_up = 24
 
-    for day in upcoming_days[:3]:
-        if x_up > WIDTH - 100:
+    for day in upcoming_days[:4]:
+        if x_up > WIDTH - 150:
             break
 
         day_name = day.get("day_name", "")
@@ -213,26 +261,35 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
         try:
             dt = datetime.strptime(date_str, "%Y-%m-%d")
             day_num = dt.strftime("%d")
+            month_abbr = dt.strftime("%b").upper()
         except (ValueError, TypeError):
             day_num = date_str[-2:]
+            month_abbr = ""
 
-        draw.text((x_up, footer_y + 2), day_name[:3].upper(), fill=theme.dim, font=font(16, bold=True), anchor="lm")
-        draw.text((x_up, footer_y + 22), day_num, fill=theme.fg, font=font(28, bold=True), anchor="lm")
+        total_day_events = sum(len(c.get("events", [])) for c in day.get("calendars", []))
 
-        x_up += 90
+        draw.text((x_up, footer_y + 2), f"{day_name[:3].upper()} {day_num} {month_abbr}", fill=theme.dim, font=font(14, bold=True), anchor="lm")
+
+        # Draw dynamic color-coded bullet dot under/beside the date if there are events
+        if total_day_events > 0:
+            dot_color = theme.fg
+            if day.get("calendars"):
+                first_cal = day["calendars"][0]
+                dot_color = closest_panel_color(first_cal.get("color", [128, 128, 128]))
+
+            draw.ellipse([(x_up, footer_y + 20), (x_up + 6, footer_y + 26)], fill=dot_color)
+            draw.text((x_up + 12, footer_y + 23), f"{total_day_events} event{'s' if total_day_events > 1 else ''}", fill=theme.fg, font=font(14, bold=True), anchor="lm")
+        else:
+            draw.text((x_up, footer_y + 23), "No events", fill=theme.dim, font=font(14), anchor="lm")
+
+        x_up += 160
 
     total = sum(len(c.get("events", [])) for d in days for c in d.get("calendars", []))
-    draw.text((WIDTH - 24, footer_y + 18), f"{total} EVENTS", fill=theme.dim, font=f_footer, anchor="rm")
+    draw.text((WIDTH - 24, footer_y + 16), f"{total} EVENTS THIS WEEK", fill=theme.dim, font=f_footer, anchor="rm")
 
 
 def render_agenda(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_str: str, theme: Theme) -> None:
-    f_mast = font(18, bold=True)
     f_clock = font(24, bold=True)
-    f_time = font(22, bold=True)
-    f_event = font(22)
-    f_source = font(14, bold=True)
-    f_empty = font(28, bold=True)
-    f_day = font(16, bold=True)
 
     if not days:
         render_empty(draw, theme)
@@ -241,84 +298,105 @@ def render_agenda(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_s
     # TOP BAR
     header_y = 22
     draw.text((24, header_y), now_str, fill=theme.fg, font=f_clock, anchor="lm")
-    draw.line([(24, 50), (WIDTH - 24, 50)], fill=theme.dim, width=1)
+    draw.line([(24, 45), (WIDTH - 24, 45)], fill=theme.dim, width=1)
 
-    # COMPACT AGENDA LIST
-    y = 60
-    max_items = 12
-    item_h = 32
-    count = 0
+    # TWO-COLUMN AGENDA LAYOUT
+    # Left Gutter: Day info (x: 24 to 164)
+    # Right Gutter: Events (x: 184 to WIDTH - 24)
+    divider_x = 170
+    draw.line([(divider_x, 60), (divider_x, HEIGHT - 35)], fill=theme.dim, width=2)
+
+    y = 65
+    row_h = 52
+    gap = 8
+    max_y = HEIGHT - 45
 
     for day in days:
-        if count >= max_items:
+        if y > max_y - 20:
             break
 
         date_str = day.get("date", "")
-        day_name = day.get("day_name", "")[:3].upper()
-        try:
-            dt = datetime.strptime(date_str, "%Y-%m-%d")
-            day_num = dt.strftime("%d")
-        except (ValueError, TypeError):
-            day_num = date_str[-2:]
-
+        day_name = day.get("day_name", "")
         is_today = date_str == today
 
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            day_label = dt.strftime("%b %d").upper()
+        except (ValueError, TypeError):
+            day_label = date_str[-5:]
+
+        # Filter events
+        day_events = []
         for cal in day.get("calendars", []):
-            cal_name_raw = cal.get("name", "?")
-            cal_color = tuple(cal.get("color", [128, 128, 128]))
-            cal_label = cal.get("label") or SOURCE_LABELS.get(cal_name_raw, cal_name_raw[:8])
-
+            cal_color = closest_panel_color(cal.get("color", [128, 128, 128]))
+            cal_label = cal.get("label") or cal.get("name", "")[:10]
             for ev in cal.get("events", []):
-                if count >= max_items or y > HEIGHT - 40:
-                    break
+                day_events.append((ev, cal_color, cal_label))
 
-                start_s = ev.get("start", "")
-                all_day = ev.get("all_day", False)
-                summary = ev.get("summary", "")[:48]
+        if not day_events:
+            continue
 
-                if all_day:
-                    time_label = "ALL DAY"
-                else:
-                    try:
-                        st = datetime.fromisoformat(start_s.replace("Z", "+00:00"))
-                        time_label = st.strftime("%H:%M")
-                    except (ValueError, TypeError):
-                        time_label = ""
+        start_y = y
 
-                # Accent strip
-                strip_w = 6
-                if is_today and theme.bg == BLACK:
-                    draw.rectangle([(24, y), (24 + strip_w, y + item_h)], fill=cal_color)
-                elif is_today:
-                    draw.rectangle([(24, y), (24 + strip_w, y + item_h)], fill=cal_color)
+        for ev, cal_color, cal_label in day_events:
+            if y > max_y:
+                break
 
-                # Time
-                draw.text((44, y + 6), time_label, fill=theme.fg if not all_day else theme.dim, font=f_time, anchor="lm")
-                # Summary
-                draw.text((130, y + 6), summary, fill=theme.fg, font=f_event, anchor="lm")
-                # Source badge
-                badge_w = draw.textlength(cal_label, font=f_source) + 12
-                draw.text((WIDTH - 24, y + 6), cal_label, fill=theme.dim, font=f_source, anchor="rm")
+            start_s = ev.get("start", "")
+            end_s = ev.get("end", "")
+            all_day = ev.get("all_day", False)
+            summary = ev.get("summary", "")[:42]
 
-                if count > 0:
-                    draw.line([(44, y - 4), (WIDTH - 24, y - 4)], fill=theme.dim, width=1)
-                y += item_h + 6
-                count += 1
+            if all_day:
+                time_label = "ALL DAY"
+            else:
+                try:
+                    st = datetime.fromisoformat(start_s.replace("Z", "+00:00"))
+                    time_label = st.strftime("%H:%M")
+                    if end_s:
+                        et = datetime.fromisoformat(end_s.replace("Z", "+00:00"))
+                        time_label += f" - {et.strftime('%H:%M')}"
+                except (ValueError, TypeError):
+                    time_label = ""
 
-    # Day headers in left gutter
-    # Already integrated above with accent strips
+            # Accent Color Bar (x: 184 to 188)
+            draw.rounded_rectangle([(divider_x + 14, y), (divider_x + 18, y + 42)], radius=2, fill=cal_color)
+
+            # Time (x: 196)
+            draw.text((divider_x + 26, y + 2), time_label, fill=theme.fg, font=font(15, bold=True))
+
+            # Event Title (x: 196)
+            draw.text((divider_x + 26, y + 22), summary, fill=theme.fg, font=font(17))
+
+            # Source Tag
+            draw.text((WIDTH - 24, y + 12), cal_label, fill=theme.dim, font=font(13, bold=True), anchor="rm")
+
+            y += row_h + gap
+
+        # Draw Day Header in Left Gutter
+        day_center_y = start_y + (y - start_y - gap) // 2
+
+        if is_today:
+            # Highlight Today
+            draw.rounded_rectangle([(24, day_center_y - 22), (divider_x - 14, day_center_y + 22)], radius=6, fill=BLUE)
+            draw.text(((24 + divider_x - 14) // 2, day_center_y - 8), "TODAY", fill=WHITE, font=font(13, bold=True), anchor="mm")
+            draw.text(((24 + divider_x - 14) // 2, day_center_y + 10), day_label, fill=WHITE, font=font(15, bold=True), anchor="mm")
+        else:
+            # Normal Day
+            draw.text(((24 + divider_x - 14) // 2, day_center_y - 10), day_name[:3].upper(), fill=theme.dim, font=font(14, bold=True), anchor="mm")
+            draw.text(((24 + divider_x - 14) // 2, day_center_y + 10), day_label, fill=theme.fg, font=font(16, bold=True), anchor="mm")
+
+        # Bottom separator for this day's group
+        if y < max_y:
+            draw.line([(24, y - gap // 2), (WIDTH - 24, y - gap // 2)], fill=theme.dim, width=1)
+            y += 6
+
     total = sum(len(c.get("events", [])) for d in days for c in d.get("calendars", []))
-    draw.text((WIDTH - 24, HEIGHT - 20), f"{total} events", fill=theme.dim, font=font(14, bold=True), anchor="rm")
+    draw.text((WIDTH - 24, HEIGHT - 20), f"{total} events this week", fill=theme.dim, font=font(14, bold=True), anchor="rm")
 
 
 def render_weekstrip(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_str: str, theme: Theme) -> None:
-    f_mast = font(18, bold=True)
     f_clock = font(24, bold=True)
-    f_day = font(16, bold=True)
-    f_num = font(36, bold=True)
-    f_event = font(14)
-    f_source = font(12, bold=True)
-    f_empty = font(28, bold=True)
 
     if not days:
         render_empty(draw, theme)
@@ -327,69 +405,76 @@ def render_weekstrip(draw: ImageDraw.ImageDraw, days: list[dict], today: str, no
     # TOP BAR
     header_y = 22
     draw.text((24, header_y), now_str, fill=theme.fg, font=f_clock, anchor="lm")
-    draw.line([(24, 50), (WIDTH - 24, 50)], fill=theme.dim, width=1)
+    draw.line([(24, 45), (WIDTH - 24, 45)], fill=theme.dim, width=1)
 
-    # 7-DAY STRIP
+    # 7-DAY COLUMNS
     col_w = (WIDTH - 48) // 7
     x_start = 24
     strip_y = 60
-    strip_h = 360
-
-    # Fill in missing days to show full week
-    all_days = list(days)
-    if all_days:
-        first_date = all_days[0]["date"]
-        try:
-            first_dt = datetime.strptime(first_date, "%Y-%m-%d")
-            day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-            for i in range(7):
-                d = first_dt.replace(day=first_dt.day + i) if False else None
-        except:
-            pass
+    strip_h = 375
 
     for i in range(7):
         x = x_start + i * col_w
         cx = x + col_w // 2
 
-        day = all_days[i] if i < len(all_days) else None
+        day = days[i] if i < len(days) else None
         if day is None:
             continue
 
         date_str = day.get("date", "")
         day_name = day.get("day_name", "")[:3].upper()
         is_today = date_str == today
+
         try:
             dt = datetime.strptime(date_str, "%Y-%m-%d")
             day_num = dt.strftime("%d")
         except (ValueError, TypeError):
             day_num = date_str[-2:]
 
-        # Day header background
+        # Day column rounded card
+        outline_color = BLUE if is_today else theme.dim
+        outline_width = 3 if is_today else 2
+        draw.rounded_rectangle([(x, strip_y), (x + col_w - 4, strip_y + strip_h)], radius=8, fill=theme.bg_card, outline=outline_color, width=outline_width)
+
+        # Header section inside card
         if is_today:
-            draw.rectangle([(x, strip_y), (x + col_w - 2, strip_y + 56)], fill=BLUE)
-            draw.text((cx, strip_y + 8), day_name, fill=WHITE, font=f_day, anchor="ma")
-            draw.text((cx, strip_y + 30), day_num, fill=WHITE, font=f_num, anchor="ma")
+            draw.rounded_rectangle([(x + 2, strip_y + 2), (x + col_w - 6, strip_y + 48)], radius=6, fill=BLUE)
+            draw.text((cx - 2, strip_y + 12), day_name, fill=WHITE, font=font(12, bold=True), anchor="ma")
+            draw.text((cx - 2, strip_y + 26), day_num, fill=WHITE, font=font(20, bold=True), anchor="ma")
         else:
-            draw.text((cx, strip_y + 8), day_name, fill=theme.dim, font=f_day, anchor="ma")
-            draw.text((cx, strip_y + 30), day_num, fill=theme.fg, font=f_num, anchor="ma")
+            draw.text((cx - 2, strip_y + 10), day_name, fill=theme.dim, font=font(12, bold=True), anchor="ma")
+            draw.text((cx - 2, strip_y + 24), day_num, fill=theme.fg, font=font(20, bold=True), anchor="ma")
 
-        # Events as colored dots with labels
-        ev_y = strip_y + 64
+        draw.line([(x + 8, strip_y + 54), (x + col_w - 12, strip_y + 54)], fill=theme.dim, width=1)
+
+        # Events list left-aligned
+        ev_y = strip_y + 60
         ev_count = 0
-        for cal in day.get("calendars", []):
-            cal_color = tuple(cal.get("color", [128, 128, 128]))
-            for ev in cal.get("events", []):
-                if ev_y > strip_y + strip_h - 20 or ev_count >= 6:
-                    break
+        max_ev = 8
 
-                summary = ev.get("summary", "")[:12]
-                # Colored dot
-                dot_r = 5
-                draw.ellipse([(cx - dot_r, ev_y + 4), (cx + dot_r, ev_y + 4 + dot_r * 2)], fill=cal_color)
-                # Event text
-                draw.text((cx, ev_y + 16), summary, fill=theme.fg, font=f_event, anchor="mt")
-                ev_y += 28
-                ev_count += 1
+        # Collect events
+        day_events = []
+        for cal in day.get("calendars", []):
+            cal_color = closest_panel_color(cal.get("color", [128, 128, 128]))
+            for ev in cal.get("events", []):
+                day_events.append((ev, cal_color))
+
+        for ev, cal_color in day_events:
+            if ev_y > strip_y + strip_h - 22:
+                # Out of space indicator
+                remaining = len(day_events) - ev_count
+                draw.text((x + 8, strip_y + strip_h - 18), f"+{remaining} more", fill=theme.dim, font=font(11, bold=True))
+                break
+
+            summary = ev.get("summary", "")[:12]
+
+            # Left Accent Dot
+            draw.ellipse([(x + 8, ev_y + 6), (x + 14, ev_y + 12)], fill=cal_color)
+            # Event Text
+            draw.text((x + 18, ev_y + 3), summary, fill=theme.fg, font=font(11, bold=True))
+
+            ev_y += 20
+            ev_count += 1
 
     # FOOTER
     total = sum(len(c.get("events", [])) for d in days for c in d.get("calendars", []))

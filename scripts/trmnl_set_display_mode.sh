@@ -223,3 +223,8 @@ echo json_encode([
 ]);
 PHP
 fi
+
+if [[ "${MODE}" == "bus" ]]; then
+  echo "Bus mode activated. Triggering immediate refresh..."
+  /home/dave/bin/trmnl-refresh-bus-sidecar --force || true
+fi

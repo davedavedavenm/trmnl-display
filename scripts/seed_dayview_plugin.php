@@ -17,8 +17,10 @@ $current['theme'] = $current['theme'] ?? 'dark';
 $current['layout'] = $current['layout'] ?? 'featured';
 $current['nango_base_url'] = $current['nango_base_url'] ?? 'https://nango.example.com';
 
+$strategy = $data['strategy'] ?? 'polling';
 DB::table('plugins')->where('id', 27)->update([
     'configuration_template' => json_encode(['custom_fields' => $custom]),
     'configuration' => json_encode($current),
+    'data_strategy' => $strategy,
 ]);
 echo "seeded day view plugin\n";
