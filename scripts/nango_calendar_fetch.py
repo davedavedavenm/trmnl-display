@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import urllib.parse
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -12,11 +13,87 @@ NANGO_BASE_URL = os.getenv("NANGO_BASE_URL", "https://nango.example.com")
 NANGO_SECRET_KEY = os.getenv("NANGO_SECRET_KEY", "")
 
 PRIMARY_CALENDARS = [
-    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 0, 255]},
-    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 255, 0]},
-    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [255, 0, 0]},
-    {"connection_id": "REDACTED-CONNECTION", "provider": "outlook", "calendar_id": None, "color": [255, 128, 0]},
+    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 0, 255], "label": "REDACTED-LABEL"},
+    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 255, 0], "label": "DAVE"},
+    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [255, 0, 0], "label": "JEN"},
+    {"connection_id": "REDACTED-CONNECTION", "provider": "outlook", "calendar_id": None, "color": [255, 128, 0], "label": "OUTLOOK"},
 ]
+
+PALETTE_MAP = {
+    "blue": [0, 0, 255],
+    "green": [0, 255, 0],
+    "red": [255, 0, 0],
+    "orange": [255, 128, 0],
+    "yellow": [255, 255, 0],
+    "black": [0, 0, 0],
+}
+
+
+def load_plugin_config() -> dict:
+    plugin_id = os.getenv("TRMNL_PLUGIN_ID", "27")
+    container = os.getenv("TRMNL_LARAPAPER_CONTAINER", "larapaper-app-1")
+    php = (
+        "require '/var/www/html/vendor/autoload.php';"
+        "$app = require '/var/www/html/bootstrap/app.php';"
+        "$app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();"
+        f"echo DB::table('plugins')->where('id', {plugin_id})->value('configuration') ?: '{{}}';"
+    )
+    try:
+        result = subprocess.run(
+            ["docker", "exec", container, "php", "-r", php],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=True,
+        )
+        stdout = (result.stdout or "").strip()
+        if stdout:
+            return json.loads(stdout)
+    except Exception as e:
+        print(f"Warning: failed to load LaraPaper config: {e}")
+    return {}
+
+
+def get_provider(connection_id: str) -> str:
+    if "outlook" in connection_id or connection_id in ["REDACTED-UUID", "REDACTED-UUID"]:
+        return "outlook"
+    return "google-calendar"
+
+
+def parse_color(color_name: str, custom_hex: str) -> list[int]:
+    if custom_hex:
+        custom_hex = custom_hex.lstrip("#")
+        if len(custom_hex) == 6:
+            try:
+                return [int(custom_hex[i:i+2], 16) for i in (0, 2, 4)]
+            except ValueError:
+                pass
+    return PALETTE_MAP.get(color_name.lower(), [0, 0, 255])
+
+
+def get_calendars_from_config(config: dict) -> list[dict]:
+    calendars = []
+    for idx in range(1, 7):
+        connection_id = config.get(f"calendar_{idx}_connection_id", "").strip()
+        if not connection_id:
+            continue
+
+        calendar_id = config.get(f"calendar_{idx}_calendar_id", "").strip() or None
+        label = config.get(f"calendar_{idx}_label", "").strip() or None
+        color_name = config.get(f"calendar_{idx}_color", "blue").strip()
+        color_custom = config.get(f"calendar_{idx}_color_custom", "").strip()
+
+        provider = get_provider(connection_id)
+        color = parse_color(color_name, color_custom)
+
+        calendars.append({
+            "connection_id": connection_id,
+            "provider": provider,
+            "calendar_id": calendar_id,
+            "color": color,
+            "label": label
+        })
+    return calendars
 
 
 def nango_proxy_get(path: str, connection_id: str, provider: str) -> dict:
@@ -41,13 +118,14 @@ def nango_get_token(connection_id: str, provider: str) -> str:
 
 
 def fetch_google_events(cal: dict, time_min: str, time_max: str) -> dict:
+    calendar_id = cal.get("calendar_id") or "primary"
     params = urllib.parse.urlencode({
         "timeMin": time_min,
         "timeMax": time_max,
         "singleEvents": "true",
         "orderBy": "startTime",
     })
-    path = f"calendar/v3/calendars/{urllib.parse.quote(cal['calendar_id'], safe='')}/events?{params}"
+    path = f"calendar/v3/calendars/{urllib.parse.quote(calendar_id, safe='')}/events?{params}"
     events = []
     try:
         result = nango_proxy_get(path, cal["connection_id"], cal["provider"])
@@ -74,7 +152,7 @@ def fetch_google_events(cal: dict, time_min: str, time_max: str) -> dict:
             })
     except requests.RequestException as e:
         print(f"Warning: {cal['connection_id']}: {e}")
-    return {"name": cal["connection_id"], "color": cal["color"], "events": events}
+    return {"name": cal["connection_id"], "label": cal.get("label"), "color": cal["color"], "events": events}
 
 
 def fetch_outlook_events(cal: dict, time_min: str, time_max: str) -> dict:
@@ -85,7 +163,9 @@ def fetch_outlook_events(cal: dict, time_min: str, time_max: str) -> dict:
             "endDateTime": time_max,
             "$select": "subject,start,end,location",
         })
-        url = f"https://graph.microsoft.com/v1.0/me/calendarview?{params}"
+        calendar_id = cal.get("calendar_id")
+        outlook_path = f"me/calendars/{urllib.parse.quote(calendar_id)}/calendarview" if calendar_id else "me/calendarview"
+        url = f"https://graph.microsoft.com/v1.0/{outlook_path}?{params}"
         headers = {"Authorization": f"Bearer {token}"}
         resp = requests.get(url, headers=headers, timeout=15)
         resp.raise_for_status()
@@ -99,10 +179,10 @@ def fetch_outlook_events(cal: dict, time_min: str, time_max: str) -> dict:
                 "all_day": False,
                 "location": (item.get("location") or {}).get("displayName", ""),
             })
-        return {"name": cal["connection_id"], "color": cal["color"], "events": events}
+        return {"name": cal["connection_id"], "label": cal.get("label"), "color": cal["color"], "events": events}
     except requests.RequestException as e:
         print(f"Warning: {cal['connection_id']}: {e}")
-        return {"name": cal["connection_id"], "color": cal["color"], "events": []}
+        return {"name": cal["connection_id"], "label": cal.get("label"), "color": cal["color"], "events": []}
 
 
 def group_events_by_day(calendars: list[dict], start: datetime, days: int) -> list[dict]:
@@ -110,7 +190,18 @@ def group_events_by_day(calendars: list[dict], start: datetime, days: int) -> li
     for i in range(days):
         d = start + timedelta(days=i)
         key = d.strftime("%Y-%m-%d")
-        day_map[key] = {"date": key, "day_name": d.strftime("%A"), "calendars": {c["name"]: {"name": c["name"], "color": c["color"], "events": []} for c in calendars}}
+        day_map[key] = {
+            "date": key,
+            "day_name": d.strftime("%A"),
+            "calendars": {
+                c["name"]: {
+                    "name": c["name"],
+                    "label": c.get("label"),
+                    "color": c["color"],
+                    "events": []
+                } for c in calendars
+            }
+        }
 
     for cal in calendars:
         for ev in cal["events"]:
@@ -137,6 +228,21 @@ def group_events_by_day(calendars: list[dict], start: datetime, days: int) -> li
 
 
 def fetch_payload() -> dict:
+    config = load_plugin_config()
+
+    global NANGO_SECRET_KEY, NANGO_BASE_URL
+    if not NANGO_SECRET_KEY:
+        NANGO_SECRET_KEY = config.get("nango_secret_key", "")
+    NANGO_BASE_URL = config.get("nango_base_url", NANGO_BASE_URL)
+
+    theme = os.getenv("TRMNL_CALENDAR_THEME", config.get("theme", "dark"))
+    layout = os.getenv("TRMNL_CALENDAR_LAYOUT", config.get("layout", "featured"))
+
+    active_calendars = get_calendars_from_config(config)
+    if not active_calendars:
+        print("No active calendars configured in LaraPaper DB, falling back to default primary calendars")
+        active_calendars = PRIMARY_CALENDARS
+
     now = datetime.now(timezone.utc)
     week_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_end = week_start + timedelta(days=7)
@@ -144,7 +250,7 @@ def fetch_payload() -> dict:
     time_max = week_end.isoformat()
 
     calendars = []
-    for cal in PRIMARY_CALENDARS:
+    for cal in active_calendars:
         if cal["provider"] == "google-calendar":
             calendars.append(fetch_google_events(cal, time_min, time_max))
         elif cal["provider"] == "outlook":
@@ -155,8 +261,8 @@ def fetch_payload() -> dict:
     return {
         "days": days,
         "today": now.strftime("%Y-%m-%d"),
-        "theme": os.getenv("TRMNL_CALENDAR_THEME", "dark"),
-        "layout": os.getenv("TRMNL_CALENDAR_LAYOUT", "featured"),
+        "theme": theme,
+        "layout": layout,
     }
 
 

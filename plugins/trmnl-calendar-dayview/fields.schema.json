@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "title": "Calendar Week Ahead",
-  "description": "7-day week agenda view showing events from Nango-connected calendars. Each calendar gets its own colour accent. Supports dark/light themes and multiple layouts (featured, agenda, weekstrip).",
+  "description": "7-day week agenda view showing events from Nango-connected calendars. Each calendar gets its own color accent. Supports dark/light themes and multiple layouts (featured, agenda, weekstrip).",
   "properties": {
     "theme": {
       "type": "string",
@@ -29,7 +29,43 @@
       "title": "Nango Secret Key",
       "description": "Nango API secret key",
       "ui:widget": "password"
-    }
+    },
+
+    "calendar_1_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_1_calendar_id": { "type": "string", "default": "" },
+    "calendar_1_label": { "type": "string", "default": "" },
+    "calendar_1_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "blue" },
+    "calendar_1_color_custom": { "type": "string", "default": "" },
+
+    "calendar_2_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_2_calendar_id": { "type": "string", "default": "" },
+    "calendar_2_label": { "type": "string", "default": "" },
+    "calendar_2_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "green" },
+    "calendar_2_color_custom": { "type": "string", "default": "" },
+
+    "calendar_3_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_3_calendar_id": { "type": "string", "default": "" },
+    "calendar_3_label": { "type": "string", "default": "" },
+    "calendar_3_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "red" },
+    "calendar_3_color_custom": { "type": "string", "default": "" },
+
+    "calendar_4_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_4_calendar_id": { "type": "string", "default": "" },
+    "calendar_4_label": { "type": "string", "default": "" },
+    "calendar_4_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "orange" },
+    "calendar_4_color_custom": { "type": "string", "default": "" },
+
+    "calendar_5_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_5_calendar_id": { "type": "string", "default": "" },
+    "calendar_5_label": { "type": "string", "default": "" },
+    "calendar_5_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "yellow" },
+    "calendar_5_color_custom": { "type": "string", "default": "" },
+
+    "calendar_6_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_6_calendar_id": { "type": "string", "default": "" },
+    "calendar_6_label": { "type": "string", "default": "" },
+    "calendar_6_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "black" },
+    "calendar_6_color_custom": { "type": "string", "default": "" }
   },
   "required": ["nango_secret_key"]
 }

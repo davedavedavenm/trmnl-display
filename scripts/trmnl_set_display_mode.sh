@@ -25,8 +25,8 @@ SIDECAR_CONTAINER_IMAGE_PATH="${TRMNL_SIDECAR_CONTAINER_IMAGE_PATH:-/var/www/htm
 
 plugin_name_for_mode() {
   case "$1" in
-    calendar) echo "${TRMNL_MODE_PLUGIN_CALENDAR:-Multi-Calendar}" ;;
-    idle) echo "${TRMNL_MODE_PLUGIN_IDLE:-Multi-Calendar}" ;;
+    calendar) echo "${TRMNL_MODE_PLUGIN_CALENDAR:-Calendar Day View}" ;;
+    idle) echo "${TRMNL_MODE_PLUGIN_IDLE:-Calendar Day View}" ;;
     sonos) echo "${TRMNL_MODE_PLUGIN_SONOS:-Sonos Local}" ;;
     jen_commute) echo "${TRMNL_MODE_PLUGIN_JEN_COMMUTE:-Jen Commute}" ;;
     ha_dashboard) echo "${TRMNL_MODE_PLUGIN_HA_DASHBOARD:-Home Assistant}" ;;

@@ -142,7 +142,7 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
         for cal in calendars:
             cal_name_raw = cal.get("name", "?")
             cal_color = tuple(cal.get("color", [128, 128, 128]))
-            cal_label = SOURCE_LABELS.get(cal_name_raw, cal_name_raw.split("-")[-1].capitalize()[:10])
+            cal_label = cal.get("label") or SOURCE_LABELS.get(cal_name_raw, cal_name_raw.split("-")[-1].capitalize()[:10])
             cal_events = cal.get("events", [])[:max_events]
 
             for ev in cal_events:
@@ -266,7 +266,7 @@ def render_agenda(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_s
         for cal in day.get("calendars", []):
             cal_name_raw = cal.get("name", "?")
             cal_color = tuple(cal.get("color", [128, 128, 128]))
-            cal_label = SOURCE_LABELS.get(cal_name_raw, cal_name_raw[:8])
+            cal_label = cal.get("label") or SOURCE_LABELS.get(cal_name_raw, cal_name_raw[:8])
 
             for ev in cal.get("events", []):
                 if count >= max_items or y > HEIGHT - 40:
