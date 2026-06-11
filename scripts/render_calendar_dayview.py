@@ -221,7 +221,7 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
                     subtext = desc.replace("\n", " ").replace("\r", " ")[:60]
 
                 if subtext:
-                    draw.text((46, ev_y + 74), subtext, fill=theme.dim, font=font(15))
+                    draw.text((46, ev_y + 74), subtext, fill=theme.fg, font=font(15))
 
                 # Source Badge (top-right of card)
                 badge_w = draw.textlength(cal_label, font=font(12, bold=True)) + 16
