@@ -1066,15 +1066,22 @@ def build(payload_path: Path | None = None, style: str = "split_contrast") -> Im
         config["style"] = style
     else:
         data, config, dark_mode = load_data_from_db()
-        if "style" not in config:
+        if "style" not in config and "layout_variant" not in config:
             config["style"] = style
 
-    # Auto-toggle dark mode for specific styles
-    if style in ("dark_tech", "automotive_hud"):
-        dark_mode = 1
-    elif style in ("minimalist", "swiss_typographic", "infographic_timeline", "bauhaus_geometric"):
-        dark_mode = 0
+    # Resolve the final active style used for rendering
+    active_style = config.get("style") or config.get("layout_variant") or style
+    if data.get("style"):
+        active_style = data.get("style")
+    elif data.get("layout_variant"):
+        active_style = data.get("layout_variant")
 
+    # Auto-toggle dark mode for specific styles
+    if active_style in ("dark_tech", "automotive_hud"):
+        dark_mode = 1
+    elif active_style in ("minimalist", "swiss_typographic", "infographic_timeline", "bauhaus_geometric"):
+        dark_mode = 0
+        
     quotes = load_quotes()
     return render_morning_mashup(data, quotes, config, dark_mode)
 
