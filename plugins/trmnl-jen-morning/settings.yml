@@ -12,7 +12,7 @@ custom_fields:
     options:
       - Mashup: mashup
       - Standalone: standalone
-    description: Layout mode: mashup for split-screen with HP quote, standalone for full-screen commute display.
+    description: "Layout mode: mashup for split-screen with HP quote, standalone for full-screen commute display."
   - keyname: layout_variant
     name: Layout Variant
     field_type: select
@@ -26,7 +26,7 @@ custom_fields:
       - Bento Grid: bento_grid
       - Minimalist: minimalist
       - Dark Tech: dark_tech
-    description: Visual style for the commute display. Maps Style uses a bold left/right split with gradient panels.
+    description: "Visual style for the commute display. Maps Style uses a bold left/right split with gradient panels."
   - keyname: screen_label
     name: Screen Label
     field_type: string

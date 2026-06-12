@@ -10,17 +10,17 @@ custom_fields:
     field_type: select
     default: dark
     options:
-      - {key: dark, value: "Dark (black background)"}
-      - {key: light, value: "Light (white background)"}
+      - "Dark (black background)": "dark"
+      - "Light (white background)": "light"
     description: Visual theme for the calendar display
   - keyname: layout
     name: Layout
     field_type: select
     default: featured
     options:
-      - {key: featured, value: "Featured (large event cards)"}
-      - {key: agenda, value: "Agenda (compact list)"}
-      - {key: weekstrip, value: "Week Strip (7-day columns)"}
+      - "Featured (large event cards)": "featured"
+      - "Agenda (compact list)": "agenda"
+      - "Week Strip (7-day columns)": "weekstrip"
     description: Layout style for the calendar view
   - keyname: nango_base_url
     name: Nango Base URL
@@ -39,14 +39,14 @@ custom_fields:
     field_type: select
     optional: true
     options:
-      - {key: "", value: "Disabled"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "david_magnus@hotmail.com (Outlook)"}
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
   - keyname: calendar_1_calendar_id
     name: Calendar 1 ID
     field_type: string
@@ -62,12 +62,12 @@ custom_fields:
     field_type: select
     default: blue
     options:
-      - {key: blue, value: "Blue"}
-      - {key: red, value: "Red"}
-      - {key: green, value: "Green"}
-      - {key: yellow, value: "Yellow"}
-      - {key: orange, value: "Orange"}
-      - {key: black, value: "Black"}
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
   - keyname: calendar_1_color_custom
     name: Calendar 1 Custom Color
     field_type: string
@@ -80,14 +80,14 @@ custom_fields:
     field_type: select
     optional: true
     options:
-      - {key: "", value: "Disabled"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "david_magnus@hotmail.com (Outlook)"}
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
   - keyname: calendar_2_calendar_id
     name: Calendar 2 ID
     field_type: string
@@ -103,12 +103,12 @@ custom_fields:
     field_type: select
     default: green
     options:
-      - {key: blue, value: "Blue"}
-      - {key: red, value: "Red"}
-      - {key: green, value: "Green"}
-      - {key: yellow, value: "Yellow"}
-      - {key: orange, value: "Orange"}
-      - {key: black, value: "Black"}
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
   - keyname: calendar_2_color_custom
     name: Calendar 2 Custom Color
     field_type: string
@@ -121,14 +121,14 @@ custom_fields:
     field_type: select
     optional: true
     options:
-      - {key: "", value: "Disabled"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "david_magnus@hotmail.com (Outlook)"}
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
   - keyname: calendar_3_calendar_id
     name: Calendar 3 ID
     field_type: string
@@ -144,12 +144,12 @@ custom_fields:
     field_type: select
     default: red
     options:
-      - {key: blue, value: "Blue"}
-      - {key: red, value: "Red"}
-      - {key: green, value: "Green"}
-      - {key: yellow, value: "Yellow"}
-      - {key: orange, value: "Orange"}
-      - {key: black, value: "Black"}
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
   - keyname: calendar_3_color_custom
     name: Calendar 3 Custom Color
     field_type: string
@@ -162,14 +162,14 @@ custom_fields:
     field_type: select
     optional: true
     options:
-      - {key: "", value: "Disabled"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "david_magnus@hotmail.com (Outlook)"}
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
   - keyname: calendar_4_calendar_id
     name: Calendar 4 ID
     field_type: string
@@ -185,12 +185,12 @@ custom_fields:
     field_type: select
     default: orange
     options:
-      - {key: blue, value: "Blue"}
-      - {key: red, value: "Red"}
-      - {key: green, value: "Green"}
-      - {key: yellow, value: "Yellow"}
-      - {key: orange, value: "Orange"}
-      - {key: black, value: "Black"}
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
   - keyname: calendar_4_color_custom
     name: Calendar 4 Custom Color
     field_type: string
@@ -203,14 +203,14 @@ custom_fields:
     field_type: select
     optional: true
     options:
-      - {key: "", value: "Disabled"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "david_magnus@hotmail.com (Outlook)"}
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
   - keyname: calendar_5_calendar_id
     name: Calendar 5 ID
     field_type: string
@@ -226,12 +226,12 @@ custom_fields:
     field_type: select
     default: yellow
     options:
-      - {key: blue, value: "Blue"}
-      - {key: red, value: "Red"}
-      - {key: green, value: "Green"}
-      - {key: yellow, value: "Yellow"}
-      - {key: orange, value: "Orange"}
-      - {key: black, value: "Black"}
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
   - keyname: calendar_5_color_custom
     name: Calendar 5 Custom Color
     field_type: string
@@ -244,14 +244,14 @@ custom_fields:
     field_type: select
     optional: true
     options:
-      - {key: "", value: "Disabled"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Google)"}
-      - {key: "REDACTED-CONNECTION", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "REDACTED@example.com (Outlook)"}
-      - {key: "REDACTED-UUID", value: "david_magnus@hotmail.com (Outlook)"}
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
   - keyname: calendar_6_calendar_id
     name: Calendar 6 ID
     field_type: string
@@ -267,12 +267,12 @@ custom_fields:
     field_type: select
     default: black
     options:
-      - {key: blue, value: "Blue"}
-      - {key: red, value: "Red"}
-      - {key: green, value: "Green"}
-      - {key: yellow, value: "Yellow"}
-      - {key: orange, value: "Orange"}
-      - {key: black, value: "Black"}
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
   - keyname: calendar_6_color_custom
     name: Calendar 6 Custom Color
     field_type: string
