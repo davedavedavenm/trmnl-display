@@ -76,12 +76,29 @@ input_select:
   trmnl_display_default_mode:
     name: TRMNL Display Default Mode
     options:
-      # Why: Default to the HA dashboard when no higher-priority mode is active.
       - ha_dashboard
       - calendar
       - idle
     initial: ha_dashboard
     icon: mdi:page-layout-sidebar-right
+
+  trmnl_display_default_mode_weekday:
+    name: TRMNL Default Mode (Weekday)
+    options:
+      - calendar
+      - ha_dashboard
+      - idle
+    initial: calendar
+    icon: mdi:calendar-range
+
+  trmnl_display_default_mode_weekend:
+    name: TRMNL Default Mode (Weekend)
+    options:
+      - ha_dashboard
+      - calendar
+      - idle
+    initial: ha_dashboard
+    icon: mdi:calendar-heart
 
   trmnl_display_manual_override:
     name: TRMNL Display Manual Override
@@ -310,6 +327,8 @@ automation:
           - input_boolean.trmnl_alert_active
           - input_boolean.trmnl_dave_commute_active
           - input_select.trmnl_display_default_mode
+          - input_select.trmnl_display_default_mode_weekday
+          - input_select.trmnl_display_default_mode_weekend
           - input_select.trmnl_display_manual_override
           - media_player.living_room
           - media_player.bedroom
@@ -335,7 +354,13 @@ automation:
         - media_player.gym
         - media_player.sonos_roam
       manual_override: "{{ states('input_select.trmnl_display_manual_override') }}"
-      default_mode: "{{ states('input_select.trmnl_display_default_mode') }}"
+      is_weekend: "{{ now().isoweekday() in [6, 7] }}"
+      default_mode: >
+        {% if is_weekend %}
+          {{ states('input_select.trmnl_display_default_mode_weekend') | default('ha_dashboard') }}
+        {% else %}
+          {{ states('input_select.trmnl_display_default_mode_weekday') | default('calendar') }}
+        {% endif %}
       any_playing: >
         {{ expand(player_entities) | selectattr('state', 'eq', 'playing') | selectattr('attributes.media_title', 'defined') | selectattr('attributes.media_title') | list | count > 0 }}
       sonos_hold_until_ts: >
