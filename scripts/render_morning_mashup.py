@@ -323,14 +323,11 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
 
     # 1. Resolve Cohesive Theme Colors
     if dark_mode == 1:
-        # Dark mode
-        bg_panel = BLACK
-        header_fg = (180, 180, 180)
-        panel_line_color = (60, 60, 60)
-        card_bg = (20, 20, 20)
-        card_border = WHITE
+        # Dark mode (sleek dark blue-grey dashboard)
+        bg_panel = (18, 24, 32)
+        divider_color = (35, 45, 55)
         fg_primary = WHITE
-        fg_secondary = (180, 180, 180)
+        fg_secondary = (140, 150, 160)
         
         if profile == "forest":
             theme_color = GREEN
@@ -342,15 +339,15 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
             theme_color = BLUE
             secondary_accent = ORANGE
             
-        pill_bg = theme_color
-        pill_fg = BLACK if theme_color in (YELLOW, WHITE) else WHITE
-        
-        status_bg = theme_color
-        status_fg = BLACK if theme_color in (YELLOW, WHITE) else WHITE
-        status_left_bar = theme_color
-        status_icon_color = theme_color
+        banner_bg = (28, 36, 48)
+        banner_outline = divider_color
     else:
-        # Light mode
+        # Light mode (clean slate/white dashboard)
+        bg_panel = (250, 250, 250)
+        divider_color = (230, 235, 240)
+        fg_primary = (18, 24, 32)
+        fg_secondary = (100, 110, 120)
+        
         if profile == "forest":
             theme_color = GREEN
             secondary_accent = ORANGE
@@ -361,162 +358,130 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
             theme_color = BLUE
             secondary_accent = ORANGE
 
-        bg_panel = closest_panel_color(theme_color)
-        header_fg = WHITE
-        panel_line_color = WHITE
-        card_bg = WHITE
-        card_border = WHITE  # Borderless cards on colored background
-        fg_primary = BLACK
-        fg_secondary = (100, 100, 100)
-        
-        pill_bg = WHITE
-        pill_fg = theme_color
+        banner_bg = (242, 244, 248)
+        banner_outline = theme_color
 
-        status_bg = theme_color
-        status_fg = WHITE
-        status_left_bar = theme_color
-        status_icon_color = theme_color
-
-    # Initialize Card 1 colors
-    card1_bg = card_bg
-    card1_fg_primary = fg_primary
-    card1_fg_secondary = fg_secondary
-    card1_accent_bar = theme_color
-    
-    if dark_mode == 1:
-        card1_badge_bg = WHITE
-        card1_badge_fg = theme_color
-    else:
-        # Light Mode: white card background, so badge background is theme_color
-        card1_badge_bg = theme_color
-        card1_badge_fg = WHITE
-
-    # Overrides for warnings
+    # Resolve warning status traffic pill and banner subtext
     traffic_text = "LIGHT TRAFFIC"
     sub_text = "On-time arrival expected"
+    
+    eta_m = 0
     try:
         eta_m = int(eta)
-        if eta_m > 55:
-            traffic_text = "HEAVY TRAFFIC"
-            sub_text = "Heavy traffic warning!"
-            
-            # Card 1 overrides
-            card1_bg = RED
-            card1_fg_primary = WHITE
-            card1_fg_secondary = WHITE
-            card1_accent_bar = WHITE
-            card1_badge_bg = WHITE
-            card1_badge_fg = RED
-
-            # Card 3 overrides
-            status_bg = RED
-            status_fg = WHITE
-            status_left_bar = RED
-            status_icon_color = RED
-        elif eta_m > 45:
-            traffic_text = "MODERATE TRAFFIC"
-            sub_text = "Caution: minor delay"
-            
-            # Card 1 overrides
-            card1_bg = ORANGE
-            card1_fg_primary = WHITE
-            card1_fg_secondary = WHITE
-            card1_accent_bar = WHITE
-            card1_badge_bg = WHITE
-            card1_badge_fg = ORANGE
-
-            # Card 3 overrides
-            status_bg = ORANGE
-            status_fg = WHITE
-            status_left_bar = ORANGE
-            status_icon_color = ORANGE
     except ValueError:
         pass
 
-    # 2. Draw Background
+    # Snape traffic pills to solid, undithered panel colors
+    if eta_m > 55:
+        traffic_text = "HEAVY TRAFFIC"
+        sub_text = "Heavy traffic warning!"
+        pill_bg = RED
+        pill_fg = WHITE
+    elif eta_m > 45:
+        traffic_text = "MODERATE TRAFFIC"
+        sub_text = "Caution: minor delay"
+        pill_bg = ORANGE
+        pill_fg = WHITE
+    else:
+        pill_bg = GREEN
+        pill_fg = WHITE
+
+    # Arrive by & Leave time variables
+    arrive_by = config.get("arrive_by") or "8:30 AM"
+    arrive_sub = f"to arrive by {arrive_by}"
+
+    leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
+    if "leave by" in leave_time.lower():
+        for prefix in ["leave by ", "leave by"]:
+            if leave_time.lower().startswith(prefix):
+                leave_time = leave_time[len(prefix):].strip()
+
+    # 2. Draw Sidebar Background
     draw.rectangle([0, 0, WIDTH // 2, HEIGHT], fill=bg_panel)
 
     # 3. Header
-    badge_font = font(14, bold=True)
-    badge_w = int(draw.textlength(screen_label, font=badge_font))
-    pill_x0, pill_y0 = 18, 16
-    pill_x1, pill_y1 = pill_x0 + badge_w + 20, 40
-
-    draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x1, pill_y1)], radius=12, fill=closest_panel_color(pill_bg))
-    draw.text((pill_x0 + 10, pill_y0 + 4), screen_label.upper(), fill=closest_panel_color(pill_fg), font=badge_font)
+    draw_clock_icon(draw, 26, 30, 7, closest_panel_color(theme_color))
+    
+    title_font = font(13, bold=True)
+    draw.text((44, 21), "TIME TO WORK", fill=closest_panel_color(fg_primary), font=title_font)
 
     if updated:
         upd_font = font(12, bold=True)
-        draw.text((WIDTH // 2 - 18, 28), updated, fill=closest_panel_color(header_fg), font=upd_font, anchor="rm")
+        draw.text((WIDTH // 2 - 18, 30), updated, fill=closest_panel_color(fg_secondary), font=upd_font, anchor="rm")
 
     divider_y = 50
-    draw.line([(18, divider_y), (WIDTH // 2 - 18, divider_y)], fill=closest_panel_color(panel_line_color), width=1)
+    draw.line([(18, divider_y), (WIDTH // 2 - 18, divider_y)], fill=closest_panel_color(divider_color), width=1)
 
-    # 4. ETA Card (Card 1)
-    card1_y0, card1_y1 = 62, 182
-    draw.rounded_rectangle([(18, card1_y0), (WIDTH // 2 - 18, card1_y1)], radius=10, fill=card1_bg, outline=closest_panel_color(card_border), width=2)
-    draw.rounded_rectangle([(20, card1_y0 + 2), (28, card1_y1 - 2)], radius=3, fill=closest_panel_color(card1_accent_bar))
+    # 4. Your Commute Section
+    path_lbl_font = font(10, bold=True)
+    draw.text((18, 62), "YOUR COMMUTE", fill=closest_panel_color(fg_secondary), font=path_lbl_font)
+    
+    path_font = font(18, bold=True)
+    home_w = int(draw.textlength("Home ", font=path_font))
+    arrow_w = int(draw.textlength("-> ", font=path_font))
+    
+    draw.text((18, 76), "Home ", fill=closest_panel_color(fg_primary), font=path_font)
+    draw.text((18 + home_w, 76), "-> ", fill=closest_panel_color(theme_color), font=path_font)
+    draw.text((18 + home_w + arrow_w, 76), "Office", fill=closest_panel_color(fg_primary), font=path_font)
 
-    draw_clock_icon(draw, 44, card1_y0 + 18, 7, closest_panel_color(card1_fg_secondary))
-    lbl_font = font(12, bold=True)
-    draw.text((58, card1_y0 + 11), eta_lbl.upper(), fill=closest_panel_color(card1_fg_secondary), font=lbl_font)
+    draw.line([(18, 110), (WIDTH // 2 - 18, 110)], fill=closest_panel_color(divider_color), width=1)
 
-    eta_font = font(54, bold=True)
+    # 5. Commute Status (ETA vs Leave by columns)
+    # Left Column (ETA / Drive Time)
+    lbl_font = font(10, bold=True)
+    draw.text((18, 122), eta_lbl.upper(), fill=closest_panel_color(fg_secondary), font=lbl_font)
+
+    eta_font = font(58, bold=True)
     eta_str = str(eta)
-    draw.text((44, card1_y0 + 36), eta_str, fill=closest_panel_color(card1_fg_primary), font=eta_font)
+    draw.text((18, 138), eta_str, fill=closest_panel_color(fg_primary), font=eta_font)
     eta_w = int(draw.textlength(eta_str, font=eta_font))
 
     unit_font = font(18, bold=True)
-    draw.text((44 + eta_w + 6, card1_y0 + 64), eta_unit, fill=closest_panel_color(card1_fg_secondary), font=unit_font)
+    draw.text((18 + eta_w + 6, 172), eta_unit, fill=closest_panel_color(fg_secondary), font=unit_font)
 
-    t_font = font(11, bold=True)
-    t_w = int(draw.textlength(traffic_text, font=t_font))
-    t_badge_x0 = 382 - 20 - t_w - 12
-    t_badge_y0 = card1_y0 + 44
-    draw.rounded_rectangle([(t_badge_x0, t_badge_y0), (t_badge_x0 + t_w + 12, t_badge_y0 + 24)], radius=6, fill=closest_panel_color(card1_badge_bg))
-    draw.text((t_badge_x0 + 6, t_badge_y0 + 4), traffic_text, fill=closest_panel_color(card1_badge_fg), font=t_font)
+    # Traffic Pill
+    pill_font = font(10, bold=True)
+    pill_w = int(draw.textlength(traffic_text, font=pill_font)) + 16
+    pill_x0, pill_y0 = 18, 202
+    draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x0 + pill_w, pill_y0 + 24)], radius=6, fill=closest_panel_color(pill_bg))
+    draw.text((pill_x0 + 8, pill_y0 + 5), traffic_text, fill=closest_panel_color(pill_fg), font=pill_font)
 
-    # 5. Route Card (Card 2)
-    card2_y0, card2_y1 = 196, 326
-    draw.rounded_rectangle([(18, card2_y0), (WIDTH // 2 - 18, card2_y1)], radius=10, fill=card_bg, outline=closest_panel_color(card_border), width=2)
-    draw.rounded_rectangle([(20, card2_y0 + 2), (28, card2_y1 - 2)], radius=3, fill=closest_panel_color(secondary_accent))
-
-    draw_pin_icon(draw, 44, card2_y0 + 18, 6, closest_panel_color(fg_secondary))
-    draw.text((58, card2_y0 + 11), "OPTIMAL ROUTE", fill=closest_panel_color(fg_secondary), font=lbl_font)
-
-    route_text = f"via {route}"
-    if len(route_text) > 28:
-        route_text = route_text[:25] + "..."
-    route_font = font(16 if len(route_text) > 22 else 20, bold=True)
-    draw.text((44, card2_y0 + 32), route_text, fill=closest_panel_color(fg_primary), font=route_font)
-
-    if show_dist and distance is not None and str(distance).strip() not in ("", "?", "unknown"):
-        dist_text = f"{distance} {dist_unit}"
-        dist_font = font(13, bold=True)
-        draw.text((44, card2_y0 + 58), dist_text, fill=closest_panel_color(fg_secondary), font=dist_font)
-
-    # Cute Visual Timeline
-    draw_route_diagram(draw, 44, card2_y0 + 96, 310, closest_panel_color(theme_color), closest_panel_color(secondary_accent))
-
-    # 6. Status Card (Card 3)
-    card3_y0, card3_y1 = 340, 464
-    draw.rounded_rectangle([(18, card3_y0), (WIDTH // 2 - 18, card3_y1)], radius=10, fill=card_bg, outline=closest_panel_color(card_border), width=2)
-    draw.rounded_rectangle([(20, card3_y0 + 2), (28, card3_y1 - 2)], radius=3, fill=closest_panel_color(status_left_bar))
-
-    draw_alert_icon(draw, 44, card3_y0 + 18, 7, closest_panel_color(status_icon_color))
-    draw.text((58, card3_y0 + 11), "RECOMMENDED ACTION", fill=closest_panel_color(fg_secondary), font=lbl_font)
-
-    status_text = "LEAVE BY 7:15 AM"
-    status_font = font(18, bold=True)
-    draw.text((44, card3_y0 + 32), status_text, fill=closest_panel_color(fg_primary), font=status_font)
-
-    s_font = font(12, bold=True)
-    s_w = int(draw.textlength(sub_text, font=s_font))
-    s_badge_x0 = 44
-    s_badge_y0 = card3_y0 + 62
+    # Right Column (Leave By time)
+    draw.text((210, 122), "LEAVE BY", fill=closest_panel_color(fg_secondary), font=lbl_font)
     
-    draw.rounded_rectangle([(s_badge_x0, s_badge_y0), (s_badge_x0 + s_w + 20, s_badge_y0 + 24)], radius=6, fill=closest_panel_color(status_bg))
-    draw.text((s_badge_x0 + 10, s_badge_y0 + 4), sub_text, fill=closest_panel_color(status_fg), font=s_font)
+    leave_font = font(36, bold=True)
+    draw.text((210, 142), leave_time, fill=closest_panel_color(fg_primary), font=leave_font)
+
+    arrive_font = font(12, bold=True)
+    draw.text((210, 204), arrive_sub, fill=closest_panel_color(fg_secondary), font=arrive_font)
+
+    draw.line([(18, 246), (WIDTH // 2 - 18, 246)], fill=closest_panel_color(divider_color), width=1)
+
+    # 6. Best Route & Timeline
+    draw.text((18, 258), "BEST ROUTE", fill=closest_panel_color(fg_secondary), font=lbl_font)
+    
+    route_font = font(15, bold=True)
+    route_full = f"via {route}"
+    if show_dist and distance is not None and str(distance).strip() not in ("", "?", "unknown"):
+        route_full += f" · {distance} {dist_unit}"
+    draw.text((18, 272), route_full, fill=closest_panel_color(fg_primary), font=route_font)
+
+    # Horizontal timeline diagram
+    draw_route_diagram(draw, 44, 336, 310, closest_panel_color(theme_color), closest_panel_color(secondary_accent))
+
+    draw.line([(18, 396), (WIDTH // 2 - 18, 396)], fill=closest_panel_color(divider_color), width=1)
+
+    # 7. Delays Action Banner
+    banner_y0, banner_y1 = 412, 464
+    draw.rounded_rectangle([(18, banner_y0), (WIDTH // 2 - 18, banner_y1)], radius=8, fill=closest_panel_color(banner_bg), outline=closest_panel_color(banner_outline), width=1)
+    
+    # Alert icon on left side of banner
+    alert_color = pill_bg
+    draw_alert_icon(draw, 38, banner_y0 + 26, 7, closest_panel_color(alert_color))
+    
+    # Text content centered next to icon
+    banner_text_font = font(12, bold=True)
+    draw.text((56, banner_y0 + 19), sub_text.upper(), fill=closest_panel_color(fg_primary), font=banner_text_font)
 
 
 def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: str, book: str | None, house: str | None, show_book: bool, dark_mode: int) -> None:
