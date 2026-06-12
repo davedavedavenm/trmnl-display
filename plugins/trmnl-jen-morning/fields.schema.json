@@ -22,9 +22,9 @@
       "key": "layout_variant",
       "type": "text",
       "required": false,
-      "default": "maps_style",
-      "allowed_values": ["maps_style", "editorial", "structured"],
-      "description": "Visual style for the commute display. maps_style uses a bold left/right split with gradient panels."
+      "default": "automotive_hud",
+      "allowed_values": ["swiss_typographic", "infographic_timeline", "bauhaus_geometric", "automotive_hud", "split_contrast", "bento_grid", "minimalist", "dark_tech"],
+      "description": "Visual style for the commute display."
     },
     {
       "key": "screen_label",

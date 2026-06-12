@@ -226,7 +226,7 @@ def draw_route_diagram(draw: ImageDraw.ImageDraw, x0: int, y: int, w: int, color
     draw.line((x0, y, x0 + w, y), fill=(210, 210, 210), width=2)
     draw.ellipse((x0 - 5, y - 5, x0 + 5, y + 5), fill=color, outline=BLACK, width=1)
     draw.ellipse((x0 + w - 5, y - 5, x0 + w + 5, y + 5), fill=secondary_color, outline=BLACK, width=1)
-    
+
     # Draw a cute little car at 45% along the way
     car_x = x0 + int(w * 0.45)
     # Wheels
@@ -290,7 +290,7 @@ def draw_house_stripes(draw: ImageDraw.ImageDraw, start_x: int, y: int, width: i
         colors = [YELLOW, BLACK, YELLOW, BLACK, YELLOW, BLACK, YELLOW, BLACK, YELLOW]
     else:
         colors = [BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK]
-        
+
     stripe_w = width // len(colors)
     for i, col in enumerate(colors):
         x0 = start_x + i * stripe_w
@@ -303,6 +303,257 @@ def draw_house_stripes(draw: ImageDraw.ImageDraw, start_x: int, y: int, width: i
 # ==========================================
 # MAIN PANEL RENDERERS
 # ==========================================
+
+def draw_swiss_typographic(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int, colors_dict: dict) -> None:
+    fg_prim = colors_dict["fg_primary"]
+    fg_sec = colors_dict["fg_secondary"]
+    theme_col = colors_dict["theme_color"]
+    div_col = colors_dict["divider_color"]
+    traffic_bg = colors_dict["pill_bg"]
+    traffic_txt = colors_dict["traffic_text"]
+    sub_txt = colors_dict["sub_text"]
+
+    # 1. Clean uppercase subtitle
+    draw.text((24, 28), "01 / OUTBOUND TRANSIT", fill=closest_panel_color(fg_sec), font=font(10, bold=True))
+
+    # 2. Main route path in bold
+    route = data.get("route_label") or "Direct"
+    draw.text((24, 44), f"HOME -> OFFICE via {route.upper()}", fill=closest_panel_color(theme_col), font=font(15, bold=True))
+
+    # Thin divider
+    draw.line([(24, 68), (WIDTH // 2 - 24, 68)], fill=closest_panel_color(div_col), width=1)
+
+    # 3. Huge ETA Display
+    eta = data.get("eta_minutes") or "?"
+    eta_str = str(eta)
+    eta_font = font(110, bold=True)
+    draw.text((24, 76), eta_str, fill=closest_panel_color(fg_prim), font=eta_font)
+    eta_w = int(draw.textlength(eta_str, font=eta_font))
+
+    # Stacked label next to ETA
+    draw.text((24 + eta_w + 12, 116), "MINUTES", fill=closest_panel_color(fg_prim), font=font(18, bold=True))
+    draw.text((24 + eta_w + 12, 138), "ESTIMATED DRIVE", fill=closest_panel_color(fg_sec), font=font(9, bold=True))
+
+    # 4. Bold color bar for traffic alert
+    bar_y = 210
+    draw.rectangle([24, bar_y, WIDTH // 2 - 24, bar_y + 6], fill=closest_panel_color(traffic_bg))
+
+    # Traffic text
+    draw.text((24, bar_y + 16), traffic_txt, fill=closest_panel_color(traffic_bg), font=font(13, bold=True))
+    draw.text((24, bar_y + 34), sub_txt.upper(), fill=closest_panel_color(fg_prim), font=font(10, bold=True))
+
+    # 5. Leave By section
+    leave_y = 285
+    draw.line([(24, leave_y), (WIDTH // 2 - 24, leave_y)], fill=closest_panel_color(div_col), width=1)
+
+    draw.text((24, leave_y + 16), "DEPARTURE TARGET", fill=closest_panel_color(fg_sec), font=font(9, bold=True))
+    leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
+    draw.text((24, leave_y + 32), f"LEAVE BY {leave_time}", fill=closest_panel_color(fg_prim), font=font(32, bold=True))
+
+    # 6. Bottom footer
+    footer_y = 390
+    draw.line([(24, footer_y), (WIDTH // 2 - 24, footer_y)], fill=closest_panel_color(div_col), width=1)
+
+    dist_txt = f"{data.get('distance_km')} KM DISTANCE" if data.get("distance_km") else "DISTANCE N/A"
+    draw.text((24, footer_y + 16), dist_txt, fill=closest_panel_color(fg_prim), font=font(11, bold=True))
+    arrive_by = config.get("arrive_by") or "8:30 AM"
+    draw.text((WIDTH // 2 - 24, footer_y + 16), f"ARRIVE {arrive_by}", fill=closest_panel_color(fg_sec), font=font(11, bold=True), anchor="ra")
+
+
+def draw_infographic_timeline(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int, colors_dict: dict) -> None:
+    fg_prim = colors_dict["fg_primary"]
+    fg_sec = colors_dict["fg_secondary"]
+    theme_col = colors_dict["theme_color"]
+    traffic_bg = colors_dict["pill_bg"]
+    traffic_txt = colors_dict["traffic_text"]
+
+    timeline_x = 60
+    start_y = 90
+    end_y = 390
+    mid_y = start_y + (end_y - start_y) // 2
+
+    # Header
+    draw.text((24, 24), "COMMUTE ROADMAP", fill=closest_panel_color(fg_sec), font=font(10, bold=True))
+
+    # Target Leave time box in top right
+    leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
+    draw.text((WIDTH // 2 - 24, 24), f"LEAVE BY {leave_time}", fill=closest_panel_color(fg_prim), font=font(12, bold=True), anchor="ra")
+
+    # Draw timeline base track
+    draw.line([(timeline_x, start_y), (timeline_x, end_y)], fill=(225, 225, 225) if dark_mode == 0 else (45, 55, 65), width=8)
+
+    # Highlight segment based on traffic
+    draw.line([(timeline_x, start_y), (timeline_x, mid_y)], fill=closest_panel_color(GREEN), width=8)
+    draw.line([(timeline_x, mid_y), (timeline_x, mid_y + 50)], fill=closest_panel_color(traffic_bg), width=8)
+
+    # Station 1: HOME (Start)
+    draw.ellipse((timeline_x - 10, start_y - 10, timeline_x + 10, start_y + 10), fill=closest_panel_color(theme_col), outline=closest_panel_color(fg_prim), width=2)
+    draw.text((timeline_x + 20, start_y - 6), "HOME", fill=closest_panel_color(fg_prim), font=font(12, bold=True))
+
+    # Station 2: TRAFFIC POINT (Middle)
+    draw.ellipse((timeline_x - 10, mid_y + 25 - 10, timeline_x + 10, mid_y + 25 + 10), fill=closest_panel_color(traffic_bg), outline=closest_panel_color(fg_prim), width=2)
+    route = data.get("route_label") or "Direct"
+    draw.text((timeline_x + 20, mid_y + 13), f"VIA {route.upper()}", fill=closest_panel_color(fg_prim), font=font(11, bold=True))
+    draw.text((timeline_x + 20, mid_y + 27), traffic_txt, fill=closest_panel_color(traffic_bg), font=font(9, bold=True))
+
+    # Station 3: OFFICE (End)
+    draw.ellipse((timeline_x - 10, end_y - 10, timeline_x + 10, end_y + 10), fill=closest_panel_color(theme_col), outline=closest_panel_color(fg_prim), width=2)
+    draw.text((timeline_x + 20, end_y - 6), "OFFICE", fill=closest_panel_color(fg_prim), font=font(12, bold=True))
+
+    # Car marker representing current progress
+    car_y = mid_y - 15
+    draw.rounded_rectangle([(timeline_x - 12, car_y - 6), (timeline_x + 12, car_y + 6)], radius=2, fill=closest_panel_color(theme_col), outline=closest_panel_color(fg_prim), width=1)
+    draw.ellipse((timeline_x - 8, car_y + 4, timeline_x - 5, car_y + 7), fill=closest_panel_color(fg_prim))
+    draw.ellipse((timeline_x + 5, car_y + 4, timeline_x + 8, car_y + 7), fill=closest_panel_color(fg_prim))
+
+    # Large floating ETA box on the right half
+    eta_x = 240
+    eta_y = 150
+    draw.text((eta_x, eta_y), "DRIVE TIME", fill=closest_panel_color(fg_sec), font=font(10, bold=True))
+
+    eta = data.get("eta_minutes") or "?"
+    draw.text((eta_x, eta_y + 12), str(eta), fill=closest_panel_color(fg_prim), font=font(64, bold=True))
+    eta_w = int(draw.textlength(str(eta), font=font(64, bold=True)))
+    draw.text((eta_x + eta_w + 6, eta_y + 54), "MINS", fill=closest_panel_color(fg_sec), font=font(14, bold=True))
+
+    # Sub-detail: distance and arrive_by
+    dist = f"{data.get('distance_km')} km" if data.get("distance_km") else "N/A"
+    arrive_by = config.get("arrive_by") or "8:30 AM"
+    draw.text((eta_x, eta_y + 88), f"Distance: {dist}", fill=closest_panel_color(fg_prim), font=font(11, bold=True))
+    draw.text((eta_x, eta_y + 104), f"Arrive by: {arrive_by}", fill=closest_panel_color(fg_sec), font=font(11))
+
+    # Traffic notice banner at the bottom
+    draw.rectangle([24, HEIGHT - 46, WIDTH // 2 - 24, HEIGHT - 18], fill=closest_panel_color(colors_dict["banner_bg"]), outline=closest_panel_color(colors_dict["banner_outline"]), width=1)
+    draw_alert_icon(draw, 40, HEIGHT - 32, 6, closest_panel_color(traffic_bg))
+    draw.text((56, HEIGHT - 38), colors_dict["sub_text"].upper(), fill=closest_panel_color(fg_prim), font=font(9, bold=True))
+
+
+def draw_bauhaus_geometric(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int, colors_dict: dict) -> None:
+    fg_prim = colors_dict["fg_primary"]
+    fg_sec = colors_dict["fg_secondary"]
+    theme_col = colors_dict["theme_color"]
+    traffic_bg = colors_dict["pill_bg"]
+    traffic_txt = colors_dict["traffic_text"]
+
+    # Bauhaus relies on thick shapes, color blocking, and geometric lines
+
+    # 1. Left thick margin block in traffic color
+    draw.rectangle([0, 0, 30, HEIGHT], fill=closest_panel_color(traffic_bg))
+
+    # 2. Huge yellow circle for the morning target (Leave By / Sun)
+    sun_x, sun_y = WIDTH // 2 - 90, 110
+    sun_r = 70
+    draw.ellipse((sun_x - sun_r, sun_y - sun_r, sun_x + sun_r, sun_y + sun_r), fill=closest_panel_color(YELLOW))
+
+    leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
+    draw.text((sun_x, sun_y - 20), "LEAVE BY", fill=closest_panel_color(BLACK), font=font(9, bold=True), anchor="ma")
+    draw.text((sun_x, sun_y - 6), leave_time, fill=closest_panel_color(BLACK), font=font(22, bold=True), anchor="ma")
+
+    # 3. Blue/Dark quadrant block for the ETA (Bottom-Left)
+    block_x, block_y = 120, 350
+    block_r = 100
+    draw.ellipse((block_x - block_r, block_y - block_r, block_x + block_r, block_y + block_r), fill=closest_panel_color(BLUE if dark_mode == 0 else (35, 45, 65)))
+
+    eta = data.get("eta_minutes") or "?"
+    draw.text((block_x, block_y - 40), "ETA", fill=closest_panel_color(WHITE), font=font(11, bold=True), anchor="ma")
+    draw.text((block_x, block_y - 22), str(eta), fill=closest_panel_color(WHITE), font=font(64, bold=True), anchor="ma")
+    draw.text((block_x, block_y + 40), "MINUTES", fill=closest_panel_color(YELLOW), font=font(11, bold=True), anchor="ma")
+
+    # 4. Asymmetric diagonal path line crossing the canvas
+    draw.line([(30, 220), (WIDTH // 2 - 30, 220)], fill=closest_panel_color(fg_prim), width=5)
+    draw.line([(30, 220), (sun_x, sun_y)], fill=closest_panel_color(fg_prim), width=3)
+
+    # 5. Metadata boxes
+    # Top-Left text
+    draw.text((45, 24), "COMMUTE REPORT", fill=closest_panel_color(fg_prim), font=font(14, bold=True))
+    draw.text((45, 44), traffic_txt, fill=closest_panel_color(traffic_bg), font=font(11, bold=True))
+    route = data.get("route_label") or "Direct"
+    draw.text((45, 62), f"VIA {route.upper()}", fill=closest_panel_color(fg_sec), font=font(11, bold=True))
+
+    # Bottom-Right text
+    detail_x = WIDTH // 2 - 120
+    detail_y = 270
+    draw.text((detail_x, detail_y), "METRICS", fill=closest_panel_color(fg_sec), font=font(9, bold=True))
+
+    dist = f"{data.get('distance_km')} KM" if data.get("distance_km") else "N/A"
+    draw.text((detail_x, detail_y + 16), f"DIST: {dist}", fill=closest_panel_color(fg_prim), font=font(13, bold=True))
+    arrive_by = config.get("arrive_by") or "8:30 AM"
+    draw.text((detail_x, detail_y + 36), f"ARRV: {arrive_by}", fill=closest_panel_color(fg_prim), font=font(13, bold=True))
+
+    # Text badge under the sun
+    draw.text((sun_x, sun_y + sun_r + 8), colors_dict["sub_text"].upper(), fill=closest_panel_color(fg_prim), font=font(9, bold=True), anchor="ma")
+
+
+def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int, colors_dict: dict) -> None:
+    fg_prim = colors_dict["fg_primary"]
+    fg_sec = colors_dict["fg_secondary"]
+    theme_col = colors_dict["theme_color"]
+    div_col = colors_dict["divider_color"]
+    traffic_bg = colors_dict["pill_bg"]
+    traffic_txt = colors_dict["traffic_text"]
+
+    # HUD uses high-tech telemetry graphics
+    cx, cy = WIDTH // 4, HEIGHT // 2 - 15
+    r = 90
+
+    # 1. Tech Title
+    draw.text((24, 24), "SYS.STATUS // OUTBOUND COMMUTE", fill=closest_panel_color(fg_sec), font=font(9, bold=True))
+    draw.text((24, 36), "[ RADAR TELEMETRY ONLINE ]", fill=closest_panel_color(GREEN), font=font(8, bold=True))
+
+    # 2. HUD outer coordinates & brackets
+    draw_corner_ornaments(draw, (18, 54, WIDTH // 2 - 18, HEIGHT - 18), 10, closest_panel_color(theme_col))
+
+    # 3. Speedometer-like Arch Dial
+    xy = (cx - r, cy - r, cx + r, cy + r)
+    draw.arc(xy, 135, 405, fill=closest_panel_color((200, 200, 200) if dark_mode == 0 else (45, 55, 65)), width=8)
+
+    eta = 0
+    try:
+        eta = int(data.get("eta_minutes") or 0)
+    except ValueError:
+        pass
+
+    fill_pct = min(1.0, max(0.0, eta / 60.0))
+    end_angle = 135 + int(270 * fill_pct)
+
+    if fill_pct > 0:
+        draw.arc(xy, 135, end_angle, fill=closest_panel_color(traffic_bg), width=8)
+
+    # Dial labels & ticks
+    draw.text((cx - 65, cy + 60), "0", fill=closest_panel_color(fg_sec), font=font(8), anchor="ma")
+    draw.text((cx + 65, cy + 60), "60+", fill=closest_panel_color(fg_sec), font=font(8), anchor="ma")
+
+    # Center digits
+    draw.text((cx, cy - 30), str(eta or "?"), fill=closest_panel_color(fg_prim), font=font(48, bold=True), anchor="ma")
+    draw.text((cx, cy + 18), "MINS", fill=closest_panel_color(fg_sec), font=font(9, bold=True), anchor="ma")
+
+    # 4. Telemetry data readouts (4 Corners)
+    lbl_font = font(8, bold=True)
+    val_font = font(13, bold=True)
+
+    # Top Left
+    draw.text((36, 68), "ROUTE", fill=closest_panel_color(fg_sec), font=lbl_font)
+    route = data.get("route_label") or "Direct"
+    draw.text((36, 80), route.upper(), fill=closest_panel_color(fg_prim), font=val_font)
+
+    # Top Right
+    draw.text((WIDTH // 2 - 110, 68), "DISTANCE", fill=closest_panel_color(fg_sec), font=lbl_font)
+    dist = f"{data.get('distance_km')} KM" if data.get("distance_km") else "N/A"
+    draw.text((WIDTH // 2 - 110, 80), dist, fill=closest_panel_color(fg_prim), font=val_font)
+
+    # Bottom Left
+    draw.text((36, cy + 105), "LEAVE BY", fill=closest_panel_color(fg_sec), font=lbl_font)
+    leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
+    draw.text((36, cy + 117), leave_time, fill=closest_panel_color(fg_prim), font=val_font)
+
+    # Bottom Right
+    draw.text((WIDTH // 2 - 110, cy + 105), "TRAFFIC", fill=closest_panel_color(fg_sec), font=lbl_font)
+    draw.text((WIDTH // 2 - 110, cy + 117), traffic_txt, fill=closest_panel_color(traffic_bg), font=val_font)
+
+    # 5. Status banner text
+    draw.rectangle([36, HEIGHT - 30, WIDTH // 2 - 36, HEIGHT - 28], fill=closest_panel_color(div_col))
+    draw.text((cx, HEIGHT - 24), colors_dict["sub_text"].upper(), fill=closest_panel_color(fg_sec), font=font(8, bold=True), anchor="ma")
+
 
 def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> None:
     eta = data.get("eta_minutes") or "?"
@@ -320,15 +571,34 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
         show_dist = show_dist.lower() == "true"
 
     profile = config.get("colour_profile", "navy_blue")
+    style = config.get("style") or config.get("layout_variant") or "split_contrast"
+    if data.get("style"):
+        style = data.get("style")
+    elif data.get("layout_variant"):
+        style = data.get("layout_variant")
 
     # 1. Resolve Cohesive Theme Colors
-    if dark_mode == 1:
+    if dark_mode == 1 or style == "dark_tech" or style == "automotive_hud":
         # Dark mode (sleek dark blue-grey dashboard)
-        bg_panel = (18, 24, 32)
-        divider_color = (35, 45, 55)
         fg_primary = WHITE
         fg_secondary = (140, 150, 160)
-        
+
+        if style == "swiss_typographic":
+            bg_panel = (0, 0, 0)
+            divider_color = (60, 60, 60)
+        elif style == "bauhaus_geometric":
+            bg_panel = (15, 20, 30)
+            divider_color = (40, 50, 70)
+        elif style == "automotive_hud":
+            bg_panel = (10, 14, 20)
+            divider_color = (40, 50, 65)
+        elif style == "infographic_timeline":
+            bg_panel = (18, 24, 32)
+            divider_color = (35, 45, 55)
+        else: # dark_tech
+            bg_panel = (18, 24, 32)
+            divider_color = (35, 45, 55)
+
         if profile == "forest":
             theme_color = GREEN
             secondary_accent = ORANGE
@@ -338,16 +608,11 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
         else: # navy_blue
             theme_color = BLUE
             secondary_accent = ORANGE
-            
+
         banner_bg = (28, 36, 48)
         banner_outline = divider_color
     else:
-        # Light mode (clean slate/white dashboard)
-        bg_panel = (250, 250, 250)
-        divider_color = (230, 235, 240)
-        fg_primary = (18, 24, 32)
-        fg_secondary = (100, 110, 120)
-        
+        # Light mode
         if profile == "forest":
             theme_color = GREEN
             secondary_accent = ORANGE
@@ -358,20 +623,63 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
             theme_color = BLUE
             secondary_accent = ORANGE
 
-        banner_bg = (242, 244, 248)
-        banner_outline = theme_color
+        if style == "split_contrast":
+            # Solid colored sidebar background with white widgets
+            bg_panel = closest_panel_color(theme_color)
+            divider_color = WHITE
+            fg_primary = (18, 24, 32)
+            fg_secondary = (100, 110, 120)
+            banner_bg = WHITE
+            banner_outline = theme_color
+        elif style == "bento_grid":
+            # Soft grey bento widgets page
+            bg_panel = (240, 242, 245)
+            divider_color = (210, 215, 220)
+            fg_primary = (18, 24, 32)
+            fg_secondary = (100, 110, 120)
+            banner_bg = WHITE
+            banner_outline = theme_color
+        elif style == "swiss_typographic":
+            bg_panel = (255, 255, 255)
+            divider_color = (220, 220, 220)
+            fg_primary = (18, 24, 32)
+            fg_secondary = (100, 110, 120)
+            banner_bg = (245, 245, 245)
+            banner_outline = theme_color
+        elif style == "infographic_timeline":
+            bg_panel = (245, 247, 250)
+            divider_color = (210, 215, 220)
+            fg_primary = (18, 24, 32)
+            fg_secondary = (100, 110, 120)
+            banner_bg = WHITE
+            banner_outline = theme_color
+        elif style == "bauhaus_geometric":
+            bg_panel = (248, 246, 240)
+            divider_color = (210, 205, 195)
+            fg_primary = (18, 24, 32)
+            fg_secondary = (100, 110, 120)
+            banner_bg = WHITE
+            banner_outline = theme_color
+        else:
+            # Minimalist White Dashboard
+            bg_panel = (250, 250, 250)
+            divider_color = (230, 235, 240)
+            fg_primary = (18, 24, 32)
+            fg_secondary = (100, 110, 120)
+            banner_bg = (242, 244, 248)
+            banner_outline = theme_color
 
     # Resolve warning status traffic pill and banner subtext
     traffic_text = "LIGHT TRAFFIC"
     sub_text = "On-time arrival expected"
-    
+
     eta_m = 0
     try:
         eta_m = int(eta)
     except ValueError:
         pass
 
-    # Snape traffic pills to solid, undithered panel colors
+    # Snap traffic pills to solid, undithered panel colors
     if eta_m > 55:
         traffic_text = "HEAVY TRAFFIC"
         sub_text = "Heavy traffic warning!"
@@ -386,102 +694,224 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
         pill_bg = GREEN
         pill_fg = WHITE
 
-    # Arrive by & Leave time variables
-    arrive_by = config.get("arrive_by") or "8:30 AM"
-    arrive_sub = f"to arrive by {arrive_by}"
-
-    leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
-    if "leave by" in leave_time.lower():
-        for prefix in ["leave by ", "leave by"]:
-            if leave_time.lower().startswith(prefix):
-                leave_time = leave_time[len(prefix):].strip()
+    colors_dict = {
+        "bg_panel": bg_panel,
+        "divider_color": divider_color,
+        "fg_primary": fg_primary,
+        "fg_secondary": fg_secondary,
+        "theme_color": theme_color,
+        "secondary_accent": secondary_accent,
+        "banner_bg": banner_bg,
+        "banner_outline": banner_outline,
+        "pill_bg": pill_bg,
+        "pill_fg": pill_fg,
+        "traffic_text": traffic_text,
+        "sub_text": sub_text,
+    }
 
     # 2. Draw Sidebar Background
     draw.rectangle([0, 0, WIDTH // 2, HEIGHT], fill=bg_panel)
 
-    # 3. Header
-    draw_clock_icon(draw, 26, 30, 7, closest_panel_color(theme_color))
-    
-    title_font = font(13, bold=True)
-    draw.text((44, 21), "TIME TO WORK", fill=closest_panel_color(fg_primary), font=title_font)
+    # 3. Dispatch to Specific Style Renderer
+    if style == "swiss_typographic":
+        draw_swiss_typographic(draw, data, config, dark_mode, colors_dict)
+    elif style == "infographic_timeline":
+        draw_infographic_timeline(draw, data, config, dark_mode, colors_dict)
+    elif style == "bauhaus_geometric":
+        draw_bauhaus_geometric(draw, data, config, dark_mode, colors_dict)
+    elif style == "automotive_hud":
+        draw_automotive_hud(draw, data, config, dark_mode, colors_dict)
+    elif style == "split_contrast":
+        card_border = WHITE
 
-    if updated:
-        upd_font = font(12, bold=True)
-        draw.text((WIDTH // 2 - 18, 30), updated, fill=closest_panel_color(fg_secondary), font=upd_font, anchor="rm")
+        # Card 1 (ETA)
+        card1_y0, card1_y1 = 62, 182
+        draw.rounded_rectangle([(18, card1_y0), (WIDTH // 2 - 18, card1_y1)], radius=10, fill=WHITE, outline=closest_panel_color(card_border), width=2)
+        draw.rounded_rectangle([(20, card1_y0 + 2), (28, card1_y1 - 2)], radius=3, fill=closest_panel_color(theme_color))
 
-    divider_y = 50
-    draw.line([(18, divider_y), (WIDTH // 2 - 18, divider_y)], fill=closest_panel_color(divider_color), width=1)
+        draw_clock_icon(draw, 44, card1_y0 + 18, 7, closest_panel_color(fg_secondary))
+        lbl_font = font(12, bold=True)
+        draw.text((58, card1_y0 + 11), eta_lbl.upper(), fill=closest_panel_color(fg_secondary), font=lbl_font)
 
-    # 4. Your Commute Section
-    path_lbl_font = font(10, bold=True)
-    draw.text((18, 62), "YOUR COMMUTE", fill=closest_panel_color(fg_secondary), font=path_lbl_font)
-    
-    path_font = font(18, bold=True)
-    home_w = int(draw.textlength("Home ", font=path_font))
-    arrow_w = int(draw.textlength("-> ", font=path_font))
-    
-    draw.text((18, 76), "Home ", fill=closest_panel_color(fg_primary), font=path_font)
-    draw.text((18 + home_w, 76), "-> ", fill=closest_panel_color(theme_color), font=path_font)
-    draw.text((18 + home_w + arrow_w, 76), "Office", fill=closest_panel_color(fg_primary), font=path_font)
+        eta_font = font(54, bold=True)
+        eta_str = str(eta)
+        draw.text((44, card1_y0 + 36), eta_str, fill=closest_panel_color(fg_primary), font=eta_font)
+        eta_w = int(draw.textlength(eta_str, font=eta_font))
 
-    draw.line([(18, 110), (WIDTH // 2 - 18, 110)], fill=closest_panel_color(divider_color), width=1)
+        unit_font = font(18, bold=True)
+        draw.text((44 + eta_w + 6, card1_y0 + 64), eta_unit, fill=closest_panel_color(fg_secondary), font=unit_font)
 
-    # 5. Commute Status (ETA vs Leave by columns)
-    # Left Column (ETA / Drive Time)
-    lbl_font = font(10, bold=True)
-    draw.text((18, 122), eta_lbl.upper(), fill=closest_panel_color(fg_secondary), font=lbl_font)
+        pill_font = font(10, bold=True)
+        pill_w = int(draw.textlength(traffic_text, font=pill_font)) + 16
+        pill_x0, pill_y0 = 382 - 20 - pill_w, card1_y0 + 44
+        draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x0 + pill_w, pill_y0 + 24)], radius=6, fill=closest_panel_color(pill_bg))
+        draw.text((pill_x0 + 8, pill_y0 + 5), traffic_text, fill=closest_panel_color(pill_fg), font=pill_font)
 
-    eta_font = font(58, bold=True)
-    eta_str = str(eta)
-    draw.text((18, 138), eta_str, fill=closest_panel_color(fg_primary), font=eta_font)
-    eta_w = int(draw.textlength(eta_str, font=eta_font))
+        # Card 2 (Route Card)
+        card2_y0, card2_y1 = 196, 326
+        draw.rounded_rectangle([(18, card2_y0), (WIDTH // 2 - 18, card2_y1)], radius=10, fill=WHITE, outline=closest_panel_color(card_border), width=2)
+        draw.rounded_rectangle([(20, card2_y0 + 2), (28, card2_y1 - 2)], radius=3, fill=closest_panel_color(secondary_accent))
 
-    unit_font = font(18, bold=True)
-    draw.text((18 + eta_w + 6, 172), eta_unit, fill=closest_panel_color(fg_secondary), font=unit_font)
+        draw_pin_icon(draw, 44, card2_y0 + 18, 6, closest_panel_color(fg_secondary))
+        draw.text((58, card2_y0 + 11), "OPTIMAL ROUTE", fill=closest_panel_color(fg_secondary), font=lbl_font)
 
-    # Traffic Pill
-    pill_font = font(10, bold=True)
-    pill_w = int(draw.textlength(traffic_text, font=pill_font)) + 16
-    pill_x0, pill_y0 = 18, 202
-    draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x0 + pill_w, pill_y0 + 24)], radius=6, fill=closest_panel_color(pill_bg))
-    draw.text((pill_x0 + 8, pill_y0 + 5), traffic_text, fill=closest_panel_color(pill_fg), font=pill_font)
+        route_text = f"via {route}"
+        if len(route_text) > 28:
+            route_text = route_text[:25] + "..."
+        route_font = font(16 if len(route_text) > 22 else 20, bold=True)
+        draw.text((44, card2_y0 + 32), route_text, fill=closest_panel_color(fg_primary), font=route_font)
 
-    # Right Column (Leave By time)
-    draw.text((210, 122), "LEAVE BY", fill=closest_panel_color(fg_secondary), font=lbl_font)
-    
-    leave_font = font(36, bold=True)
-    draw.text((210, 142), leave_time, fill=closest_panel_color(fg_primary), font=leave_font)
+        if show_dist and distance is not None and str(distance).strip() not in ("", "?", "unknown"):
+            dist_text = f"{distance} {dist_unit}"
+            dist_font = font(13, bold=True)
+            draw.text((44, card2_y0 + 58), dist_text, fill=closest_panel_color(fg_secondary), font=dist_font)
 
-    arrive_font = font(12, bold=True)
-    draw.text((210, 204), arrive_sub, fill=closest_panel_color(fg_secondary), font=arrive_font)
+        draw_route_diagram(draw, 44, card2_y0 + 96, 310, closest_panel_color(theme_color), closest_panel_color(secondary_accent))
 
-    draw.line([(18, 246), (WIDTH // 2 - 18, 246)], fill=closest_panel_color(divider_color), width=1)
+        # Card 3 (Action Card)
+        card3_y0, card3_y1 = 340, 464
+        draw.rounded_rectangle([(18, card3_y0), (WIDTH // 2 - 18, card3_y1)], radius=10, fill=WHITE, outline=closest_panel_color(card_border), width=2)
 
-    # 6. Best Route & Timeline
-    draw.text((18, 258), "BEST ROUTE", fill=closest_panel_color(fg_secondary), font=lbl_font)
-    
-    route_font = font(15, bold=True)
-    route_full = f"via {route}"
-    if show_dist and distance is not None and str(distance).strip() not in ("", "?", "unknown"):
-        route_full += f" · {distance} {dist_unit}"
-    draw.text((18, 272), route_full, fill=closest_panel_color(fg_primary), font=route_font)
+        status_action_bg = RED if eta_m > 55 else (ORANGE if eta_m > 45 else theme_color)
+        status_action_fg = WHITE
+        draw.rounded_rectangle([(20, card3_y0 + 2), (28, card3_y1 - 2)], radius=3, fill=closest_panel_color(status_action_bg))
 
-    # Horizontal timeline diagram
-    draw_route_diagram(draw, 44, 336, 310, closest_panel_color(theme_color), closest_panel_color(secondary_accent))
+        draw_alert_icon(draw, 44, card3_y0 + 18, 7, closest_panel_color(status_action_bg))
+        draw.text((58, card3_y0 + 11), "RECOMMENDED ACTION", fill=closest_panel_color(fg_secondary), font=lbl_font)
 
-    draw.line([(18, 396), (WIDTH // 2 - 18, 396)], fill=closest_panel_color(divider_color), width=1)
+        leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
+        status_text = f"LEAVE BY {leave_time}"
+        status_font = font(18, bold=True)
+        draw.text((44, card3_y0 + 32), status_text, fill=closest_panel_color(fg_primary), font=status_font)
 
-    # 7. Delays Action Banner
-    banner_y0, banner_y1 = 412, 464
-    draw.rounded_rectangle([(18, banner_y0), (WIDTH // 2 - 18, banner_y1)], radius=8, fill=closest_panel_color(banner_bg), outline=closest_panel_color(banner_outline), width=1)
-    
-    # Alert icon on left side of banner
-    alert_color = pill_bg
-    draw_alert_icon(draw, 38, banner_y0 + 26, 7, closest_panel_color(alert_color))
-    
-    # Text content centered next to icon
-    banner_text_font = font(12, bold=True)
-    draw.text((56, banner_y0 + 19), sub_text.upper(), fill=closest_panel_color(fg_primary), font=banner_text_font)
+        s_font = font(12, bold=True)
+        s_w = int(draw.textlength(sub_text, font=s_font))
+        s_badge_x0 = 44
+        s_badge_y0 = card3_y0 + 62
+
+        draw.rounded_rectangle([(s_badge_x0, s_badge_y0), (s_badge_x0 + s_w + 20, s_badge_y0 + 24)], radius=6, fill=closest_panel_color(status_action_bg))
+        draw.text((s_badge_x0 + 10, s_badge_y0 + 4), sub_text, fill=closest_panel_color(status_action_fg), font=s_font)
+
+    elif style == "bento_grid":
+        card_border = WHITE
+
+        # Quadrant 1 (top-left, Drive Time)
+        draw.rounded_rectangle([(18, 62), (194, 236)], radius=10, fill=WHITE, outline=closest_panel_color(card_border), width=2)
+        lbl_font = font(10, bold=True)
+        draw.text((30, 72), "DRIVE TIME", fill=closest_panel_color(fg_secondary), font=lbl_font)
+
+        eta_font = font(48, bold=True)
+        eta_str = str(eta)
+        draw.text((30, 92), eta_str, fill=closest_panel_color(fg_primary), font=eta_font)
+        eta_w = int(draw.textlength(eta_str, font=eta_font))
+
+        unit_font = font(16, bold=True)
+        draw.text((30 + eta_w + 4, 120), eta_unit, fill=closest_panel_color(fg_secondary), font=unit_font)
+
+        pill_font = font(9, bold=True)
+        pill_w = int(draw.textlength(traffic_text, font=pill_font)) + 12
+        pill_x0, pill_y0 = 30, 196
+        draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x0 + pill_w, pill_y0 + 22)], radius=5, fill=closest_panel_color(pill_bg))
+        draw.text((pill_x0 + 6, pill_y0 + 4), traffic_text, fill=closest_panel_color(pill_fg), font=pill_font)
+
+        # Quadrant 2 (top-right, Leave By)
+        draw.rounded_rectangle([(206, 62), (382, 236)], radius=10, fill=WHITE, outline=closest_panel_color(card_border), width=2)
+        draw.text((218, 72), "LEAVE BY", fill=closest_panel_color(fg_secondary), font=lbl_font)
+
+        leave_font = font(26, bold=True)
+        leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
+        draw.text((218, 102), leave_time, fill=closest_panel_color(fg_primary), font=leave_font)
+
+        arrive_by = config.get("arrive_by") or "8:30 AM"
+        arrive_sub = f"to arrive by {arrive_by}"
+        draw.text((218, 196), arrive_sub, fill=closest_panel_color(fg_secondary), font=font(11, bold=True))
+
+        # Quadrant 3 (bottom-left, Best Route)
+        draw.rounded_rectangle([(18, 248), (382, 386)], radius=10, fill=WHITE, outline=closest_panel_color(card_border), width=2)
+        draw.text((30, 258), "BEST ROUTE", fill=closest_panel_color(fg_secondary), font=lbl_font)
+
+        route_font = font(15, bold=True)
+        route_full = f"via {route}"
+        if show_dist and distance is not None and str(distance).strip() not in ("", "?", "unknown"):
+            route_full += f" · {distance} {dist_unit}"
+        draw.text((30, 272), route_full, fill=closest_panel_color(fg_primary), font=route_font)
+
+        draw_route_diagram(draw, 44, 336, 310, closest_panel_color(theme_color), closest_panel_color(secondary_accent))
+
+        # Quadrant 4 (bottom action banner)
+        banner_y0, banner_y1 = 398, 464
+        draw.rounded_rectangle([(18, banner_y0), (382, banner_y1)], radius=10, fill=WHITE, outline=closest_panel_color(banner_outline), width=1)
+
+        alert_color = pill_bg
+        draw_alert_icon(draw, 38, banner_y0 + 26, 7, closest_panel_color(alert_color))
+
+        banner_text_font = font(12, bold=True)
+        draw.text((56, banner_y0 + 19), sub_text.upper(), fill=closest_panel_color(fg_primary), font=banner_text_font)
+
+    else:
+        # minimalist / default
+        path_lbl_font = font(10, bold=True)
+        draw.text((18, 62), "YOUR COMMUTE", fill=closest_panel_color(fg_secondary), font=path_lbl_font)
+
+        path_font = font(18, bold=True)
+        home_w = int(draw.textlength("Home ", font=path_font))
+        arrow_w = int(draw.textlength("-> ", font=path_font))
+
+        draw.text((18, 76), "Home ", fill=closest_panel_color(fg_primary), font=path_font)
+        draw.text((18 + home_w, 76), "-> ", fill=closest_panel_color(theme_color), font=path_font)
+        draw.text((18 + home_w + arrow_w, 76), "Office", fill=closest_panel_color(fg_primary), font=path_font)
+
+        draw.line([(18, 110), (WIDTH // 2 - 18, 110)], fill=closest_panel_color(divider_color), width=1)
+
+        lbl_font = font(10, bold=True)
+        draw.text((18, 122), eta_lbl.upper(), fill=closest_panel_color(fg_secondary), font=lbl_font)
+
+        eta_font = font(58, bold=True)
+        eta_str = str(eta)
+        draw.text((18, 138), eta_str, fill=closest_panel_color(fg_primary), font=eta_font)
+        eta_w = int(draw.textlength(eta_str, font=eta_font))
+
+        unit_font = font(18, bold=True)
+        draw.text((18 + eta_w + 6, 172), eta_unit, fill=closest_panel_color(fg_secondary), font=unit_font)
+
+        pill_font = font(10, bold=True)
+        pill_w = int(draw.textlength(traffic_text, font=pill_font)) + 16
+        pill_x0, pill_y0 = 18, 202
+        draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x0 + pill_w, pill_y0 + 24)], radius=6, fill=closest_panel_color(pill_bg))
+        draw.text((pill_x0 + 8, pill_y0 + 5), traffic_text, fill=closest_panel_color(pill_fg), font=pill_font)
+
+        draw.text((210, 122), "LEAVE BY", fill=closest_panel_color(fg_secondary), font=lbl_font)
+
+        leave_font = font(36, bold=True)
+        leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
+        draw.text((210, 142), leave_time, fill=closest_panel_color(fg_primary), font=leave_font)
+
+        arrive_by = config.get("arrive_by") or "8:30 AM"
+        arrive_sub = f"to arrive by {arrive_by}"
+        draw.text((210, 204), arrive_sub, fill=closest_panel_color(fg_secondary), font=font(12, bold=True))
+
+        draw.line([(18, 246), (WIDTH // 2 - 18, 246)], fill=closest_panel_color(divider_color), width=1)
+
+        draw.text((18, 258), "BEST ROUTE", fill=closest_panel_color(fg_secondary), font=lbl_font)
+
+        route_font = font(15, bold=True)
+        route_full = f"via {route}"
+        if show_dist and distance is not None and str(distance).strip() not in ("", "?", "unknown"):
+            route_full += f" · {distance} {dist_unit}"
+        draw.text((18, 272), route_full, fill=closest_panel_color(fg_primary), font=route_font)
+
+        draw_route_diagram(draw, 44, 336, 310, closest_panel_color(theme_color), closest_panel_color(secondary_accent))
+
+        draw.line([(18, 396), (WIDTH // 2 - 18, 396)], fill=closest_panel_color(divider_color), width=1)
+
+        banner_y0, banner_y1 = 412, 464
+        draw.rounded_rectangle([(18, banner_y0), (WIDTH // 2 - 18, banner_y1)], radius=8, fill=closest_panel_color(banner_bg), outline=closest_panel_color(banner_outline), width=1)
+
+        alert_color = pill_bg
+        draw_alert_icon(draw, 38, banner_y0 + 26, 7, closest_panel_color(alert_color))
+
+        banner_text_font = font(12, bold=True)
+        draw.text((56, banner_y0 + 19), sub_text.upper(), fill=closest_panel_color(fg_primary), font=banner_text_font)
 
 
 def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: str, book: str | None, house: str | None, show_book: bool, dark_mode: int) -> None:
@@ -499,7 +929,7 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
         bg_color = (253, 250, 242)  # Elegant light parchment
         quote_color = (30, 25, 20)  # Calligraphy ink
         watermark_color = (244, 238, 226) # Watermark shield color (subtle cream)
-        
+
         # Map house names to vibrant panel colors for light mode
         if house == "gryffindor":
             banner_bg = RED
@@ -531,7 +961,7 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
     # 3. Top Banner & House Tie Stripes
     banner_h = 36
     draw.rectangle([start_x, 0, WIDTH, banner_h], fill=closest_panel_color(banner_bg))
-    
+
     # House Title
     house_name = HOUSE_LABELS.get(house, "Wizarding World") if house else "Wizarding World"
     name_font = font(15, bold=True)
@@ -586,7 +1016,7 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
     # 8. Footer & Attribution
     attr_bar_h = 32
     attr_y = HEIGHT - attr_bar_h
-    
+
     # Gold stripe above footer banner
     draw_house_stripes(draw, start_x, attr_y - 4, WIDTH - start_x, house or "gryffindor")
     draw.rectangle([start_x, attr_y, WIDTH, HEIGHT], fill=closest_panel_color(banner_bg))
@@ -627,14 +1057,24 @@ def remap_to_panel_palette(img: Image.Image) -> Image.Image:
     return img.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG)
 
 
-def build(payload_path: Path | None = None) -> Image.Image:
+def build(payload_path: Path | None = None, style: str = "split_contrast") -> Image.Image:
     data = {}
     config = {}
     dark_mode = 0
     if payload_path is not None:
         data = load_payload(payload_path)
+        config["style"] = style
     else:
         data, config, dark_mode = load_data_from_db()
+        if "style" not in config:
+            config["style"] = style
+
+    # Auto-toggle dark mode for specific styles
+    if style in ("dark_tech", "automotive_hud"):
+        dark_mode = 1
+    elif style in ("minimalist", "swiss_typographic", "infographic_timeline", "bauhaus_geometric"):
+        dark_mode = 0
+
     quotes = load_quotes()
     return render_morning_mashup(data, quotes, config, dark_mode)
 
@@ -645,6 +1085,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=OUT_PATH)
     parser.add_argument("--source-output", type=Path, default=SOURCE_PATH)
     parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--style", type=str, default="split_contrast", choices=["swiss_typographic", "infographic_timeline", "bauhaus_geometric", "automotive_hud", "minimalist", "dark_tech", "split_contrast", "bento_grid"])
     return parser.parse_args()
 
 
@@ -654,7 +1095,7 @@ def main() -> None:
     args.source_output.parent.mkdir(parents=True, exist_ok=True)
     if args.seed is not None:
         random.seed(args.seed)
-    source = build(args.payload)
+    source = build(args.payload, args.style)
     source.save(args.source_output)
     remapped = remap_to_panel_palette(source)
     remapped.save(args.output, optimize=True)

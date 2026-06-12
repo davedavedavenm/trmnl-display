@@ -16,11 +16,16 @@ custom_fields:
   - keyname: layout_variant
     name: Layout Variant
     field_type: select
-    default: maps_style
+    default: automotive_hud
     options:
-      - Maps Style: maps_style
-      - Editorial: editorial
-      - Structured: structured
+      - Swiss Typographic: swiss_typographic
+      - Infographic Roadmap: infographic_timeline
+      - Bauhaus Geometric: bauhaus_geometric
+      - Automotive HUD: automotive_hud
+      - Split Contrast: split_contrast
+      - Bento Grid: bento_grid
+      - Minimalist: minimalist
+      - Dark Tech: dark_tech
     description: Visual style for the commute display. Maps Style uses a bold left/right split with gradient panels.
   - keyname: screen_label
     name: Screen Label
