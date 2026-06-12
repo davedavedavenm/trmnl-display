@@ -271,7 +271,7 @@ automation:
         - media_player.gym
         - media_player.sonos_roam
       any_playing: >
-        {{ expand(player_entities) | selectattr('state', 'eq', 'playing') | list | count > 0 }}
+        {{ expand(player_entities) | selectattr('state', 'eq', 'playing') | selectattr('attributes.media_title', 'defined') | selectattr('attributes.media_title') | list | count > 0 }}
       hold_minutes: "{{ states('input_number.trmnl_sonos_hold_minutes') | int(10) }}"
       hold_until_value: >
         {{ (as_timestamp(now()) + (hold_minutes * 60)) | timestamp_custom('%Y-%m-%d %H:%M:%S', true) }}
@@ -337,7 +337,7 @@ automation:
       manual_override: "{{ states('input_select.trmnl_display_manual_override') }}"
       default_mode: "{{ states('input_select.trmnl_display_default_mode') }}"
       any_playing: >
-        {{ expand(player_entities) | selectattr('state', 'eq', 'playing') | list | count > 0 }}
+        {{ expand(player_entities) | selectattr('state', 'eq', 'playing') | selectattr('attributes.media_title', 'defined') | selectattr('attributes.media_title') | list | count > 0 }}
       sonos_hold_until_ts: >
         {{ as_timestamp(states('input_datetime.trmnl_sonos_hold_until')) | int(0) }}
       sonos_hold_active: >
