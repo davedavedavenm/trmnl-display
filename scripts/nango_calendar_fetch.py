@@ -280,32 +280,45 @@ def update_ha_weekend_events(payload: dict):
         ref_date = datetime.strptime(today_str, "%Y-%m-%d").date()
     except Exception:
         ref_date = datetime.now().date()
-
-    # Calculate target dates for the current weekend (Sat/Sun) and Monday
     wd = ref_date.weekday()
+
+    # Decide if we include Monday in our check:
+    # Monday is included if today is Sunday after 12:00 PM (local time), or today is Monday
+    now_local = datetime.now()
+    include_monday = False
+    if wd == 6:  # Sunday
+        if now_local.hour >= 12:
+            include_monday = True
+    elif wd == 0:  # Monday
+        include_monday = True
+
+    # Calculate target dates for the current weekend (Sat/Sun) and Monday (if included)
     if wd == 6:  # Sunday
         target_dates = [
             ref_date - timedelta(days=1),  # Saturday
             ref_date,                     # Sunday
-            ref_date + timedelta(days=1)   # Monday
         ]
+        if include_monday:
+            target_dates.append(ref_date + timedelta(days=1))  # Monday
     elif wd == 5:  # Saturday
         target_dates = [
             ref_date,                     # Saturday
             ref_date + timedelta(days=1),  # Sunday
-            ref_date + timedelta(days=2)   # Monday
         ]
+        if include_monday:
+            target_dates.append(ref_date + timedelta(days=2))  # Monday
     else:  # Monday - Friday
         days_to_sat = 5 - wd
         saturday = ref_date + timedelta(days=days_to_sat)
         target_dates = [
             saturday,
             saturday + timedelta(days=1),
-            saturday + timedelta(days=2)
         ]
+        if include_monday:
+            target_dates.append(saturday + timedelta(days=2))  # Monday
 
     target_strs = {d.strftime("%Y-%m-%d") for d in target_dates}
-    print(f"Checking weekend/Monday calendar events for: {sorted(target_strs)}")
+    print(f"Checking weekend/Monday calendar events (include_monday={include_monday}) for: {sorted(target_strs)}")
 
     has_events = False
     for day in payload.get("days", []):
