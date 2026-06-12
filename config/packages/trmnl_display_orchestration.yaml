@@ -40,6 +40,11 @@ input_boolean:
     initial: false
     icon: mdi:car-arrow-right
 
+  trmnl_weekend_has_calendar_events:
+    name: TRMNL Weekend Has Calendar Events
+    initial: false
+    icon: mdi:calendar-check
+
 input_text:
   trmnl_alert_title:
     name: TRMNL Alert Title
@@ -326,6 +331,7 @@ automation:
           - input_boolean.trmnl_mode_alert_enabled
           - input_boolean.trmnl_alert_active
           - input_boolean.trmnl_dave_commute_active
+          - input_boolean.trmnl_weekend_has_calendar_events
           - input_select.trmnl_display_default_mode
           - input_select.trmnl_display_default_mode_weekday
           - input_select.trmnl_display_default_mode_weekend
@@ -355,9 +361,14 @@ automation:
         - media_player.sonos_roam
       manual_override: "{{ states('input_select.trmnl_display_manual_override') }}"
       is_weekend: "{{ now().isoweekday() in [6, 7] }}"
+      weekend_has_events: "{{ is_state('input_boolean.trmnl_weekend_has_calendar_events', 'on') }}"
       default_mode: >
         {% if is_weekend %}
-          {{ states('input_select.trmnl_display_default_mode_weekend') | default('ha_dashboard') }}
+          {% if weekend_has_events %}
+            calendar
+          {% else %}
+            {{ states('input_select.trmnl_display_default_mode_weekend') | default('ha_dashboard') }}
+          {% endif %}
         {% else %}
           {{ states('input_select.trmnl_display_default_mode_weekday') | default('calendar') }}
         {% endif %}
@@ -403,6 +414,9 @@ automation:
         {% else %}
           false
         {% endif %}
+      bus_window_active: >
+        {% set weekday = now().isoweekday() in [1, 2, 3, 4, 5] %}
+        {{ weekday and now() >= today_at('07:50') and now() <= today_at('09:30') }}
       requested_mode: >
         {% if alert_mode_active %}
           alert
@@ -416,6 +430,8 @@ automation:
           jen_morning
         {% elif dave_commute_active %}
           dave_commute
+        {% elif bus_window_active %}
+          bus
         {% elif default_mode == 'calendar' and is_state('input_boolean.trmnl_mode_calendar_enabled', 'on') %}
           calendar
         {% elif default_mode == 'ha_dashboard' %}

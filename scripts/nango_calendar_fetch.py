@@ -266,6 +266,84 @@ def fetch_payload() -> dict:
     }
 
 
+def update_ha_weekend_events(payload: dict):
+    from dotenv import load_dotenv
+    load_dotenv("/home/dave/.env")
+    ha_url = os.getenv("HA_URL", "http://192.168.1.89:8123").strip()
+    ha_token = os.getenv("HA_TOKEN", "").strip()
+    if not ha_token:
+        print("HA_TOKEN not found in environment, skipping HA state update.")
+        return
+
+    today_str = payload.get("today", "")
+    try:
+        ref_date = datetime.strptime(today_str, "%Y-%m-%d").date()
+    except Exception:
+        ref_date = datetime.now().date()
+
+    # Calculate target dates for the current weekend (Sat/Sun) and Monday
+    wd = ref_date.weekday()
+    if wd == 6:  # Sunday
+        target_dates = [
+            ref_date - timedelta(days=1),  # Saturday
+            ref_date,                     # Sunday
+            ref_date + timedelta(days=1)   # Monday
+        ]
+    elif wd == 5:  # Saturday
+        target_dates = [
+            ref_date,                     # Saturday
+            ref_date + timedelta(days=1),  # Sunday
+            ref_date + timedelta(days=2)   # Monday
+        ]
+    else:  # Monday - Friday
+        days_to_sat = 5 - wd
+        saturday = ref_date + timedelta(days=days_to_sat)
+        target_dates = [
+            saturday,
+            saturday + timedelta(days=1),
+            saturday + timedelta(days=2)
+        ]
+
+    target_strs = {d.strftime("%Y-%m-%d") for d in target_dates}
+    print(f"Checking weekend/Monday calendar events for: {sorted(target_strs)}")
+
+    has_events = False
+    for day in payload.get("days", []):
+        if day.get("date") in target_strs:
+            for cal in day.get("calendars", []):
+                if cal.get("events"):
+                    has_events = True
+                    break
+        if has_events:
+            break
+
+    state = "on" if has_events else "off"
+    print(f"Determined weekend/Monday calendar events state: {state.upper()}")
+
+    # Push state to Home Assistant
+    url = f"{ha_url}/api/states/input_boolean.trmnl_weekend_has_calendar_events"
+    headers = {
+        "Authorization": f"Bearer {ha_token}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "state": state,
+        "attributes": {
+            "friendly_name": "TRMNL Weekend Has Calendar Events",
+            "icon": "mdi:calendar-check" if has_events else "mdi:calendar-blank",
+            "checked_at": datetime.now().isoformat()
+        }
+    }
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=10)
+        if response.status_code in [200, 201]:
+            print(f"Successfully updated input_boolean.trmnl_weekend_has_calendar_events to {state.upper()} in Home Assistant.")
+        else:
+            print(f"Failed to update HA state. HTTP {response.status_code}: {response.text}")
+    except Exception as e:
+        print(f"Error updating HA state: {e}")
+
+
 def main():
     payload = fetch_payload()
     out_path = Path(__file__).resolve().parent / "tmp" / "nango_calendar_payload.json"
@@ -278,7 +356,11 @@ def main():
         for c in day["calendars"]:
             for e in c["events"]:
                 print(f"  {day['date']} {c['name']}: {e['summary']}")
+    
+    # Update HA with weekend/Monday events status
+    update_ha_weekend_events(payload)
 
 
 if __name__ == "__main__":
     main()
+
