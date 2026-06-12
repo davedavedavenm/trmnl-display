@@ -485,10 +485,20 @@ def draw_bauhaus_geometric(draw: ImageDraw.ImageDraw, data: dict[str, Any], conf
 
 
 def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int, colors_dict: dict) -> None:
-    fg_prim = colors_dict["fg_primary"]
-    fg_sec = colors_dict["fg_secondary"]
-    theme_col = colors_dict["theme_color"]
-    div_col = colors_dict["divider_color"]
+    # Resolve high-contrast palette to prevent dithering noise
+    if dark_mode == 1:
+        fg_prim = WHITE
+        fg_sec = YELLOW  # High contrast labels
+        dial_bg = WHITE   # Solid white speedometer track background
+        hud_bracket = YELLOW  # Solid yellow brackets
+        div_c = YELLOW
+    else:
+        fg_prim = BLACK
+        fg_sec = (100, 110, 120)
+        dial_bg = (200, 200, 200)
+        hud_bracket = colors_dict["theme_color"]
+        div_c = colors_dict["divider_color"]
+
     traffic_bg = colors_dict["pill_bg"]
     traffic_txt = colors_dict["traffic_text"]
 
@@ -501,11 +511,11 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
     draw.text((24, 36), "[ RADAR TELEMETRY ONLINE ]", fill=closest_panel_color(GREEN), font=font(8, bold=True))
 
     # 2. HUD outer coordinates & brackets
-    draw_corner_ornaments(draw, (18, 54, WIDTH // 2 - 18, HEIGHT - 18), 10, closest_panel_color(theme_col))
+    draw_corner_ornaments(draw, (18, 54, WIDTH // 2 - 18, HEIGHT - 18), 10, closest_panel_color(hud_bracket))
 
     # 3. Speedometer-like Arch Dial
     xy = (cx - r, cy - r, cx + r, cy + r)
-    draw.arc(xy, 135, 405, fill=closest_panel_color((200, 200, 200) if dark_mode == 0 else (45, 55, 65)), width=8)
+    draw.arc(xy, 135, 405, fill=closest_panel_color(dial_bg), width=2)
 
     eta = 0
     try:
@@ -551,7 +561,7 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
     draw.text((WIDTH // 2 - 110, cy + 117), traffic_txt, fill=closest_panel_color(traffic_bg), font=val_font)
 
     # 5. Status banner text
-    draw.rectangle([36, HEIGHT - 30, WIDTH // 2 - 36, HEIGHT - 28], fill=closest_panel_color(div_col))
+    draw.rectangle([36, HEIGHT - 30, WIDTH // 2 - 36, HEIGHT - 28], fill=closest_panel_color(div_c))
     draw.text((cx, HEIGHT - 24), colors_dict["sub_text"].upper(), fill=closest_panel_color(fg_sec), font=font(8, bold=True), anchor="ma")
 
 
@@ -590,8 +600,8 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
             bg_panel = (15, 20, 30)
             divider_color = (40, 50, 70)
         elif style == "automotive_hud":
-            bg_panel = (10, 14, 20)
-            divider_color = (40, 50, 65)
+            bg_panel = BLACK
+            divider_color = BLUE
         elif style == "infographic_timeline":
             bg_panel = (18, 24, 32)
             divider_color = (35, 45, 55)
@@ -926,9 +936,9 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
         banner_fg = h["secondary"]
         watermark_color = (bg_color[0] + 8, bg_color[1] + 8, bg_color[2] + 8)
     else:
-        bg_color = (253, 250, 242)  # Elegant light parchment
-        quote_color = (30, 25, 20)  # Calligraphy ink
-        watermark_color = (244, 238, 226) # Watermark shield color (subtle cream)
+        bg_color = WHITE  # Pure white background to eliminate any quantization noise
+        quote_color = BLACK  # Pure black ink for maximum contrast
+        watermark_color = WHITE  # Invisible watermark to avoid dither noise
 
         # Map house names to vibrant panel colors for light mode
         if house == "gryffindor":
@@ -956,7 +966,8 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
     draw.rectangle([start_x, 0, WIDTH, HEIGHT], fill=bg_color)
 
     # 2. Watermark shield in background center
-    draw_shield_watermark(draw, start_x + 200, 240, 140, 180, closest_panel_color(watermark_color), dark_mode)
+    if dark_mode == 1:
+        draw_shield_watermark(draw, start_x + 200, 240, 140, 180, closest_panel_color(watermark_color), dark_mode)
 
     # 3. Top Banner & House Tie Stripes
     banner_h = 36
@@ -973,7 +984,7 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
 
     # 4. Ornate Inner Card Border (Thin line with corner brackets)
     card_box = (start_x + 16, banner_h + 16, WIDTH - 16, HEIGHT - 16)
-    draw.rectangle(card_box, outline=closest_panel_color((220, 215, 205) if dark_mode == 0 else (60, 50, 40)), width=1)
+    draw.rectangle(card_box, outline=closest_panel_color(accent_color), width=1)
     # Bold corner brackets
     draw_corner_ornaments(draw, card_box, 16, closest_panel_color(accent_color))
 
@@ -1030,19 +1041,18 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
     draw.text((start_x + (WIDTH - start_x - attr_w) // 2, attr_y + (attr_bar_h - 15) // 2), attr_text.upper(), fill=closest_panel_color(banner_fg), font=attr_font)
 
 
-def render_morning_mashup(jen_data: dict[str, Any], quotes: list[dict[str, Any]], config: dict[str, Any], dark_mode: int) -> Image.Image:
-    bg_color = BLACK if dark_mode == 1 else WHITE
-    img = Image.new("RGB", (WIDTH, HEIGHT), bg_color)
+def render_morning_mashup(jen_data: dict[str, Any], quotes: list[dict[str, Any]], config: dict[str, Any], left_dark_mode: int, hp_dark_mode: int) -> Image.Image:
+    img = Image.new("RGB", (WIDTH, HEIGHT), WHITE)
     draw = ImageDraw.Draw(img)
 
-    draw_left_panel(draw, jen_data, config, dark_mode)
+    draw_left_panel(draw, jen_data, config, left_dark_mode)
 
     divider_x = WIDTH // 2
-    divider_color = (100, 100, 100) if dark_mode == 1 else (0, 0, 0)
+    divider_color = BLACK
     draw.line([(divider_x, 0), (divider_x, HEIGHT)], fill=divider_color, width=2)
 
     quote_data = pick_random_quote(quotes)
-    draw_hp_quote_card(draw, quote_data["text"], quote_data["character"], quote_data.get("book"), quote_data.get("house"), True, dark_mode)
+    draw_hp_quote_card(draw, quote_data["text"], quote_data["character"], quote_data.get("book"), quote_data.get("house"), True, hp_dark_mode)
 
     return img
 
@@ -1054,18 +1064,18 @@ def remap_to_panel_palette(img: Image.Image) -> Image.Image:
         flat.extend(rgb)
     flat.extend([0, 0, 0] * (256 - len(PANEL_PALETTE)))
     palette.putpalette(flat)
-    return img.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG)
+    return img.quantize(palette=palette, dither=0)
 
 
 def build(payload_path: Path | None = None, style: str = "split_contrast") -> Image.Image:
     data = {}
     config = {}
-    dark_mode = 0
+    db_dark_mode = 0
     if payload_path is not None:
         data = load_payload(payload_path)
         config["style"] = style
     else:
-        data, config, dark_mode = load_data_from_db()
+        data, config, db_dark_mode = load_data_from_db()
         if "style" not in config and "layout_variant" not in config:
             config["style"] = style
 
@@ -1076,14 +1086,18 @@ def build(payload_path: Path | None = None, style: str = "split_contrast") -> Im
     elif data.get("layout_variant"):
         active_style = data.get("layout_variant")
 
-    # Auto-toggle dark mode for specific styles
+    # Resolve left panel dark mode based on the style
+    left_dark_mode = db_dark_mode
     if active_style in ("dark_tech", "automotive_hud"):
-        dark_mode = 1
+        left_dark_mode = 1
     elif active_style in ("minimalist", "swiss_typographic", "infographic_timeline", "bauhaus_geometric"):
-        dark_mode = 0
+        left_dark_mode = 0
+
+    # Right panel dark mode is strictly determined to be light (0) as requested by user
+    hp_dark_mode = 0
         
     quotes = load_quotes()
-    return render_morning_mashup(data, quotes, config, dark_mode)
+    return render_morning_mashup(data, quotes, config, left_dark_mode, hp_dark_mode)
 
 
 def parse_args() -> argparse.Namespace:
