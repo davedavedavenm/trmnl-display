@@ -320,41 +320,137 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
         show_dist = show_dist.lower() == "true"
 
     profile = config.get("colour_profile", "navy_blue")
-    if profile == "forest":
-        primary_accent = GREEN
-        secondary_accent = BLUE
-    elif profile == "slate":
-        primary_accent = BLACK if dark_mode == 0 else WHITE
-        secondary_accent = ORANGE
-    else:  # navy_blue
-        primary_accent = BLUE
-        secondary_accent = ORANGE
 
+    # 1. Resolve Cohesive Theme Colors
     if dark_mode == 1:
         bg_panel = BLACK
         fg_primary = WHITE
         fg_secondary = (180, 180, 180)
         card_bg = (20, 20, 20)
         card_border = WHITE
-        status_green = (50, 220, 100)
+        
+        if profile == "forest":
+            theme_color = GREEN
+            secondary_accent = ORANGE
+            card1_default_bg = (10, 35, 20)
+        elif profile == "slate":
+            theme_color = WHITE
+            secondary_accent = ORANGE
+            card1_default_bg = (40, 40, 40)
+        else: # navy_blue
+            theme_color = BLUE
+            secondary_accent = ORANGE
+            card1_default_bg = (15, 35, 90)
+            
+        traffic_bg = (30, 30, 30)
+        traffic_fg = theme_color
+        status_bg = theme_color
+        status_fg = BLACK if theme_color in (YELLOW, WHITE) else WHITE
+        status_left_bar = theme_color
+        status_icon_color = theme_color
     else:
-        bg_panel = (250, 248, 244)  # Premium off-white bento background
-        fg_primary = BLACK
-        fg_secondary = (110, 110, 110)
-        card_bg = WHITE             # Pure white cards
-        card_border = (0, 0, 0)
-        status_green = (0, 120, 50)
+        # Light mode
+        if profile == "forest":
+            bg_panel = (242, 248, 243)      # soft pale green
+            card_border = GREEN
+            theme_color = GREEN
+            secondary_accent = ORANGE
+            fg_secondary = (50, 100, 60)
+            traffic_bg = (220, 244, 225)
+            traffic_fg = GREEN
+            card1_default_bg = (220, 244, 225)
+        elif profile == "slate":
+            bg_panel = (244, 244, 244)      # soft grey
+            card_border = BLACK
+            theme_color = BLACK
+            secondary_accent = ORANGE
+            fg_secondary = (110, 110, 110)
+            traffic_bg = (230, 230, 230)
+            traffic_fg = BLACK
+            card1_default_bg = (230, 230, 230)
+        else: # navy_blue
+            bg_panel = (240, 244, 250)      # soft pale blue
+            card_border = BLUE
+            theme_color = BLUE
+            secondary_accent = ORANGE
+            fg_secondary = (60, 90, 140)
+            traffic_bg = (220, 232, 252)
+            traffic_fg = BLUE
+            card1_default_bg = (220, 232, 252)
 
-    # 1. Background
+        card_bg = WHITE
+        fg_primary = BLACK
+        status_bg = theme_color
+        status_fg = WHITE
+        status_left_bar = theme_color
+        status_icon_color = theme_color
+
+    # Initialize Card 1 colors
+    card1_bg = card1_default_bg
+    card1_accent_bar = theme_color
+    if dark_mode == 1:
+        card1_fg_primary = WHITE
+        card1_fg_secondary = (180, 180, 180)
+        card1_badge_bg = WHITE
+        card1_badge_fg = theme_color
+    else:
+        card1_fg_primary = BLACK
+        card1_fg_secondary = fg_secondary
+        card1_badge_bg = WHITE
+        card1_badge_fg = theme_color
+
+    # Overrides for warnings
+    traffic_text = "LIGHT TRAFFIC"
+    sub_text = "On-time arrival expected"
+    try:
+        eta_m = int(eta)
+        if eta_m > 55:
+            traffic_text = "HEAVY TRAFFIC"
+            sub_text = "Heavy traffic warning!"
+            
+            # Card 1 overrides
+            card1_bg = RED
+            card1_fg_primary = WHITE
+            card1_fg_secondary = WHITE
+            card1_accent_bar = WHITE
+            card1_badge_bg = WHITE
+            card1_badge_fg = RED
+
+            # Card 3 overrides
+            status_bg = RED
+            status_fg = WHITE
+            status_left_bar = RED
+            status_icon_color = RED
+        elif eta_m > 45:
+            traffic_text = "MODERATE TRAFFIC"
+            sub_text = "Caution: minor delay"
+            
+            # Card 1 overrides
+            card1_bg = ORANGE
+            card1_fg_primary = WHITE
+            card1_fg_secondary = WHITE
+            card1_accent_bar = WHITE
+            card1_badge_bg = WHITE
+            card1_badge_fg = ORANGE
+
+            # Card 3 overrides
+            status_bg = ORANGE
+            status_fg = WHITE
+            status_left_bar = ORANGE
+            status_icon_color = ORANGE
+    except ValueError:
+        pass
+
+    # 2. Draw Background
     draw.rectangle([0, 0, WIDTH // 2, HEIGHT], fill=bg_panel)
 
-    # 2. Header (Screen Label Pill + Updated Time)
+    # 3. Header
     badge_font = font(14, bold=True)
     badge_w = int(draw.textlength(screen_label, font=badge_font))
     pill_x0, pill_y0 = 18, 16
     pill_x1, pill_y1 = pill_x0 + badge_w + 20, 40
 
-    pill_bg = primary_accent
+    pill_bg = theme_color
     pill_fg = WHITE
     if pill_bg == YELLOW:
         pill_fg = BLACK
@@ -371,108 +467,74 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
         upd_font = font(12, bold=True)
         draw.text((WIDTH // 2 - 18, 28), updated, fill=closest_panel_color(fg_secondary), font=upd_font, anchor="rm")
 
-    divider_y = 54
+    divider_y = 50
     draw.line([(18, divider_y), (WIDTH // 2 - 18, divider_y)], fill=closest_panel_color(fg_secondary), width=1)
 
-    # 3. ETA Card (Card 1)
+    # 4. ETA Card (Card 1)
     card1_y0, card1_y1 = 62, 182
-    draw.rounded_rectangle([(18, card1_y0), (WIDTH // 2 - 18, card1_y1)], radius=10, fill=card_bg, outline=closest_panel_color(card_border), width=2)
-    draw.rounded_rectangle([(20, card1_y0 + 2), (28, card1_y1 - 2)], radius=3, fill=closest_panel_color(primary_accent))
+    draw.rounded_rectangle([(18, card1_y0), (WIDTH // 2 - 18, card1_y1)], radius=10, fill=card1_bg, outline=closest_panel_color(card_border), width=2)
+    draw.rounded_rectangle([(20, card1_y0 + 2), (28, card1_y1 - 2)], radius=3, fill=closest_panel_color(card1_accent_bar))
 
-    # Header section inside card (Clock Icon + uppercase Label)
-    draw_clock_icon(draw, 44, card1_y0 + 18, 7, closest_panel_color(fg_secondary))
+    draw_clock_icon(draw, 44, card1_y0 + 18, 7, closest_panel_color(card1_fg_secondary))
     lbl_font = font(12, bold=True)
-    draw.text((58, card1_y0 + 11), eta_lbl.upper(), fill=closest_panel_color(fg_secondary), font=lbl_font)
+    draw.text((58, card1_y0 + 11), eta_lbl.upper(), fill=closest_panel_color(card1_fg_secondary), font=lbl_font)
 
-    # Large Drive Time Number
     eta_font = font(54, bold=True)
     eta_str = str(eta)
-    draw.text((44, card1_y0 + 36), eta_str, fill=closest_panel_color(fg_primary), font=eta_font)
+    draw.text((44, card1_y0 + 36), eta_str, fill=closest_panel_color(card1_fg_primary), font=eta_font)
     eta_w = int(draw.textlength(eta_str, font=eta_font))
 
-    # Unit text next to the number
     unit_font = font(18, bold=True)
-    draw.text((44 + eta_w + 6, card1_y0 + 64), eta_unit, fill=closest_panel_color(fg_secondary), font=unit_font)
+    draw.text((44 + eta_w + 6, card1_y0 + 64), eta_unit, fill=closest_panel_color(card1_fg_secondary), font=unit_font)
 
-    # Right-side Traffic Badge
-    traffic_bg = GREEN
-    traffic_fg = WHITE
-    traffic_text = "LIGHT TRAFFIC"
-    try:
-        eta_m = int(eta)
-        if eta_m > 55:
-            traffic_bg = RED
-            traffic_text = "HEAVY TRAFFIC"
-        elif eta_m > 45:
-            traffic_bg = ORANGE
-            traffic_text = "MODERATE TRAFFIC"
-    except ValueError:
-        pass
-        
     t_font = font(11, bold=True)
     t_w = int(draw.textlength(traffic_text, font=t_font))
     t_badge_x0 = 382 - 20 - t_w - 12
     t_badge_y0 = card1_y0 + 44
-    draw.rounded_rectangle([(t_badge_x0, t_badge_y0), (t_badge_x0 + t_w + 12, t_badge_y0 + 24)], radius=6, fill=closest_panel_color(traffic_bg))
-    draw.text((t_badge_x0 + 6, t_badge_y0 + 4), traffic_text, fill=closest_panel_color(traffic_fg), font=t_font)
+    draw.rounded_rectangle([(t_badge_x0, t_badge_y0), (t_badge_x0 + t_w + 12, t_badge_y0 + 24)], radius=6, fill=closest_panel_color(card1_badge_bg))
+    draw.text((t_badge_x0 + 6, t_badge_y0 + 4), traffic_text, fill=closest_panel_color(card1_badge_fg), font=t_font)
 
-    # 4. Route Card (Card 2)
+    # 5. Route Card (Card 2)
     card2_y0, card2_y1 = 196, 326
     draw.rounded_rectangle([(18, card2_y0), (WIDTH // 2 - 18, card2_y1)], radius=10, fill=card_bg, outline=closest_panel_color(card_border), width=2)
     draw.rounded_rectangle([(20, card2_y0 + 2), (28, card2_y1 - 2)], radius=3, fill=closest_panel_color(secondary_accent))
 
-    # Header inside card (Map Pin Icon + label)
     draw_pin_icon(draw, 44, card2_y0 + 18, 6, closest_panel_color(fg_secondary))
     draw.text((58, card2_y0 + 11), "OPTIMAL ROUTE", fill=closest_panel_color(fg_secondary), font=lbl_font)
 
-    # Route Name
     route_text = f"via {route}"
     if len(route_text) > 28:
         route_text = route_text[:25] + "..."
     route_font = font(16 if len(route_text) > 22 else 20, bold=True)
     draw.text((44, card2_y0 + 32), route_text, fill=closest_panel_color(fg_primary), font=route_font)
 
-    # Distance Badge
     if show_dist and distance is not None and str(distance).strip() not in ("", "?", "unknown"):
         dist_text = f"{distance} {dist_unit}"
         dist_font = font(13, bold=True)
         draw.text((44, card2_y0 + 58), dist_text, fill=closest_panel_color(fg_secondary), font=dist_font)
 
-    # Cute Visual Timeline (Home -> Car -> Work)
-    draw_route_diagram(draw, 44, card2_y0 + 96, 310, closest_panel_color(primary_accent), closest_panel_color(secondary_accent))
+    # Cute Visual Timeline
+    draw_route_diagram(draw, 44, card2_y0 + 96, 310, closest_panel_color(theme_color), closest_panel_color(secondary_accent))
 
-    # 5. Status Card (Card 3)
+    # 6. Status Card (Card 3)
     card3_y0, card3_y1 = 340, 464
     draw.rounded_rectangle([(18, card3_y0), (WIDTH // 2 - 18, card3_y1)], radius=10, fill=card_bg, outline=closest_panel_color(card_border), width=2)
-    draw.rounded_rectangle([(20, card3_y0 + 2), (28, card3_y1 - 2)], radius=3, fill=closest_panel_color(GREEN))
+    draw.rounded_rectangle([(20, card3_y0 + 2), (28, card3_y1 - 2)], radius=3, fill=closest_panel_color(status_left_bar))
 
-    # Header (Check/Badge Icon + Label)
-    draw_alert_icon(draw, 44, card3_y0 + 18, 7, closest_panel_color(GREEN))
+    draw_alert_icon(draw, 44, card3_y0 + 18, 7, closest_panel_color(status_icon_color))
     draw.text((58, card3_y0 + 11), "RECOMMENDED ACTION", fill=closest_panel_color(fg_secondary), font=lbl_font)
 
-    # Recommended action text
     status_text = "LEAVE BY 7:15 AM"
     status_font = font(18, bold=True)
     draw.text((44, card3_y0 + 32), status_text, fill=closest_panel_color(fg_primary), font=status_font)
 
-    # Status Pill indicator
-    sub_text = "On-time arrival expected"
-    try:
-        eta_m = int(eta)
-        if eta_m > 55:
-            sub_text = "Heavy traffic warning!"
-            status_green = RED
-    except ValueError:
-        pass
-        
     s_font = font(12, bold=True)
     s_w = int(draw.textlength(sub_text, font=s_font))
     s_badge_x0 = 44
     s_badge_y0 = card3_y0 + 62
     
-    # White check icon inside status pill
-    draw.rounded_rectangle([(s_badge_x0, s_badge_y0), (s_badge_x0 + s_w + 20, s_badge_y0 + 24)], radius=6, fill=closest_panel_color(status_green))
-    draw.text((s_badge_x0 + 10, s_badge_y0 + 4), sub_text, fill=closest_panel_color(WHITE), font=s_font)
+    draw.rounded_rectangle([(s_badge_x0, s_badge_y0), (s_badge_x0 + s_w + 20, s_badge_y0 + 24)], radius=6, fill=closest_panel_color(status_bg))
+    draw.text((s_badge_x0 + 10, s_badge_y0 + 4), sub_text, fill=closest_panel_color(status_fg), font=s_font)
 
 
 def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: str, book: str | None, house: str | None, show_book: bool, dark_mode: int) -> None:
