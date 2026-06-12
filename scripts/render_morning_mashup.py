@@ -494,20 +494,20 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
         div_c = YELLOW
     else:
         fg_prim = BLACK
-        fg_sec = (100, 110, 120)
-        dial_bg = (200, 200, 200)
-        hud_bracket = colors_dict["theme_color"]
-        div_c = colors_dict["divider_color"]
+        fg_sec = BLUE  # High contrast blue labels
+        dial_bg = BLACK   # Solid black speedometer track background
+        hud_bracket = BLUE  # Solid blue brackets
+        div_c = BLUE
 
     traffic_bg = colors_dict["pill_bg"]
     traffic_txt = colors_dict["traffic_text"]
 
     # HUD uses high-tech telemetry graphics
-    cx, cy = WIDTH // 4, 180
-    r = 110
+    cx, cy = WIDTH // 4, 175
+    r = 120
 
     # 1. HUD outer coordinates & brackets (using the full left panel space)
-    draw_corner_ornaments(draw, (18, 18, WIDTH // 2 - 18, HEIGHT - 18), 15, closest_panel_color(hud_bracket))
+    draw_corner_ornaments(draw, (16, 16, WIDTH // 2 - 16, HEIGHT - 16), 18, closest_panel_color(hud_bracket))
 
     # 2. Speedometer-like Arch Dial (enlarged)
     xy = (cx - r, cy - r, cx + r, cy + r)
@@ -526,26 +526,30 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
         draw.arc(xy, 135, end_angle, fill=closest_panel_color(traffic_bg), width=12)
 
     # Dial labels & ticks
-    draw.text((cx - 90, cy + 85), "0", fill=closest_panel_color(fg_sec), font=font(10, bold=True), anchor="ma")
-    draw.text((cx + 90, cy + 85), "60+", fill=closest_panel_color(fg_sec), font=font(10, bold=True), anchor="ma")
+    draw.text((cx - 95, cy + 90), "0", fill=closest_panel_color(fg_sec), font=font(11, bold=True), anchor="ma")
+    draw.text((cx + 95, cy + 90), "60+", fill=closest_panel_color(fg_sec), font=font(11, bold=True), anchor="ma")
 
     # Center digits (much larger ETA)
-    draw.text((cx, cy - 35), str(eta or "?"), fill=closest_panel_color(fg_prim), font=font(72, bold=True), anchor="ma")
-    draw.text((cx, cy + 40), "MINS", fill=closest_panel_color(fg_sec), font=font(14, bold=True), anchor="ma")
+    draw.text((cx, cy - 35), str(eta or "?"), fill=closest_panel_color(fg_prim), font=font(84, bold=True), anchor="ma")
+    draw.text((cx, cy + 45), "MINS", fill=closest_panel_color(fg_sec), font=font(15, bold=True), anchor="ma")
 
     # 3. Telemetry data readouts (Grid of 2 Rows x 2 Columns)
-    lbl_font = font(11, bold=True)
-    val_font = font(16, bold=True)
+    lbl_font = font(12, bold=True)
+    val_font = font(18, bold=True)
 
-    col1_x = 42
-    col2_x = 222
-    row1_y = 315
-    row2_y = 385
+    col1_x = 36
+    col2_x = 226
+    row1_y = 325
+    row2_y = 395
 
     # Row 1 Left: Route
     draw.text((col1_x, row1_y), "ROUTE", fill=closest_panel_color(fg_sec), font=lbl_font)
     route = data.get("route_label") or "Direct"
-    draw.text((col1_x, row1_y + 18), route.upper(), fill=closest_panel_color(fg_prim), font=val_font)
+    route_text = route.upper()
+    if len(route_text) > 18:
+        route_text = route_text[:15] + "..."
+    route_font = font(14, bold=True) if len(route_text) > 12 else val_font
+    draw.text((col1_x, row1_y + 18), route_text, fill=closest_panel_color(fg_prim), font=route_font)
 
     # Row 1 Right: Distance
     draw.text((col2_x, row1_y), "DISTANCE", fill=closest_panel_color(fg_sec), font=lbl_font)
@@ -559,7 +563,11 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
 
     # Row 2 Right: Traffic
     draw.text((col2_x, row2_y), "TRAFFIC", fill=closest_panel_color(fg_sec), font=lbl_font)
-    draw.text((col2_x, row2_y + 18), traffic_txt, fill=closest_panel_color(traffic_bg), font=val_font)
+    traffic_text_val = traffic_txt.upper()
+    if len(traffic_text_val) > 18:
+        traffic_text_val = traffic_text_val[:15] + "..."
+    traffic_val_font = font(13, bold=True) if len(traffic_text_val) > 13 else font(16, bold=True)
+    draw.text((col2_x, row2_y + 18), traffic_text_val, fill=closest_panel_color(traffic_bg), font=traffic_val_font)
 
 
 def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> None:
@@ -585,7 +593,7 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
         style = data.get("layout_variant")
 
     # 1. Resolve Cohesive Theme Colors
-    if dark_mode == 1 or style == "dark_tech" or style == "automotive_hud":
+    if dark_mode == 1 or style == "dark_tech":
         # Dark mode (sleek dark blue-grey dashboard)
         fg_primary = WHITE
         fg_secondary = (140, 150, 160)
@@ -630,7 +638,14 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
             theme_color = BLUE
             secondary_accent = ORANGE
 
-        if style == "split_contrast":
+        if style == "automotive_hud":
+            bg_panel = WHITE
+            divider_color = BLUE
+            fg_primary = BLACK
+            fg_secondary = BLUE
+            banner_bg = WHITE
+            banner_outline = BLUE
+        elif style == "split_contrast":
             # Solid colored sidebar background with white widgets
             bg_panel = closest_panel_color(theme_color)
             divider_color = WHITE
@@ -1085,7 +1100,7 @@ def build(payload_path: Path | None = None, style: str = "split_contrast") -> Im
 
     # Resolve left panel dark mode based on the style
     left_dark_mode = db_dark_mode
-    if active_style in ("dark_tech", "automotive_hud"):
+    if active_style in ("dark_tech",):
         left_dark_mode = 1
     elif active_style in ("minimalist", "swiss_typographic", "infographic_timeline", "bauhaus_geometric"):
         left_dark_mode = 0
