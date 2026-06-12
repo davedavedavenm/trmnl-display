@@ -323,27 +323,28 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
 
     # 1. Resolve Cohesive Theme Colors
     if dark_mode == 1:
+        # Dark mode
         bg_panel = BLACK
-        fg_primary = WHITE
-        fg_secondary = (180, 180, 180)
+        header_fg = (180, 180, 180)
+        panel_line_color = (60, 60, 60)
         card_bg = (20, 20, 20)
         card_border = WHITE
+        fg_primary = WHITE
+        fg_secondary = (180, 180, 180)
         
         if profile == "forest":
             theme_color = GREEN
             secondary_accent = ORANGE
-            card1_default_bg = (10, 35, 20)
         elif profile == "slate":
             theme_color = WHITE
             secondary_accent = ORANGE
-            card1_default_bg = (40, 40, 40)
         else: # navy_blue
             theme_color = BLUE
             secondary_accent = ORANGE
-            card1_default_bg = (15, 35, 90)
             
-        traffic_bg = (30, 30, 30)
-        traffic_fg = theme_color
+        pill_bg = theme_color
+        pill_fg = BLACK if theme_color in (YELLOW, WHITE) else WHITE
+        
         status_bg = theme_color
         status_fg = BLACK if theme_color in (YELLOW, WHITE) else WHITE
         status_left_bar = theme_color
@@ -351,53 +352,44 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
     else:
         # Light mode
         if profile == "forest":
-            bg_panel = (242, 248, 243)      # soft pale green
-            card_border = GREEN
             theme_color = GREEN
             secondary_accent = ORANGE
-            fg_secondary = (50, 100, 60)
-            traffic_bg = (220, 244, 225)
-            traffic_fg = GREEN
-            card1_default_bg = (220, 244, 225)
         elif profile == "slate":
-            bg_panel = (244, 244, 244)      # soft grey
-            card_border = BLACK
             theme_color = BLACK
             secondary_accent = ORANGE
-            fg_secondary = (110, 110, 110)
-            traffic_bg = (230, 230, 230)
-            traffic_fg = BLACK
-            card1_default_bg = (230, 230, 230)
         else: # navy_blue
-            bg_panel = (240, 244, 250)      # soft pale blue
-            card_border = BLUE
             theme_color = BLUE
             secondary_accent = ORANGE
-            fg_secondary = (60, 90, 140)
-            traffic_bg = (220, 232, 252)
-            traffic_fg = BLUE
-            card1_default_bg = (220, 232, 252)
 
+        bg_panel = closest_panel_color(theme_color)
+        header_fg = WHITE
+        panel_line_color = WHITE
         card_bg = WHITE
+        card_border = WHITE  # Borderless cards on colored background
         fg_primary = BLACK
+        fg_secondary = (100, 100, 100)
+        
+        pill_bg = WHITE
+        pill_fg = theme_color
+
         status_bg = theme_color
         status_fg = WHITE
         status_left_bar = theme_color
         status_icon_color = theme_color
 
     # Initialize Card 1 colors
-    card1_bg = card1_default_bg
+    card1_bg = card_bg
+    card1_fg_primary = fg_primary
+    card1_fg_secondary = fg_secondary
     card1_accent_bar = theme_color
+    
     if dark_mode == 1:
-        card1_fg_primary = WHITE
-        card1_fg_secondary = (180, 180, 180)
         card1_badge_bg = WHITE
         card1_badge_fg = theme_color
     else:
-        card1_fg_primary = BLACK
-        card1_fg_secondary = fg_secondary
-        card1_badge_bg = WHITE
-        card1_badge_fg = theme_color
+        # Light Mode: white card background, so badge background is theme_color
+        card1_badge_bg = theme_color
+        card1_badge_fg = WHITE
 
     # Overrides for warnings
     traffic_text = "LIGHT TRAFFIC"
@@ -450,25 +442,15 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
     pill_x0, pill_y0 = 18, 16
     pill_x1, pill_y1 = pill_x0 + badge_w + 20, 40
 
-    pill_bg = theme_color
-    pill_fg = WHITE
-    if pill_bg == YELLOW:
-        pill_fg = BLACK
-    elif pill_bg == WHITE and dark_mode == 0:
-        pill_bg = BLACK
-    elif pill_bg == BLACK and dark_mode == 1:
-        pill_bg = WHITE
-        pill_fg = BLACK
-
     draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x1, pill_y1)], radius=12, fill=closest_panel_color(pill_bg))
     draw.text((pill_x0 + 10, pill_y0 + 4), screen_label.upper(), fill=closest_panel_color(pill_fg), font=badge_font)
 
     if updated:
         upd_font = font(12, bold=True)
-        draw.text((WIDTH // 2 - 18, 28), updated, fill=closest_panel_color(fg_secondary), font=upd_font, anchor="rm")
+        draw.text((WIDTH // 2 - 18, 28), updated, fill=closest_panel_color(header_fg), font=upd_font, anchor="rm")
 
     divider_y = 50
-    draw.line([(18, divider_y), (WIDTH // 2 - 18, divider_y)], fill=closest_panel_color(fg_secondary), width=1)
+    draw.line([(18, divider_y), (WIDTH // 2 - 18, divider_y)], fill=closest_panel_color(panel_line_color), width=1)
 
     # 4. ETA Card (Card 1)
     card1_y0, card1_y1 = 62, 182
