@@ -503,19 +503,15 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
     traffic_txt = colors_dict["traffic_text"]
 
     # HUD uses high-tech telemetry graphics
-    cx, cy = WIDTH // 4, HEIGHT // 2 - 15
-    r = 90
+    cx, cy = WIDTH // 4, 180
+    r = 110
 
-    # 1. Tech Title
-    draw.text((24, 24), "SYS.STATUS // OUTBOUND COMMUTE", fill=closest_panel_color(fg_sec), font=font(9, bold=True))
-    draw.text((24, 36), "[ RADAR TELEMETRY ONLINE ]", fill=closest_panel_color(GREEN), font=font(8, bold=True))
+    # 1. HUD outer coordinates & brackets (using the full left panel space)
+    draw_corner_ornaments(draw, (18, 18, WIDTH // 2 - 18, HEIGHT - 18), 15, closest_panel_color(hud_bracket))
 
-    # 2. HUD outer coordinates & brackets
-    draw_corner_ornaments(draw, (18, 54, WIDTH // 2 - 18, HEIGHT - 18), 10, closest_panel_color(hud_bracket))
-
-    # 3. Speedometer-like Arch Dial
+    # 2. Speedometer-like Arch Dial (enlarged)
     xy = (cx - r, cy - r, cx + r, cy + r)
-    draw.arc(xy, 135, 405, fill=closest_panel_color(dial_bg), width=2)
+    draw.arc(xy, 135, 405, fill=closest_panel_color(dial_bg), width=3)
 
     eta = 0
     try:
@@ -527,42 +523,43 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
     end_angle = 135 + int(270 * fill_pct)
 
     if fill_pct > 0:
-        draw.arc(xy, 135, end_angle, fill=closest_panel_color(traffic_bg), width=8)
+        draw.arc(xy, 135, end_angle, fill=closest_panel_color(traffic_bg), width=12)
 
     # Dial labels & ticks
-    draw.text((cx - 65, cy + 60), "0", fill=closest_panel_color(fg_sec), font=font(8), anchor="ma")
-    draw.text((cx + 65, cy + 60), "60+", fill=closest_panel_color(fg_sec), font=font(8), anchor="ma")
+    draw.text((cx - 90, cy + 85), "0", fill=closest_panel_color(fg_sec), font=font(10, bold=True), anchor="ma")
+    draw.text((cx + 90, cy + 85), "60+", fill=closest_panel_color(fg_sec), font=font(10, bold=True), anchor="ma")
 
-    # Center digits
-    draw.text((cx, cy - 30), str(eta or "?"), fill=closest_panel_color(fg_prim), font=font(48, bold=True), anchor="ma")
-    draw.text((cx, cy + 18), "MINS", fill=closest_panel_color(fg_sec), font=font(9, bold=True), anchor="ma")
+    # Center digits (much larger ETA)
+    draw.text((cx, cy - 35), str(eta or "?"), fill=closest_panel_color(fg_prim), font=font(72, bold=True), anchor="ma")
+    draw.text((cx, cy + 40), "MINS", fill=closest_panel_color(fg_sec), font=font(14, bold=True), anchor="ma")
 
-    # 4. Telemetry data readouts (4 Corners)
-    lbl_font = font(8, bold=True)
-    val_font = font(13, bold=True)
+    # 3. Telemetry data readouts (Grid of 2 Rows x 2 Columns)
+    lbl_font = font(11, bold=True)
+    val_font = font(16, bold=True)
 
-    # Top Left
-    draw.text((36, 68), "ROUTE", fill=closest_panel_color(fg_sec), font=lbl_font)
+    col1_x = 42
+    col2_x = 222
+    row1_y = 315
+    row2_y = 385
+
+    # Row 1 Left: Route
+    draw.text((col1_x, row1_y), "ROUTE", fill=closest_panel_color(fg_sec), font=lbl_font)
     route = data.get("route_label") or "Direct"
-    draw.text((36, 80), route.upper(), fill=closest_panel_color(fg_prim), font=val_font)
+    draw.text((col1_x, row1_y + 18), route.upper(), fill=closest_panel_color(fg_prim), font=val_font)
 
-    # Top Right
-    draw.text((WIDTH // 2 - 110, 68), "DISTANCE", fill=closest_panel_color(fg_sec), font=lbl_font)
+    # Row 1 Right: Distance
+    draw.text((col2_x, row1_y), "DISTANCE", fill=closest_panel_color(fg_sec), font=lbl_font)
     dist = f"{data.get('distance_km')} KM" if data.get("distance_km") else "N/A"
-    draw.text((WIDTH // 2 - 110, 80), dist, fill=closest_panel_color(fg_prim), font=val_font)
+    draw.text((col2_x, row1_y + 18), dist, fill=closest_panel_color(fg_prim), font=val_font)
 
-    # Bottom Left
-    draw.text((36, cy + 105), "LEAVE BY", fill=closest_panel_color(fg_sec), font=lbl_font)
+    # Row 2 Left: Leave By
+    draw.text((col1_x, row2_y), "LEAVE BY", fill=closest_panel_color(fg_sec), font=lbl_font)
     leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
-    draw.text((36, cy + 117), leave_time, fill=closest_panel_color(fg_prim), font=val_font)
+    draw.text((col1_x, row2_y + 18), leave_time, fill=closest_panel_color(fg_prim), font=val_font)
 
-    # Bottom Right
-    draw.text((WIDTH // 2 - 110, cy + 105), "TRAFFIC", fill=closest_panel_color(fg_sec), font=lbl_font)
-    draw.text((WIDTH // 2 - 110, cy + 117), traffic_txt, fill=closest_panel_color(traffic_bg), font=val_font)
-
-    # 5. Status banner text
-    draw.rectangle([36, HEIGHT - 30, WIDTH // 2 - 36, HEIGHT - 28], fill=closest_panel_color(div_c))
-    draw.text((cx, HEIGHT - 24), colors_dict["sub_text"].upper(), fill=closest_panel_color(fg_sec), font=font(8, bold=True), anchor="ma")
+    # Row 2 Right: Traffic
+    draw.text((col2_x, row2_y), "TRAFFIC", fill=closest_panel_color(fg_sec), font=lbl_font)
+    draw.text((col2_x, row2_y + 18), traffic_txt, fill=closest_panel_color(traffic_bg), font=val_font)
 
 
 def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> None:
