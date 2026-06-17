@@ -105,12 +105,10 @@ def render_empty(draw: ImageDraw.ImageDraw, theme: Theme) -> None:
     f_msg = font(20)
 
     now = datetime.now(timezone.utc)
-    now_str = now.strftime("%H:%M")
     date_str = now.strftime("%A %d %B %Y")
 
-    draw.text((WIDTH // 2, HEIGHT // 2 - 50), now_str, fill=theme.fg, font=f_clock, anchor="mm")
-    draw.text((WIDTH // 2, HEIGHT // 2 + 15), date_str, fill=theme.dim, font=f_date, anchor="mm")
-    draw.text((WIDTH // 2, HEIGHT // 2 + 55), "No events this week", fill=theme.dim, font=f_msg, anchor="mm")
+    draw.text((WIDTH // 2, HEIGHT // 2 - 15), date_str, fill=theme.dim, font=f_date, anchor="mm")
+    draw.text((WIDTH // 2, HEIGHT // 2 + 25), "No events this week", fill=theme.dim, font=f_msg, anchor="mm")
 
 
 def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_str: str, theme: Theme) -> None:
@@ -123,7 +121,6 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
         today_day = days[0]
 
     f_mast = font(18, bold=True)
-    f_clock = font(24, bold=True)
     f_footer = font(16)
 
     if not days:
@@ -132,7 +129,6 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
 
     # TOP BAR
     header_y = 22
-    draw.text((24, header_y), now_str, fill=theme.fg, font=f_clock, anchor="lm")
 
     if today_day:
         day_name = today_day.get("day_name", "")
@@ -150,100 +146,142 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
 
     draw.line([(24, 45), (WIDTH - 24, 45)], fill=theme.dim, width=1)
 
+    # Collect all upcoming events chronologically across the week
+    all_upcoming_events = []
+    for day in days:
+        day_date = day.get("date", "")
+        day_name = day.get("day_name", "")
+        
+        day_events = []
+        for cal in day.get("calendars", []):
+            cal_name_raw = cal.get("name", "?")
+            cal_color = closest_panel_color(cal.get("color", [128, 128, 128]))
+            cal_label = cal.get("label") or SOURCE_LABELS.get(cal_name_raw, cal_name_raw.split("-")[-1].capitalize()[:10])
+            
+            for ev in cal.get("events", []):
+                day_events.append({
+                    "event": ev,
+                    "cal_color": cal_color,
+                    "cal_label": cal_label,
+                    "day_date": day_date,
+                    "day_name": day_name
+                })
+        
+        # Sort day_events by start time
+        def get_event_sort_key(item):
+            ev = item["event"]
+            start_s = ev.get("start", "")
+            if ev.get("all_day", False):
+                return "00:00"
+            try:
+                if "T" in start_s:
+                    return start_s.split("T")[1][:5]
+            except Exception:
+                pass
+            return "23:59"
+            
+        day_events.sort(key=get_event_sort_key)
+        all_upcoming_events.extend(day_events)
+
     # EVENT CARDS
     ev_y = 60
     block_h = 108
     gap = 14
+    max_events = 3
+    rendered_count = 0
 
-    if today_day:
-        calendars = today_day.get("calendars", [])
-        max_events = 3
-        rendered_count = 0
+    for ev_item in all_upcoming_events:
+        if rendered_count >= max_events or ev_y > HEIGHT - 120:
+            break
 
-        for cal in calendars:
-            if rendered_count >= max_events:
-                break
+        ev = ev_item["event"]
+        cal_color = ev_item["cal_color"]
+        cal_label = ev_item["cal_label"]
+        event_date_str = ev_item["day_date"]
 
-            cal_name_raw = cal.get("name", "?")
-            cal_color = closest_panel_color(cal.get("color", [128, 128, 128]))
-            cal_label = cal.get("label") or SOURCE_LABELS.get(cal_name_raw, cal_name_raw.split("-")[-1].capitalize()[:10])
-            cal_events = cal.get("events", [])
+        start_s = ev.get("start", "")
+        end_s = ev.get("end", "")
+        all_day = ev.get("all_day", False)
+        summary = ev.get("summary", "")[:45]
+        location = ev.get("location", "").strip()
+        desc = ev.get("description", "").strip()
+        status = ev.get("status", "confirmed")
+        attendees = ev.get("attendees", [])
+        attendee_count = len([a for a in attendees if a.get("status") == "accepted"])
 
-            for ev in cal_events:
-                if rendered_count >= max_events or ev_y > HEIGHT - 120:
-                    break
+        # Check if event is today
+        is_event_today = event_date_str == today
 
-                start_s = ev.get("start", "")
-                end_s = ev.get("end", "")
-                all_day = ev.get("all_day", False)
-                summary = ev.get("summary", "")[:45]
-                location = ev.get("location", "").strip()
-                desc = ev.get("description", "").strip()
-                status = ev.get("status", "confirmed")
-                attendees = ev.get("attendees", [])
-                attendee_count = len([a for a in attendees if a.get("status") == "accepted"])
+        if all_day:
+            time_label = "ALL DAY"
+        else:
+            try:
+                st = datetime.fromisoformat(start_s.replace("Z", "+00:00"))
+                time_label = st.strftime("%H:%M")
+                if end_s:
+                    et = datetime.fromisoformat(end_s.replace("Z", "+00:00"))
+                    time_label += f" - {et.strftime('%H:%M')}"
+            except (ValueError, TypeError):
+                time_label = ""
 
-                if all_day:
-                    time_label = "ALL DAY"
-                else:
-                    try:
-                        st = datetime.fromisoformat(start_s.replace("Z", "+00:00"))
-                        time_label = st.strftime("%H:%M")
-                        if end_s:
-                            et = datetime.fromisoformat(end_s.replace("Z", "+00:00"))
-                            time_label += f" - {et.strftime('%H:%M')}"
-                    except (ValueError, TypeError):
-                        time_label = ""
+        # Prepend date if not today
+        if not is_event_today and event_date_str:
+            try:
+                ev_dt = datetime.strptime(event_date_str, "%Y-%m-%d")
+                day_prefix = ev_dt.strftime("%a %d %b").upper() # e.g. "SAT 20 JUN"
+                time_label = f"{day_prefix} • {time_label}"
+            except Exception:
+                time_label = f"{event_date_str} • {time_label}"
 
-                # Card Outer Box
-                draw.rounded_rectangle([(24, ev_y), (WIDTH - 24, ev_y + block_h)], radius=10, fill=theme.bg_card, outline=theme.dim, width=2)
+        # Card Outer Box: Colored outline matching the calendar's color
+        draw.rounded_rectangle([(24, ev_y), (WIDTH - 24, ev_y + block_h)], radius=10, fill=theme.bg_card, outline=cal_color, width=3)
 
-                # Left Accent Bar
-                draw.rounded_rectangle([(26, ev_y + 2), (34, ev_y + block_h - 2)], radius=3, fill=cal_color)
+        # Left Accent Bar
+        draw.rounded_rectangle([(26, ev_y + 2), (34, ev_y + block_h - 2)], radius=3, fill=cal_color)
 
-                # Render Time
-                draw.text((46, ev_y + 14), time_label, fill=theme.fg, font=font(18, bold=True))
+        # Render Time/Date in cal_color
+        draw.text((46, ev_y + 14), time_label, fill=cal_color, font=font(18, bold=True))
 
-                # Render Summary
-                display_summary = f"[CANCELLED] {summary}" if status == "cancelled" else summary
-                draw.text((46, ev_y + 42), display_summary, fill=theme.fg, font=font(22, bold=True))
+        # Render Summary
+        display_summary = f"[CANCELLED] {summary}" if status == "cancelled" else summary
+        draw.text((46, ev_y + 42), display_summary, fill=theme.fg, font=font(22, bold=True))
 
-                # Cancelled Strike-through
-                if status == "cancelled":
-                    text_w = draw.textlength(display_summary, font=font(22, bold=True))
-                    draw.line([(46, ev_y + 42 + 13), (46 + text_w, ev_y + 42 + 13)], fill=RED, width=3)
+        # Cancelled Strike-through
+        if status == "cancelled":
+            text_w = draw.textlength(display_summary, font=font(22, bold=True))
+            draw.line([(46, ev_y + 42 + 13), (46 + text_w, ev_y + 42 + 13)], fill=RED, width=3)
 
-                # Render Location or Description
-                subtext = ""
-                if location:
-                    subtext = f"📍 {location[:55]}"
-                elif desc:
-                    subtext = desc.replace("\n", " ").replace("\r", " ")[:60]
+        # Render Location or Description
+        subtext = ""
+        if location:
+            subtext = f"📍 {location[:55]}"
+        elif desc:
+            subtext = desc.replace("\n", " ").replace("\r", " ")[:60]
 
-                if subtext:
-                    draw.text((46, ev_y + 74), subtext, fill=theme.fg, font=font(15))
+        if subtext:
+            draw.text((46, ev_y + 74), subtext, fill=theme.fg, font=font(15))
 
-                # Source Badge (top-right of card)
-                badge_w = draw.textlength(cal_label, font=font(12, bold=True)) + 16
-                badge_h = 24
-                badge_x = WIDTH - 24 - 12 - badge_w
-                badge_y = ev_y + 14
+        # Source Badge (top-right of card)
+        badge_w = draw.textlength(cal_label, font=font(12, bold=True)) + 16
+        badge_h = 24
+        badge_x = WIDTH - 24 - 12 - badge_w
+        badge_y = ev_y + 14
 
-                badge_fg = BLACK if cal_color in (YELLOW, WHITE) else WHITE
-                draw.rounded_rectangle([(badge_x, badge_y), (badge_x + badge_w, badge_y + badge_h)], radius=5, fill=cal_color)
-                draw.text((badge_x + badge_w // 2, badge_y + badge_h // 2), cal_label, fill=badge_fg, font=font(12, bold=True), anchor="mm")
+        badge_fg = BLACK if cal_color in (YELLOW, WHITE) else WHITE
+        draw.rounded_rectangle([(badge_x, badge_y), (badge_x + badge_w, badge_y + badge_h)], radius=5, fill=cal_color)
+        draw.text((badge_x + badge_w // 2, badge_y + badge_h // 2), cal_label, fill=badge_fg, font=font(12, bold=True), anchor="mm")
 
-                # Attendee Count Badge
-                if attendee_count > 0:
-                    attend_text = f"👥 {attendee_count}"
-                    a_w = draw.textlength(attend_text, font=font(11, bold=True)) + 12
-                    a_x = badge_x - 8 - a_w
-                    a_y = badge_y
-                    draw.rounded_rectangle([(a_x, a_y), (a_x + a_w, a_y + badge_h)], radius=5, outline=theme.dim, width=1)
-                    draw.text((a_x + a_w // 2, a_y + badge_h // 2), attend_text, fill=theme.fg, font=font(11, bold=True), anchor="mm")
+        # Attendee Count Badge
+        if attendee_count > 0:
+            attend_text = f"👥 {attendee_count}"
+            a_w = draw.textlength(attend_text, font=font(11, bold=True)) + 12
+            a_x = badge_x - 8 - a_w
+            a_y = badge_y
+            draw.rounded_rectangle([(a_x, a_y), (a_x + a_w, a_y + badge_h)], radius=5, outline=theme.dim, width=1)
+            draw.text((a_x + a_w // 2, a_y + badge_h // 2), attend_text, fill=theme.fg, font=font(11, bold=True), anchor="mm")
 
-                ev_y += block_h + gap
-                rendered_count += 1
+        ev_y += block_h + gap
+        rendered_count += 1
 
     # FOOTER: upcoming days
     footer_y = HEIGHT - 45
@@ -297,7 +335,6 @@ def render_agenda(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_s
 
     # TOP BAR
     header_y = 22
-    draw.text((24, header_y), now_str, fill=theme.fg, font=f_clock, anchor="lm")
     draw.line([(24, 45), (WIDTH - 24, 45)], fill=theme.dim, width=1)
 
     # TWO-COLUMN AGENDA LAYOUT
@@ -404,7 +441,6 @@ def render_weekstrip(draw: ImageDraw.ImageDraw, days: list[dict], today: str, no
 
     # TOP BAR
     header_y = 22
-    draw.text((24, header_y), now_str, fill=theme.fg, font=f_clock, anchor="lm")
     draw.line([(24, 45), (WIDTH - 24, 45)], fill=theme.dim, width=1)
 
     # 7-DAY COLUMNS
