@@ -64,10 +64,19 @@ $updated = DB::table('plugins')
     ->update([
         'current_image' => $imageName,
         'current_image_metadata' => $metadata,
-        'data_payload_updated_at' => now(),
+        'data_payload_updated_at' => now()->subHours(2),
         'data_stale_minutes' => 1440,
         'updated_at' => now(),
     ]);
+
+// Also ensure the device displays this sidecar image immediately
+DB::table('devices')
+    ->where('id', 1)
+    ->update([
+        'current_screen_image' => $imageName,
+        'updated_at' => now(),
+    ]);
+
 
 if ($updated < 1) {
     fwrite(STDERR, "Plugin not found: {$pluginName}\n");

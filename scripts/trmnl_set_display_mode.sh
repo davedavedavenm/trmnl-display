@@ -226,6 +226,61 @@ echo json_encode([
 PHP
 fi
 
+if [[ "${MODE}" == "jen_morning" && "${SIDECAR_HANDOFF_ENABLED}" == "1" ]]; then
+  MORNING_SIDECAR_IMAGE_PATH="/home/dave/trmnl-display-scripts/tmp/sidecar_morning_mashup_next.png"
+  MORNING_SIDECAR_IMAGE_NAME="sidecar_morning_mashup_next"
+  MORNING_SIDECAR_CONTAINER_IMAGE_PATH="/var/www/html/storage/app/public/images/generated/${MORNING_SIDECAR_IMAGE_NAME}.png"
+
+  if [[ -s "${MORNING_SIDECAR_IMAGE_PATH}" ]]; then
+    docker cp "${MORNING_SIDECAR_IMAGE_PATH}" "${LARAPAPER_CONTAINER}:${MORNING_SIDECAR_CONTAINER_IMAGE_PATH}"
+
+    docker exec \
+      -e DEVICE_ID="${DEVICE_ID}" \
+      -e PLUGIN_NAME="${PLUGIN_NAME}" \
+      -e SIDECAR_IMAGE_NAME="${MORNING_SIDECAR_IMAGE_NAME}" \
+      -i "${LARAPAPER_CONTAINER}" php <<'PHP'
+<?php
+require '/var/www/html/vendor/autoload.php';
+$app = require '/var/www/html/bootstrap/app.php';
+$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+$deviceId = (int) getenv('DEVICE_ID');
+$pluginName = getenv('PLUGIN_NAME');
+$imageName = getenv('SIDECAR_IMAGE_NAME');
+$metadata = json_encode([
+    'width' => 800,
+    'height' => 480,
+    'rotation' => 0,
+    'palette_id' => 10,
+    'mime_type' => 'image/png',
+]);
+
+DB::table('devices')
+    ->where('id', $deviceId)
+    ->update([
+        'current_screen_image' => $imageName,
+        'updated_at' => now(),
+    ]);
+
+DB::table('plugins')
+    ->where('name', $pluginName)
+    ->update([
+        'current_image' => $imageName,
+        'current_image_metadata' => $metadata,
+        'data_payload_updated_at' => now()->subHours(2),
+        'updated_at' => now(),
+    ]);
+
+echo json_encode([
+    'sidecar_handoff' => true,
+    'plugin' => $pluginName,
+    'image' => $imageName,
+]);
+PHP
+  fi
+fi
+
+
 if [[ "${MODE}" == "bus" ]]; then
   echo "Bus mode activated. Triggering immediate refresh..."
   /home/dave/bin/trmnl-refresh-bus-sidecar --force || true
