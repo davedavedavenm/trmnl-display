@@ -297,7 +297,7 @@ def draw_house_stripes(draw: ImageDraw.ImageDraw, start_x: int, y: int, width: i
         x1 = x0 + stripe_w
         if i == len(colors) - 1:
             x1 = start_x + width
-        draw.rectangle([x0, y, x1, y + 4], fill=closest_panel_color(col))
+        draw.rectangle([x0, y, x1, y + 6], fill=closest_panel_color(col))
 
 
 # ==========================================
@@ -488,10 +488,10 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
     # Resolve high-contrast palette to prevent dithering noise
     if dark_mode == 1:
         fg_prim = WHITE
-        fg_sec = YELLOW  # High contrast labels
+        fg_sec = WHITE  # Flip to pure white text for "dark blue background, white text"
         dial_bg = WHITE   # Solid white speedometer track background
-        hud_bracket = YELLOW  # Solid yellow brackets
-        div_c = YELLOW
+        hud_bracket = WHITE  # Solid white brackets
+        div_c = WHITE
     else:
         fg_prim = BLACK
         fg_sec = BLUE  # High contrast blue labels
@@ -511,7 +511,7 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
 
     # 2. Speedometer-like Arch Dial (enlarged)
     xy = (cx - r, cy - r, cx + r, cy + r)
-    draw.arc(xy, 135, 405, fill=closest_panel_color(dial_bg), width=3)
+    draw.arc(xy, 135, 405, fill=closest_panel_color(dial_bg), width=4)
 
     eta = 0
     try:
@@ -525,49 +525,60 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
     if fill_pct > 0:
         draw.arc(xy, 135, end_angle, fill=closest_panel_color(traffic_bg), width=12)
 
-    # Dial labels & ticks
-    draw.text((cx - 95, cy + 90), "0", fill=closest_panel_color(fg_sec), font=font(11, bold=True), anchor="ma")
-    draw.text((cx + 95, cy + 90), "60+", fill=closest_panel_color(fg_sec), font=font(11, bold=True), anchor="ma")
+    # Dial labels & ticks (larger tick text)
+    draw.text((cx - 95, cy + 90), "0", fill=closest_panel_color(fg_sec), font=font(16, bold=True), anchor="ma")
+    draw.text((cx + 95, cy + 90), "60+", fill=closest_panel_color(fg_sec), font=font(16, bold=True), anchor="ma")
 
-    # Center digits (much larger ETA)
-    draw.text((cx, cy - 35), str(eta or "?"), fill=closest_panel_color(fg_prim), font=font(84, bold=True), anchor="ma")
-    draw.text((cx, cy + 45), "MINS", fill=closest_panel_color(fg_sec), font=font(15, bold=True), anchor="ma")
+    # Center digits (much larger ETA, adjusted position to avoid overlap with MINS)
+    draw.text((cx, cy - 45), str(eta or "?"), fill=closest_panel_color(fg_prim), font=font(110, bold=True), anchor="ma")
+    draw.text((cx, cy + 68), "MINS", fill=closest_panel_color(fg_sec), font=font(22, bold=True), anchor="ma")
 
-    # 3. Telemetry data readouts (Grid of 2 Rows x 2 Columns)
-    lbl_font = font(12, bold=True)
-    val_font = font(18, bold=True)
+    # 3. Telemetry data readouts (Grid of 2 Rows x 2 Columns) - Enlarged
+    lbl_font = font(16, bold=True)
+    val_font = font(28, bold=True)
 
-    col1_x = 36
-    col2_x = 226
-    row1_y = 325
-    row2_y = 395
+    col1_x = 32
+    col2_x = 224
+    row1_y = 305
+    row2_y = 385
 
     # Row 1 Left: Route
     draw.text((col1_x, row1_y), "ROUTE", fill=closest_panel_color(fg_sec), font=lbl_font)
     route = data.get("route_label") or "Direct"
     route_text = route.upper()
-    if len(route_text) > 18:
-        route_text = route_text[:15] + "..."
-    route_font = font(14, bold=True) if len(route_text) > 12 else val_font
-    draw.text((col1_x, row1_y + 18), route_text, fill=closest_panel_color(fg_prim), font=route_font)
+    if len(route_text) > 16:
+        route_text = route_text[:13] + "..."
+    if len(route_text) > 12:
+        route_font = font(16, bold=True)
+    elif len(route_text) > 8:
+        route_font = font(20, bold=True)
+    else:
+        route_font = val_font
+    draw.text((col1_x, row1_y + 22), route_text, fill=closest_panel_color(fg_prim), font=route_font)
 
     # Row 1 Right: Distance
     draw.text((col2_x, row1_y), "DISTANCE", fill=closest_panel_color(fg_sec), font=lbl_font)
     dist = f"{data.get('distance_km')} KM" if data.get("distance_km") else "N/A"
-    draw.text((col2_x, row1_y + 18), dist, fill=closest_panel_color(fg_prim), font=val_font)
+    draw.text((col2_x, row1_y + 22), dist, fill=closest_panel_color(fg_prim), font=val_font)
 
     # Row 2 Left: Leave By
     draw.text((col1_x, row2_y), "LEAVE BY", fill=closest_panel_color(fg_sec), font=lbl_font)
     leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
-    draw.text((col1_x, row2_y + 18), leave_time, fill=closest_panel_color(fg_prim), font=val_font)
+    draw.text((col1_x, row2_y + 22), leave_time, fill=closest_panel_color(fg_prim), font=val_font)
 
     # Row 2 Right: Traffic
     draw.text((col2_x, row2_y), "TRAFFIC", fill=closest_panel_color(fg_sec), font=lbl_font)
     traffic_text_val = traffic_txt.upper()
-    if len(traffic_text_val) > 18:
-        traffic_text_val = traffic_text_val[:15] + "..."
-    traffic_val_font = font(13, bold=True) if len(traffic_text_val) > 13 else font(16, bold=True)
-    draw.text((col2_x, row2_y + 18), traffic_text_val, fill=closest_panel_color(traffic_bg), font=traffic_val_font)
+    if len(traffic_text_val) > 16:
+        traffic_text_val = traffic_text_val[:13] + "..."
+    if len(traffic_text_val) > 12:
+        traffic_val_font = font(16, bold=True)
+    elif len(traffic_text_val) > 8:
+        traffic_val_font = font(20, bold=True)
+    else:
+        traffic_val_font = val_font
+    draw.text((col2_x, row2_y + 22), traffic_text_val, fill=closest_panel_color(traffic_bg), font=traffic_val_font)
+
 
 
 def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> None:
@@ -605,8 +616,8 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
             bg_panel = (15, 20, 30)
             divider_color = (40, 50, 70)
         elif style == "automotive_hud":
-            bg_panel = BLACK
-            divider_color = BLUE
+            bg_panel = BLUE
+            divider_color = WHITE
         elif style == "infographic_timeline":
             bg_panel = (18, 24, 32)
             divider_color = (35, 45, 55)
@@ -982,45 +993,49 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
         draw_shield_watermark(draw, start_x + 200, 240, 140, 180, closest_panel_color(watermark_color), dark_mode)
 
     # 3. Top Banner & House Tie Stripes
-    banner_h = 36
+    banner_h = 56
     draw.rectangle([start_x, 0, WIDTH, banner_h], fill=closest_panel_color(banner_bg))
 
     # House Title
     house_name = HOUSE_LABELS.get(house, "Wizarding World") if house else "Wizarding World"
-    name_font = font(15, bold=True)
+    name_font = font(24, bold=True)
     name_w = int(draw.textlength(house_name, font=name_font))
-    draw.text((start_x + (WIDTH - start_x - name_w) // 2, (banner_h - 18) // 2 + 1), house_name.upper(), fill=closest_panel_color(banner_fg), font=name_font)
+    draw.text((start_x + (WIDTH - start_x - name_w) // 2, (banner_h - 28) // 2), house_name.upper(), fill=closest_panel_color(banner_fg), font=name_font)
 
     # Draw the tie stripes under the banner
     draw_house_stripes(draw, start_x, banner_h, WIDTH - start_x, house or "gryffindor")
 
+    # 8. Footer & Attribution height definition early for card_box positioning
+    attr_bar_h = 56
+    attr_y = HEIGHT - attr_bar_h
+
     # 4. Ornate Inner Card Border (Thin line with corner brackets)
-    card_box = (start_x + 16, banner_h + 16, WIDTH - 16, HEIGHT - 16)
+    card_box = (start_x + 16, banner_h + 16, WIDTH - 16, attr_y - 16)
     draw.rectangle(card_box, outline=closest_panel_color(accent_color), width=1)
     # Bold corner brackets
     draw_corner_ornaments(draw, card_box, 16, closest_panel_color(accent_color))
 
     # 5. Large Quote Marks
-    q_mark_font = font(64, bold=True)
-    draw.text((start_x + 28, banner_h + 24), "“", fill=closest_panel_color(accent_color), font=q_mark_font)
-    draw.text((WIDTH - 54, HEIGHT - 92), "”", fill=closest_panel_color(accent_color), font=q_mark_font)
+    q_mark_font = font(84, bold=True)
+    draw.text((start_x + 28, banner_h + 20), "“", fill=closest_panel_color(accent_color), font=q_mark_font)
+    draw.text((WIDTH - 64, attr_y - 96), "”", fill=closest_panel_color(accent_color), font=q_mark_font)
 
     # 6. Quote Text
     text_area_x = start_x + 36
     text_area_w = WIDTH - start_x - 72
     text_area_y = banner_h + 36
-    text_area_h = HEIGHT - text_area_y - 84
+    text_area_h = attr_y - text_area_y - 64
 
-    quote_font_size = 24
+    quote_font_size = 38
     qf_quote = font(quote_font_size)
     wrapped = wrap_text(quote_text, qf_quote, text_area_w, draw)
 
-    while len(wrapped) > 6 and quote_font_size > 14:
+    while len(wrapped) > 6 and quote_font_size > 18:
         quote_font_size -= 2
         qf_quote = font(quote_font_size)
         wrapped = wrap_text(quote_text, qf_quote, text_area_w, draw)
 
-    line_height = quote_font_size + 6
+    line_height = quote_font_size + 8
     total_text_height = len(wrapped) * line_height
     quote_start_y = text_area_y + (text_area_h - total_text_height) // 2
 
@@ -1032,25 +1047,21 @@ def draw_hp_quote_card(draw: ImageDraw.ImageDraw, quote_text: str, character: st
 
     # 7. Ornate Divider (Line + Star)
     divider_y = quote_start_y + total_text_height + 14
-    if divider_y < HEIGHT - 64:
+    if divider_y < attr_y - 20:
         draw.line([(start_x + 120, divider_y), (WIDTH - 120, divider_y)], fill=closest_panel_color(accent_color), width=1)
         draw_star(draw, start_x + 200, divider_y, 6, closest_panel_color(accent_color))
 
-    # 8. Footer & Attribution
-    attr_bar_h = 32
-    attr_y = HEIGHT - attr_bar_h
-
     # Gold stripe above footer banner
-    draw_house_stripes(draw, start_x, attr_y - 4, WIDTH - start_x, house or "gryffindor")
+    draw_house_stripes(draw, start_x, attr_y - 6, WIDTH - start_x, house or "gryffindor")
     draw.rectangle([start_x, attr_y, WIDTH, HEIGHT], fill=closest_panel_color(banner_bg))
 
-    attr_font = font(12, bold=True)
+    attr_font = font(20, bold=True)
     short_book = {"Philosopher's Stone": "PS", "Chamber of Secrets": "CS", "Prisoner of Azkaban": "PA", "Goblet of Fire": "GF", "Order of the Phoenix": "OP", "Half-Blood Prince": "HBP", "Deathly Hallows": "DH"}.get(book, book) if show_book else None
     attr_text = f"— {character}"
     if short_book:
         attr_text += f", {short_book}"
     attr_w = int(draw.textlength(attr_text, font=attr_font))
-    draw.text((start_x + (WIDTH - start_x - attr_w) // 2, attr_y + (attr_bar_h - 15) // 2), attr_text.upper(), fill=closest_panel_color(banner_fg), font=attr_font)
+    draw.text((start_x + (WIDTH - start_x - attr_w) // 2, attr_y + (attr_bar_h - 24) // 2), attr_text.upper(), fill=closest_panel_color(banner_fg), font=attr_font)
 
 
 def render_morning_mashup(jen_data: dict[str, Any], quotes: list[dict[str, Any]], config: dict[str, Any], left_dark_mode: int, hp_dark_mode: int) -> Image.Image:
