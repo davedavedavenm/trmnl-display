@@ -78,6 +78,8 @@ PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
 def closest_panel_color(rgb: tuple[int, int, int] | list[int]) -> tuple[int, int, int]:
     if not rgb or len(rgb) < 3:
         return BLACK
+    if list(rgb) == [15, 23, 42]:
+        return BLUE
     min_dist = float("inf")
     best_color = BLACK
     for p_color in PANEL_PALETTE:
@@ -485,33 +487,54 @@ def draw_bauhaus_geometric(draw: ImageDraw.ImageDraw, data: dict[str, Any], conf
 
 
 def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dict[str, Any], dark_mode: int, colors_dict: dict) -> None:
-    # Resolve high-contrast palette to prevent dithering noise
+    # Resolve high-contrast palette
     if dark_mode == 1:
-        fg_prim = WHITE
-        fg_sec = WHITE  # Flip to pure white text for "dark blue background, white text"
-        dial_bg = WHITE   # Solid white speedometer track background
-        hud_bracket = WHITE  # Solid white brackets
-        div_c = WHITE
+        # Deep navy blue theme
+        bg_color = (15, 23, 42)
+        fg_text = BLACK      # Telemetry values inside white cards are black
+        fg_labels = BLUE     # Telemetry labels inside white cards are blue
+        banner_bg = bg_color
+        banner_fg = WHITE
+        card_outline = bg_color
     else:
-        fg_prim = BLACK
-        fg_sec = BLUE  # High contrast blue labels
-        dial_bg = BLACK   # Solid black speedometer track background
-        hud_bracket = BLUE  # Solid blue brackets
-        div_c = BLUE
+        # Light theme
+        bg_color = WHITE
+        fg_text = BLACK
+        fg_labels = BLUE
+        banner_bg = WHITE
+        banner_fg = BLUE
+        card_outline = BLUE
 
     traffic_bg = colors_dict["pill_bg"]
     traffic_txt = colors_dict["traffic_text"]
 
-    # HUD uses high-tech telemetry graphics
-    cx, cy = WIDTH // 4, 175
-    r = 120
+    # 1. Top Banner
+    banner_h = 56
+    draw.rectangle([0, 0, WIDTH // 2, banner_h], fill=closest_panel_color(banner_bg))
 
-    # 1. HUD outer coordinates & brackets (using the full left panel space)
-    draw_corner_ornaments(draw, (16, 16, WIDTH // 2 - 16, HEIGHT - 16), 18, closest_panel_color(hud_bracket))
+    # Route shifted to the header area to prevent truncation
+    route = data.get("route_label") or "Direct"
+    route_text = f"ROUTE: {route.upper()}"
+    if len(route_text) > 28:
+        route_text = route_text[:25] + "..."
+    
+    # Draw route text in the header banner
+    draw.text((WIDTH // 4, (banner_h - 24) // 2), route_text, fill=closest_panel_color(banner_fg), font=font(20, bold=True), anchor="ma")
 
-    # 2. Speedometer-like Arch Dial (enlarged)
+    # Draw the tie stripes under the banner
+    house = config.get("house") or "gryffindor"
+    draw_house_stripes(draw, 0, banner_h, WIDTH // 2, house)
+
+    # 2. Speedometer Gauge Card (White background)
+    x0, y0, x1, y1 = 20, 80, 380, 295
+    draw.rounded_rectangle([(x0, y0), (x1, y1)], radius=10, fill=WHITE, outline=closest_panel_color(card_outline), width=2)
+
+    cx, cy = 200, 185
+    r = 85
+
+    # Speedometer-like Arch Dial
     xy = (cx - r, cy - r, cx + r, cy + r)
-    draw.arc(xy, 135, 405, fill=closest_panel_color(dial_bg), width=4)
+    draw.arc(xy, 135, 405, fill=closest_panel_color(BLACK), width=4)
 
     eta = 0
     try:
@@ -525,59 +548,51 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
     if fill_pct > 0:
         draw.arc(xy, 135, end_angle, fill=closest_panel_color(traffic_bg), width=12)
 
-    # Dial labels & ticks (larger tick text)
-    draw.text((cx - 95, cy + 90), "0", fill=closest_panel_color(fg_sec), font=font(16, bold=True), anchor="ma")
-    draw.text((cx + 95, cy + 90), "60+", fill=closest_panel_color(fg_sec), font=font(16, bold=True), anchor="ma")
+    # Dial labels & ticks
+    draw.text((cx - 70, cy + 65), "0", fill=closest_panel_color(BLACK), font=font(14, bold=True), anchor="ma")
+    draw.text((cx + 70, cy + 65), "60+", fill=closest_panel_color(BLACK), font=font(14, bold=True), anchor="ma")
 
-    # Center digits (much larger ETA, adjusted position to avoid overlap with MINS)
-    draw.text((cx, cy - 45), str(eta or "?"), fill=closest_panel_color(fg_prim), font=font(110, bold=True), anchor="ma")
-    draw.text((cx, cy + 68), "MINS", fill=closest_panel_color(fg_sec), font=font(22, bold=True), anchor="ma")
+    # Center digits (ETA inside white card)
+    draw.text((cx, cy - 35), str(eta or "?"), fill=closest_panel_color(BLACK), font=font(84, bold=True), anchor="ma")
+    draw.text((cx, cy + 45), "MINS", fill=closest_panel_color(BLUE), font=font(18, bold=True), anchor="ma")
 
-    # 3. Telemetry data readouts (Grid of 2 Rows x 2 Columns) - Enlarged
-    lbl_font = font(16, bold=True)
-    val_font = font(28, bold=True)
+    # 3. Bottom Telemetry Card (White background)
+    bx0, by0, bx1, by1 = 20, 315, 380, 460
+    draw.rounded_rectangle([(bx0, by0), (bx1, by1)], radius=10, fill=WHITE, outline=closest_panel_color(card_outline), width=2)
 
-    col1_x = 32
-    col2_x = 224
-    row1_y = 305
-    row2_y = 385
+    # Telemetry data readouts (2x2 Grid inside the card)
+    col1_x = 40
+    col2_x = 360
+    row1_lbl_y = 330
+    row1_val_y = 352
+    row2_lbl_y = 395
+    row2_val_y = 417
 
-    # Row 1 Left: Route
-    draw.text((col1_x, row1_y), "ROUTE", fill=closest_panel_color(fg_sec), font=lbl_font)
-    route = data.get("route_label") or "Direct"
-    route_text = route.upper()
-    if len(route_text) > 16:
-        route_text = route_text[:13] + "..."
-    if len(route_text) > 12:
-        route_font = font(16, bold=True)
-    elif len(route_text) > 8:
-        route_font = font(20, bold=True)
-    else:
-        route_font = val_font
-    draw.text((col1_x, row1_y + 22), route_text, fill=closest_panel_color(fg_prim), font=route_font)
-
-    # Row 1 Right: Distance
-    draw.text((col2_x, row1_y), "DISTANCE", fill=closest_panel_color(fg_sec), font=lbl_font)
-    dist = f"{data.get('distance_km')} KM" if data.get("distance_km") else "N/A"
-    draw.text((col2_x, row1_y + 22), dist, fill=closest_panel_color(fg_prim), font=val_font)
-
-    # Row 2 Left: Leave By
-    draw.text((col1_x, row2_y), "LEAVE BY", fill=closest_panel_color(fg_sec), font=lbl_font)
+    # Row 1 Left: Leave By
+    draw.text((col1_x, row1_lbl_y), "LEAVE BY", fill=closest_panel_color(fg_labels), font=font(13, bold=True))
     leave_time = data.get("leave_by") or config.get("leave_by") or "7:15 AM"
-    draw.text((col1_x, row2_y + 22), leave_time, fill=closest_panel_color(fg_prim), font=val_font)
+    draw.text((col1_x, row1_val_y), leave_time, fill=closest_panel_color(fg_text), font=font(24, bold=True))
 
-    # Row 2 Right: Traffic
-    draw.text((col2_x, row2_y), "TRAFFIC", fill=closest_panel_color(fg_sec), font=lbl_font)
+    # Row 1 Right: Traffic
+    draw.text((col2_x, row1_lbl_y), "TRAFFIC", fill=closest_panel_color(fg_labels), font=font(13, bold=True), anchor="ra")
     traffic_text_val = traffic_txt.upper()
     if len(traffic_text_val) > 16:
         traffic_text_val = traffic_text_val[:13] + "..."
-    if len(traffic_text_val) > 12:
-        traffic_val_font = font(16, bold=True)
-    elif len(traffic_text_val) > 8:
-        traffic_val_font = font(20, bold=True)
-    else:
-        traffic_val_font = val_font
-    draw.text((col2_x, row2_y + 22), traffic_text_val, fill=closest_panel_color(traffic_bg), font=traffic_val_font)
+    traffic_val_font = font(20, bold=True) if len(traffic_text_val) > 8 else font(24, bold=True)
+    draw.text((col2_x, row1_val_y), traffic_text_val, fill=closest_panel_color(traffic_bg), font=traffic_val_font, anchor="ra")
+
+    # Divider line inside card
+    draw.line([(40, 385), (360, 385)], fill=(220, 220, 220), width=1)
+
+    # Row 2 Left: Distance
+    draw.text((col1_x, row2_lbl_y), "DISTANCE", fill=closest_panel_color(fg_labels), font=font(13, bold=True))
+    dist = f"{data.get('distance_km')} KM" if data.get("distance_km") else "N/A"
+    draw.text((col1_x, row2_val_y), dist, fill=closest_panel_color(fg_text), font=font(24, bold=True))
+
+    # Row 2 Right: Status
+    draw.text((col2_x, row2_lbl_y), "STATUS", fill=closest_panel_color(fg_labels), font=font(13, bold=True), anchor="ra")
+    sub_text = colors_dict["sub_text"]
+    draw.text((col2_x, row2_val_y), sub_text.upper(), fill=closest_panel_color(BLACK), font=font(15, bold=True), anchor="ra")
 
 
 
@@ -616,7 +631,7 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
             bg_panel = (15, 20, 30)
             divider_color = (40, 50, 70)
         elif style == "automotive_hud":
-            bg_panel = BLUE
+            bg_panel = (15, 23, 42)
             divider_color = WHITE
         elif style == "infographic_timeline":
             bg_panel = (18, 24, 32)
