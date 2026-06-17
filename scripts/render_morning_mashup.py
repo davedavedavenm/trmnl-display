@@ -521,9 +521,8 @@ def draw_automotive_hud(draw: ImageDraw.ImageDraw, data: dict[str, Any], config:
     # Draw route text in the header banner
     draw.text((WIDTH // 4, (banner_h - 24) // 2), route_text, fill=closest_panel_color(banner_fg), font=font(20, bold=True), anchor="ma")
 
-    # Draw the tie stripes under the banner
-    house = config.get("house") or "gryffindor"
-    draw_house_stripes(draw, 0, banner_h, WIDTH // 2, house)
+    # Draw a clean solid divider line under the banner
+    draw.rectangle([0, banner_h, WIDTH // 2, banner_h + 4], fill=closest_panel_color(banner_fg))
 
     # 2. Speedometer Gauge Card (White background)
     x0, y0, x1, y1 = 20, 80, 380, 295
