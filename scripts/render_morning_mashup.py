@@ -757,7 +757,7 @@ def draw_left_panel(draw: ImageDraw.ImageDraw, data: dict[str, Any], config: dic
     }
 
     # 2. Draw Sidebar Background
-    draw.rectangle([0, 0, WIDTH // 2, HEIGHT], fill=bg_panel)
+    draw.rectangle([0, 0, WIDTH // 2, HEIGHT], fill=closest_panel_color(bg_panel))
 
     # 3. Dispatch to Specific Style Renderer
     if style == "swiss_typographic":
