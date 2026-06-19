@@ -73,6 +73,7 @@ input_select:
       - jen_commute
       - jen_morning
       - dave_commute
+      - bus
       - ha_dashboard
       - alert
     initial: idle
@@ -116,6 +117,7 @@ input_select:
       - jen_commute
       - jen_morning
       - dave_commute
+      - bus
       - ha_dashboard
       - alert
     initial: auto
@@ -417,6 +419,8 @@ automation:
       bus_window_active: >
         {% set weekday = now().isoweekday() in [1, 2, 3, 4, 5] %}
         {{ weekday and now() >= today_at('07:50') and now() <= today_at('09:30') }}
+      night_window_active: >
+        {{ now() >= today_at('22:50') or now() < today_at('06:40') }}
       requested_mode: >
         {% if alert_mode_active %}
           alert
@@ -432,6 +436,8 @@ automation:
           dave_commute
         {% elif bus_window_active %}
           bus
+        {% elif night_window_active %}
+          ha_dashboard
         {% elif default_mode == 'calendar' and is_state('input_boolean.trmnl_mode_calendar_enabled', 'on') %}
           calendar
         {% elif default_mode == 'ha_dashboard' %}
