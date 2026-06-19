@@ -1,9 +1,10 @@
 [Unit]
-Description=Start TRMNL display at 7 AM daily
+Description=Start TRMNL display at 6:40 AM
 
 [Timer]
-OnCalendar=*-*-* 07:00:00
+OnCalendar=*-*-* 06:40:00
 Persistent=true
 
 [Install]
 WantedBy=timers.target
+
