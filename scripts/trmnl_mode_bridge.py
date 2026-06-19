@@ -16,6 +16,7 @@ ALLOWED_MODES = {"idle", "calendar", "sonos", "jen_commute", "jen_morning", "dav
 HA_REFRESH_SCRIPT = os.getenv("TRMNL_HA_REFRESH_SCRIPT", "/home/dave/bin/trmnl-refresh-ha-sidecar")
 HA_REFRESH_COOLDOWN_SECONDS = int(os.getenv("TRMNL_HA_REFRESH_COOLDOWN_SECONDS", "120"))
 HA_REFRESH_STATE_FILE = Path(os.getenv("TRMNL_HA_REFRESH_STATE_FILE", "/tmp/trmnl-ha-sidecar-refresh.json"))
+MORNING_PUSH_SCRIPT = os.getenv("TRMNL_MORNING_PUSH_SCRIPT", "/home/dave/bin/trmnl-push-morning-data")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -61,6 +62,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         if self.path == "/ha-dashboard/refresh":
             self._handle_ha_dashboard_refresh()
+            return
+
+        if self.path == "/jen-morning/push":
+            self._handle_jen_morning_push()
             return
 
         if self.path != "/mode":
@@ -138,6 +143,35 @@ class Handler(BaseHTTPRequestHandler):
 
         response = {
             "refresh": "completed" if result.returncode == 0 else "failed",
+            "returncode": result.returncode,
+            "stdout": result.stdout.strip(),
+            "stderr": result.stderr.strip(),
+        }
+        status = HTTPStatus.OK if result.returncode == 0 else HTTPStatus.BAD_GATEWAY
+        self._send(status, response)
+
+    def _handle_jen_morning_push(self) -> None:
+        if not self._authorized():
+            self._send(HTTPStatus.UNAUTHORIZED, {"error": "unauthorized"})
+            return
+
+        try:
+            payload = self._read_json()
+        except (ValueError, json.JSONDecodeError):
+            self._send(HTTPStatus.BAD_REQUEST, {"error": "invalid_json"})
+            return
+
+        result = subprocess.run(
+            [MORNING_PUSH_SCRIPT],
+            input=json.dumps(payload),
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=120,
+        )
+
+        response = {
+            "push": "completed" if result.returncode == 0 else "failed",
             "returncode": result.returncode,
             "stdout": result.stdout.strip(),
             "stderr": result.stderr.strip(),

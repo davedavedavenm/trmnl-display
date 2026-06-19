@@ -46,10 +46,11 @@ input_datetime:
 
 rest_command:
   trmnl_jen_morning_push:
-    # Environment-specific: replace host/IP and plugin UUID for another LaraPaper instance.
-    url: "http://192.168.1.143:4567/api/custom_plugins/a62c7b16-bbaa-43f3-b8b4-228d547476a5"
+    url: "http://192.168.1.143:8787/jen-morning/push"
     method: POST
     content_type: application/json
+    headers:
+      Authorization: !secret trmnl_mode_bridge_bearer
     payload: >
       {
         "merge_variables": {
