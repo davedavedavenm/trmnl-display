@@ -18,13 +18,17 @@ SOURCE_PATH = OUT_DIR / "sidecar_colour_dashboard_source_next.png"
 WIDTH = 800
 HEIGHT = 480
 
+# Pimoroni Inky Impression (UC8159) ACeP colour indices and palette values.
+# Order must match the physical panel: 0=BLACK, 1=WHITE, 2=GREEN, 3=BLUE,
+# 4=RED, 5=YELLOW, 6=ORANGE.  RGB values from Pimoroni's DESATURATED_PALETTE.
+# https://github.com/pimoroni/inky/blob/main/inky/inky_uc8159.py
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-ORANGE = (255, 128, 0)
+ORANGE = (255, 140, 0)
 
 SOURCE_BG = (250, 248, 239)
 SOFT_YELLOW = (255, 232, 96)
@@ -33,7 +37,7 @@ SOFT_GREEN = (170, 255, 170)
 SOFT_ORANGE = (255, 188, 118)
 SOFT_GREY = (235, 235, 235)
 
-PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
+PANEL_PALETTE = [BLACK, WHITE, GREEN, BLUE, RED, YELLOW, ORANGE]
 
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
