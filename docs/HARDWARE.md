@@ -140,7 +140,7 @@ LaraPaper live DB record, queried from `khpi5`:
 
 This LaraPaper model is the correct live BYOD profile for the colour screen.
 
-Generated PNGs for this model are quantized by LaraPaper into six panel colour buckets. In live samples those buckets appear as white, black, blue, green/olive, yellow/ochre, and brown/red-orange. CSS colours such as bright red or orange may map into the brown/red-orange bucket rather than staying visually separate.
+Generated PNGs for this model are quantized by LaraPaper and the Python sidecar scripts into six panel color buckets corresponding to the native Spectra 6 pigments: Black, White, Red, Yellow, Blue, and Green. Because there is no native Orange pigment on this hardware, Orange layout elements (like Outlook events or now-playing markers) are dithered into a pattern of Red and Yellow pixels during quantization, which visually renders as Orange on the screen. For solid borders and text, the renderers map Orange to solid Red or Yellow to maintain maximum legibility.
 
 ## Inconclusive Evidence
 

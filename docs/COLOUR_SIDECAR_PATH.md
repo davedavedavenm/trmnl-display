@@ -47,7 +47,7 @@ scripts/tmp/sidecar_colour_dashboard_source_next.png
 scripts/tmp/sidecar_colour_dashboard_next.png
 ```
 
-The output PNG is an indexed seven-colour image using:
+The output PNG is an indexed six-color image using:
 
 - black
 - white
@@ -55,7 +55,8 @@ The output PNG is an indexed seven-colour image using:
 - yellow
 - blue
 - green
-- orange
+
+Orange is achieved by dithering Red and Yellow pixels during quantization, which visually produces Orange without needing a native Orange pigment index. For solid layout elements (thin borders and text), the renderers map Orange to solid Red or Yellow to maintain maximum legibility.
 
 Direct hardware test on `trmnl-pi`:
 
