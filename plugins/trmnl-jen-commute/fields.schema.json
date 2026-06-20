@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Jen Commute Plugin Fields",
+  "description": "Sidecar/automation contract for the Jen Commute plugin. Must stay aligned with settings.yml.",
+  "type": "object",
+  "properties": {
+    "theme": {
+      "type": "string",
+      "enum": ["light", "dark"],
+      "default": "light",
+      "description": "Colour theme for the rendered image"
+    },
+    "show_map_link": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to show map readiness indicator"
+    },
+    "show_home_prep": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to show the home preparation status card"
+    },
+    "screen_label": {
+      "type": "string",
+      "default": "Jen Commute",
+      "description": "Optional small heading shown above the main commute headline"
+    }
+  },
+  "merge_variables": {
+    "updated_at": { "type": "string", "description": "Human-readable timestamp (e.g. '19 Jun 16:00')" },
+    "headline": { "type": "string", "enum": ["Heading Home", "At Work", "Commute Standby"] },
+    "eta_minutes": { "type": "number", "description": "Estimated minutes to home" },
+    "route_label": { "type": "string", "description": "Route description from Waze" },
+    "distance_km": { "type": "number", "description": "Distance in kilometres" },
+    "commute_state": { "type": "string", "enum": ["idle", "at_work", "journey_started", "via_clean_bean", "near_home", "completed"] },
+    "heading_home": { "type": "string", "enum": ["Yes", "No"] },
+    "home_prep_status": { "type": "string", "enum": ["Active", "Needed", "Not Needed"] },
+    "prep_note": { "type": "string", "description": "Human-readable home preparation note" },
+    "map_url": { "type": "string", "description": "Google Maps directions URL" }
+  }
+}

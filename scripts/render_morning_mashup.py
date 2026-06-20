@@ -72,7 +72,7 @@ HOUSE_LABELS = {
     "hufflepuff": "Hufflepuff"
 }
 
-PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
+PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN]
 
 
 def closest_panel_color(rgb: tuple[int, int, int] | list[int]) -> tuple[int, int, int]:

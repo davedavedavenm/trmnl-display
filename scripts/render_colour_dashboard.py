@@ -37,7 +37,7 @@ SOFT_GREEN = (170, 255, 170)
 SOFT_ORANGE = (255, 188, 118)
 SOFT_GREY = (235, 235, 235)
 
-PANEL_PALETTE = [BLACK, WHITE, GREEN, BLUE, RED, YELLOW, ORANGE]
+PANEL_PALETTE = [BLACK, WHITE, GREEN, BLUE, RED, YELLOW]
 
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:

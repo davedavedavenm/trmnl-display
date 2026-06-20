@@ -74,7 +74,7 @@ HOUSE_LABELS = {
     "hufflepuff": "Hufflepuff",
 }
 
-PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN, ORANGE]
+PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN]
 
 
 def font(size: int, bold: bool = False, italic: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:

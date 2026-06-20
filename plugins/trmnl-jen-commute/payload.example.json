@@ -1,0 +1,14 @@
+{
+  "merge_variables": {
+    "updated_at": "19 Jun 16:00",
+    "headline": "Heading Home",
+    "eta_minutes": 36,
+    "route_label": "A4 - Keynsham Bypass",
+    "distance_km": 22.5,
+    "commute_state": "journey_started",
+    "heading_home": "Yes",
+    "home_prep_status": "Not Needed",
+    "prep_note": "No home preparation action is currently required.",
+    "map_url": "https://www.google.com/maps/dir/?api=1&origin=51.43%2C-2.54&destination=51.29%2C-2.43&travelmode=driving"
+  }
+}

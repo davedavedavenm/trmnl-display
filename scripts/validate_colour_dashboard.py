@@ -43,7 +43,6 @@ EXPECTED_RGB = {
     (255, 255, 0),
     (0, 0, 255),
     (0, 255, 0),
-    (255, 128, 0),
 }
 
 
@@ -92,8 +91,8 @@ def render_case(name: str, data: dict[str, Any], out_dir: Path | None) -> tuple[
         raise AssertionError(f"{name}: expected 800x480, got {image.size}")
     if rgb - EXPECTED_RGB:
         raise AssertionError(f"{name}: found colours outside panel palette: {sorted(rgb - EXPECTED_RGB)}")
-    if len(rgb) != 7:
-        raise AssertionError(f"{name}: expected all 7 panel colours in use, got {len(rgb)}")
+    if len(rgb) != 6:
+        raise AssertionError(f"{name}: expected all 6 panel colours in use, got {len(rgb)}")
 
     if out_dir:
         out_dir.mkdir(parents=True, exist_ok=True)
