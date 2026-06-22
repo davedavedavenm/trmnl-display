@@ -290,3 +290,7 @@ if [[ "${MODE}" == "jen_morning" ]]; then
   echo "Jen Morning mode activated. Triggering immediate refresh..."
   /home/dave/bin/trmnl-refresh-morning-mashup --force || true
 fi
+
+# Wake up the physical display client to force an immediate pull of the new mode/content
+echo "Waking up physical display client..."
+ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new trmnl-pi "sudo systemctl restart trmnl-display.service" || true
