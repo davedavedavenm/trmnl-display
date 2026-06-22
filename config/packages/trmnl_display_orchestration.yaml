@@ -184,7 +184,9 @@ rest_command:
         }
       }
   trmnl_jen_commute_push:
-    url: "http://192.168.1.143:4567/api/custom_plugins/0c7061b9-a3ac-4330-a613-16566daee93a"
+    # Points at the "Jen Coming Home" webhook plugin (id 28). The old "Jen Commute"
+    # plugin (uuid 0c7061b9-...daee93a) is retained but no longer driven.
+    url: "http://192.168.1.143:4567/api/custom_plugins/6ff47f52-f6bf-4cbf-bca1-2207166dfa90"
     method: POST
     content_type: application/json
     payload: >

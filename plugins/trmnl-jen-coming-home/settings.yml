@@ -1,0 +1,13 @@
+name: Jen Coming Home
+no_screen_padding: 'no'
+dark_mode: 'no'
+strategy: webhook
+refresh_interval: 2
+id: trmnl-jen-coming-home
+custom_fields:
+  - keyname: show_home_prep
+    name: Show Home Prep
+    field_type: boolean
+    default: true
+    optional: true
+    description: Show the home preparation status card.

@@ -149,6 +149,28 @@ def get_prep_color(status: str) -> tuple[int, int, int]:
     return (20, 20, 20)
 
 
+def draw_arrow(
+    draw: ImageDraw.ImageDraw,
+    cx: int,
+    cy: int,
+    half_w: int,
+    half_h: int,
+    pointing_left: bool,
+    color: tuple[int, int, int],
+) -> None:
+    """Draw a solid triangular arrow.
+
+    The panel font (Outfit) has no glyph for the Unicode arrows, so drawing the
+    triangle directly avoids the missing-glyph 'tofu' box that appeared on screen.
+    pointing_left=True means heading home (←); False means outbound (→).
+    """
+    if pointing_left:
+        pts = [(cx - half_w, cy), (cx + half_w, cy - half_h), (cx + half_w, cy + half_h)]
+    else:
+        pts = [(cx + half_w, cy), (cx - half_w, cy - half_h), (cx - half_w, cy + half_h)]
+    draw.polygon(pts, fill=color)
+
+
 def render(data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> Image.Image:
     import math
 
@@ -175,8 +197,9 @@ def render(data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> Imag
     state_color = get_state_color(commute_state)
     prep_color = get_prep_color(home_prep_status)
 
-    urgency_fg = BLACK if urgency_color in (YELLOW, GREEN, WHITE) else WHITE
-    state_fg = BLACK if state_color in (YELLOW, GREEN, WHITE) else WHITE
+    # ORANGE remaps to YELLOW on the 6-colour panel, so it needs dark text too.
+    urgency_fg = BLACK if urgency_color in (YELLOW, GREEN, WHITE, ORANGE) else WHITE
+    state_fg = BLACK if state_color in (YELLOW, GREEN, WHITE, ORANGE) else WHITE
 
     img = Image.new("RGB", (WIDTH, HEIGHT), WHITE)
     draw = ImageDraw.Draw(img)
@@ -189,8 +212,8 @@ def render(data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> Imag
 
     # Headline at top — BLACK text on WHITE, the accent is the colored strip
     draw.text((30, 20), headline.upper(), fill=BLACK, font=font(26, bold=True))
-    arrow = "\u2190" if heading_home.lower() == "yes" else "\u2192"
-    draw.text((LEFT_W - 20, 26), arrow, fill=BLACK, font=font(32, bold=True), anchor="rm")
+    pointing_home = heading_home.lower() == "yes"
+    draw_arrow(draw, LEFT_W - 30, 36, 18, 14, pointing_home, BLACK)
 
     # === GIANT URGENCY CIRCLE ===
     cx, cy, cr = 250, 230, 135
@@ -274,7 +297,7 @@ def render(data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> Imag
         journey_bg = GREEN
     else:
         journey_bg = ORANGE
-    journey_fg = BLACK if journey_bg in (YELLOW, GREEN, WHITE) else WHITE
+    journey_fg = BLACK if journey_bg in (YELLOW, GREEN, WHITE, ORANGE) else WHITE
 
     draw.rectangle([rx, b2_y, WIDTH, b2_y + b2_h], fill=journey_bg)
     draw.text((rx + 16, b2_y + 14), "JOURNEY", fill=journey_fg, font=font(12, bold=True))
@@ -283,7 +306,7 @@ def render(data: dict[str, Any], config: dict[str, Any], dark_mode: int) -> Imag
     draw.text((rx + 16, b2_y + 36), state_display, fill=journey_fg, font=font(state_fs, bold=True))
     sub = "Heading Home" if heading_home.lower() == "yes" else "Standby"
     draw.text((rx + 16, b2_y + 64), sub.upper(), fill=journey_fg, font=font(14, bold=True))
-    draw.text((WIDTH - 16, b2_y + 55), arrow, fill=journey_fg, font=font(48, bold=True), anchor="rm")
+    draw_arrow(draw, WIDTH - 32, b2_y + 55, 22, 22, pointing_home, journey_fg)
 
     # --- Band 3: Home prep (GREEN=active, RED=needed, WHITE=not needed) ---
     if show_prep:

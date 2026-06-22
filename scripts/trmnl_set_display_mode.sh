@@ -30,7 +30,7 @@ plugin_name_for_mode() {
     calendar) echo "${TRMNL_MODE_PLUGIN_CALENDAR:-Calendar Day View}" ;;
     idle) echo "${TRMNL_MODE_PLUGIN_IDLE:-Calendar Day View}" ;;
     sonos) echo "${TRMNL_MODE_PLUGIN_SONOS:-Sonos Local}" ;;
-    jen_commute) echo "${TRMNL_MODE_PLUGIN_JEN_COMMUTE:-Jen Commute}" ;;
+    jen_commute) echo "${TRMNL_MODE_PLUGIN_JEN_COMMUTE:-Jen Coming Home}" ;;
     ha_dashboard) echo "${TRMNL_MODE_PLUGIN_HA_DASHBOARD:-Home Assistant}" ;;
     jen_morning) echo "${TRMNL_MODE_PLUGIN_JEN_MORNING:-Jen Morning}" ;;
     dave_commute) echo "${TRMNL_MODE_PLUGIN_DAVE_COMMUTE:-}" ;;
@@ -289,6 +289,11 @@ fi
 if [[ "${MODE}" == "jen_morning" ]]; then
   echo "Jen Morning mode activated. Triggering immediate refresh..."
   /home/dave/bin/trmnl-refresh-morning-mashup --force || true
+fi
+
+if [[ "${MODE}" == "jen_commute" ]]; then
+  echo "Jen Coming Home mode activated. Triggering immediate refresh..."
+  /home/dave/bin/trmnl-refresh-jen-coming-home-sidecar --force || true
 fi
 
 # Wake up the physical display client to force an immediate pull of the new mode/content
