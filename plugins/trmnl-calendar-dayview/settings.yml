@@ -278,3 +278,249 @@ custom_fields:
     field_type: string
     optional: true
     description: Optional hex code override (e.g. #FF00FF)
+
+  # Calendar 7
+  - keyname: calendar_7_connection_id
+    name: Calendar 7 Connection
+    field_type: select
+    optional: true
+    options:
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+  - keyname: calendar_7_calendar_id
+    name: Calendar 7 ID
+    field_type: string
+    optional: true
+    description: Specific calendar ID (defaults to primary)
+  - keyname: calendar_7_label
+    name: Calendar 7 Label
+    field_type: string
+    optional: true
+    description: Display label override
+  - keyname: calendar_7_color
+    name: Calendar 7 Color
+    field_type: select
+    default: blue
+    options:
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
+  - keyname: calendar_7_color_custom
+    name: Calendar 7 Custom Color
+    field_type: string
+    optional: true
+    description: Optional hex code override (e.g. #FF00FF)
+
+  # Calendar 8
+  - keyname: calendar_8_connection_id
+    name: Calendar 8 Connection
+    field_type: select
+    optional: true
+    options:
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+  - keyname: calendar_8_calendar_id
+    name: Calendar 8 ID
+    field_type: string
+    optional: true
+    description: Specific calendar ID (defaults to primary)
+  - keyname: calendar_8_label
+    name: Calendar 8 Label
+    field_type: string
+    optional: true
+    description: Display label override
+  - keyname: calendar_8_color
+    name: Calendar 8 Color
+    field_type: select
+    default: red
+    options:
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
+  - keyname: calendar_8_color_custom
+    name: Calendar 8 Custom Color
+    field_type: string
+    optional: true
+    description: Optional hex code override (e.g. #FF00FF)
+
+  # Calendar 9
+  - keyname: calendar_9_connection_id
+    name: Calendar 9 Connection
+    field_type: select
+    optional: true
+    options:
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+  - keyname: calendar_9_calendar_id
+    name: Calendar 9 ID
+    field_type: string
+    optional: true
+    description: Specific calendar ID (defaults to primary)
+  - keyname: calendar_9_label
+    name: Calendar 9 Label
+    field_type: string
+    optional: true
+    description: Display label override
+  - keyname: calendar_9_color
+    name: Calendar 9 Color
+    field_type: select
+    default: green
+    options:
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
+  - keyname: calendar_9_color_custom
+    name: Calendar 9 Custom Color
+    field_type: string
+    optional: true
+    description: Optional hex code override (e.g. #FF00FF)
+
+  # Calendar 10
+  - keyname: calendar_10_connection_id
+    name: Calendar 10 Connection
+    field_type: select
+    optional: true
+    options:
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+  - keyname: calendar_10_calendar_id
+    name: Calendar 10 ID
+    field_type: string
+    optional: true
+    description: Specific calendar ID (defaults to primary)
+  - keyname: calendar_10_label
+    name: Calendar 10 Label
+    field_type: string
+    optional: true
+    description: Display label override
+  - keyname: calendar_10_color
+    name: Calendar 10 Color
+    field_type: select
+    default: yellow
+    options:
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
+  - keyname: calendar_10_color_custom
+    name: Calendar 10 Custom Color
+    field_type: string
+    optional: true
+    description: Optional hex code override (e.g. #FF00FF)
+
+  # Calendar 11
+  - keyname: calendar_11_connection_id
+    name: Calendar 11 Connection
+    field_type: select
+    optional: true
+    options:
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+  - keyname: calendar_11_calendar_id
+    name: Calendar 11 ID
+    field_type: string
+    optional: true
+    description: Specific calendar ID (defaults to primary)
+  - keyname: calendar_11_label
+    name: Calendar 11 Label
+    field_type: string
+    optional: true
+    description: Display label override
+  - keyname: calendar_11_color
+    name: Calendar 11 Color
+    field_type: select
+    default: orange
+    options:
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
+  - keyname: calendar_11_color_custom
+    name: Calendar 11 Custom Color
+    field_type: string
+    optional: true
+    description: Optional hex code override (e.g. #FF00FF)
+
+  # Calendar 12
+  - keyname: calendar_12_connection_id
+    name: Calendar 12 Connection
+    field_type: select
+    optional: true
+    options:
+      - "Disabled": ""
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Google)": "REDACTED-UUID"
+      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
+      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
+      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+  - keyname: calendar_12_calendar_id
+    name: Calendar 12 ID
+    field_type: string
+    optional: true
+    description: Specific calendar ID (defaults to primary)
+  - keyname: calendar_12_label
+    name: Calendar 12 Label
+    field_type: string
+    optional: true
+    description: Display label override
+  - keyname: calendar_12_color
+    name: Calendar 12 Color
+    field_type: select
+    default: black
+    options:
+      - "Blue": "blue"
+      - "Red": "red"
+      - "Green": "green"
+      - "Yellow": "yellow"
+      - "Orange": "orange"
+      - "Black": "black"
+  - keyname: calendar_12_color_custom
+    name: Calendar 12 Custom Color
+    field_type: string
+    optional: true
+    description: Optional hex code override (e.g. #FF00FF)

@@ -65,7 +65,43 @@
     "calendar_6_calendar_id": { "type": "string", "default": "" },
     "calendar_6_label": { "type": "string", "default": "" },
     "calendar_6_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "black" },
-    "calendar_6_color_custom": { "type": "string", "default": "" }
+    "calendar_6_color_custom": { "type": "string", "default": "" },
+
+    "calendar_7_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_7_calendar_id": { "type": "string", "default": "" },
+    "calendar_7_label": { "type": "string", "default": "" },
+    "calendar_7_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "blue" },
+    "calendar_7_color_custom": { "type": "string", "default": "" },
+
+    "calendar_8_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_8_calendar_id": { "type": "string", "default": "" },
+    "calendar_8_label": { "type": "string", "default": "" },
+    "calendar_8_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "red" },
+    "calendar_8_color_custom": { "type": "string", "default": "" },
+
+    "calendar_9_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_9_calendar_id": { "type": "string", "default": "" },
+    "calendar_9_label": { "type": "string", "default": "" },
+    "calendar_9_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "green" },
+    "calendar_9_color_custom": { "type": "string", "default": "" },
+
+    "calendar_10_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_10_calendar_id": { "type": "string", "default": "" },
+    "calendar_10_label": { "type": "string", "default": "" },
+    "calendar_10_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "yellow" },
+    "calendar_10_color_custom": { "type": "string", "default": "" },
+
+    "calendar_11_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_11_calendar_id": { "type": "string", "default": "" },
+    "calendar_11_label": { "type": "string", "default": "" },
+    "calendar_11_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "orange" },
+    "calendar_11_color_custom": { "type": "string", "default": "" },
+
+    "calendar_12_connection_id": { "type": "string", "enum": ["", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-CONNECTION", "REDACTED-UUID", "REDACTED-UUID"], "default": "" },
+    "calendar_12_calendar_id": { "type": "string", "default": "" },
+    "calendar_12_label": { "type": "string", "default": "" },
+    "calendar_12_color": { "type": "string", "enum": ["blue", "red", "green", "yellow", "orange", "black"], "default": "black" },
+    "calendar_12_color_custom": { "type": "string", "default": "" }
   },
   "required": ["nango_secret_key"]
 }

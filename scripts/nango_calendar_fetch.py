@@ -73,7 +73,7 @@ def parse_color(color_name: str, custom_hex: str) -> list[int]:
 
 def get_calendars_from_config(config: dict) -> list[dict]:
     calendars = []
-    for idx in range(1, 7):
+    for idx in range(1, 13):
         connection_id = config.get(f"calendar_{idx}_connection_id", "").strip()
         if not connection_id:
             continue
