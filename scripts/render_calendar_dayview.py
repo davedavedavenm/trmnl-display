@@ -50,6 +50,9 @@ SOURCE_LABELS = {
 def closest_panel_color(rgb: tuple[int, int, int] | list[int]) -> tuple[int, int, int]:
     if not rgb or len(rgb) < 3:
         return BLACK
+    # Map Orange to RED for contrast/legibility on e-ink
+    if list(rgb) in ([255, 128, 0], [255, 140, 0]):
+        return RED
     min_dist = float("inf")
     best_color = BLACK
     for p_color in PANEL_PALETTE:
@@ -239,8 +242,9 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
         # Left Accent Bar
         draw.rounded_rectangle([(26, ev_y + 2), (34, ev_y + block_h - 2)], radius=3, fill=cal_color)
 
-        # Render Time/Date in cal_color
-        draw.text((46, ev_y + 14), time_label, fill=cal_color, font=font(18, bold=True))
+        # Render Time/Date in cal_color (or theme.fg if yellow/white for contrast)
+        text_color = theme.fg if cal_color in (YELLOW, WHITE) else cal_color
+        draw.text((46, ev_y + 14), time_label, fill=text_color, font=font(18, bold=True))
 
         # Render Summary
         display_summary = f"[CANCELLED] {summary}" if status == "cancelled" else summary
