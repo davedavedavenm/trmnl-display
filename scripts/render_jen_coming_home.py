@@ -177,7 +177,12 @@ def render(data: dict[str, Any]) -> Image.Image:
     if "active" in prep_l:
         bg, fg, big, small = GREEN, BLACK, "HOME PREP RUNNING", "Heating's already on for her."
         dot = GREEN
-    elif prep_l == "needed" or "need" in prep_l:
+    elif "not" in prep_l:
+        # "Not Needed" — must be checked before the "need" match below, since
+        # the substring "need" also appears inside "not needed".
+        bg, fg, big, small = WHITE, BLACK, "ALL SET AT HOME", "Nothing to do — sit tight."
+        dot = GREEN
+    elif "need" in prep_l:
         bg, fg, big, small = YELLOW, BLACK, "PREP THE HOUSE", f"Heating on before she's back — ~{eta} min."
         dot = RED
     else:
