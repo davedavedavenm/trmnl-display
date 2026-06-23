@@ -15,6 +15,9 @@ if [[ "${MODE}" == "bus" ]]; then
   REFRESH_TIME=600
 elif [[ "${MODE}" == "sonos" ]]; then
   REFRESH_TIME=60
+elif [[ "${MODE}" == "jen_commute" ]]; then
+  # Jen Coming Home: tighter poll so the live commute ETA stays current.
+  REFRESH_TIME=420
 elif [[ "${MODE}" == "calendar" || "${MODE}" == "idle" ]]; then
   REFRESH_TIME=7200
 else
