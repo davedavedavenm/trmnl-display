@@ -36,6 +36,58 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN]
 
+# Jen's commute origin (work / Bristol area). Anchors the Work->Home progress
+# from her real GPS instead of the noisy ETA. Editable if her work moves.
+WORK_ANCHOR = (51.4606, -2.5892)
+
+
+def _haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
+    import math
+
+    R = 6371.0
+    lat1, lon1 = math.radians(a[0]), math.radians(a[1])
+    lat2, lon2 = math.radians(b[0]), math.radians(b[1])
+    dlat, dlon = lat2 - lat1, lon2 - lon1
+    h = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(h))
+
+
+def _latlon(s: str) -> tuple[float, float] | None:
+    import urllib.parse
+
+    try:
+        lat, lon = urllib.parse.unquote(s).split(",")
+        return float(lat), float(lon)
+    except Exception:
+        return None
+
+
+def coords_from_map_url(url: str) -> tuple[tuple[float, float] | None, tuple[float, float] | None]:
+    """Return (current_position, home) parsed from the Google Maps directions URL."""
+    import urllib.parse
+
+    try:
+        q = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+        return _latlon(q.get("origin", [""])[0]), _latlon(q.get("destination", [""])[0])
+    except Exception:
+        return None, None
+
+
+def data_age_minutes(updated_at: str) -> int | None:
+    """Minutes since the payload's updated_at stamp ('DD Mon HH:MM'), or None."""
+    from datetime import datetime
+
+    raw = updated_at.split("(")[0].strip()
+    for fmt in ("%d %b %Y %H:%M", "%d %b %H:%M"):
+        try:
+            dt = datetime.strptime(raw, fmt)
+            if dt.year == 1900:
+                dt = dt.replace(year=datetime.now().year)
+            return max(0, int((datetime.now() - dt).total_seconds() // 60))
+        except Exception:
+            continue
+    return None
+
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     base = Path(__file__).resolve().parent
@@ -103,6 +155,7 @@ def render(data: dict[str, Any]) -> Image.Image:
     commute_state = str(data.get("commute_state", "journey_started"))
     home_prep = str(data.get("home_prep_status", "Not Needed")).strip()
     heading_home = str(data.get("heading_home", "Yes")).lower() == "yes"
+    updated_at = str(data.get("updated_at", ""))
 
     try:
         eta = int(round(float(data.get("eta_minutes", 0))))
@@ -114,7 +167,16 @@ def render(data: dict[str, Any]) -> Image.Image:
         dist = 0.0
 
     arrival = (datetime.now() + timedelta(minutes=max(eta, 0))).strftime("%H:%M")
-    progress = max(0.06, min(0.94, 1.0 - (eta / 60.0))) if eta > 0 else 0.5
+    # Position the car from her REAL GPS (origin) along Work->Home, falling back
+    # to the ETA proxy only if the coordinates can't be read.
+    cur, home_pt = coords_from_map_url(str(data.get("map_url", "")))
+    if cur and home_pt:
+        done = _haversine_km(WORK_ANCHOR, cur)
+        remaining = _haversine_km(cur, home_pt)
+        progress = max(0.04, min(0.96, done / (done + remaining))) if (done + remaining) > 0 else 0.5
+    else:
+        progress = max(0.06, min(0.94, 1.0 - (eta / 60.0))) if eta > 0 else 0.5
+    age_min = data_age_minutes(updated_at)
 
     img = Image.new("RGB", (WIDTH, HEIGHT), WHITE)
     d = ImageDraw.Draw(img)
@@ -169,6 +231,15 @@ def render(data: dict[str, Any]) -> Image.Image:
         sub = f"{sub}   ·   {dist:.1f} km to go" if sub else f"{dist:.1f} km to go"
     if sub:
         d.text((WIDTH // 2, base_y + 58), sub, fill=BLACK, font=font(18, bold=True), anchor="ma")
+
+    # Freshness stamp — makes a stale reading obvious rather than looking live.
+    if age_min is not None:
+        stamp = f"updated {updated_at}  ·  live" if age_min <= 8 else f"updated {updated_at}  ·  {age_min}m old"
+        scol = BLACK if age_min <= 8 else RED
+    else:
+        stamp, scol = (f"updated {updated_at}" if updated_at else ""), BLACK
+    if stamp:
+        d.text((WIDTH // 2, base_y + 84), stamp, fill=scol, font=font(13, bold=True), anchor="ma")
 
     # ---------------- PREP CARD (footer) ----------------
     cy0, cy1 = 360, 462
