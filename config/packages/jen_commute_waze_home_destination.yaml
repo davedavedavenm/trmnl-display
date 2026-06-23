@@ -1,0 +1,52 @@
+# Flip the Waze destination profile to "Home" while Jen is heading home, so the
+# "Jen Coming Home" screen shows live ETA/distance to HOME instead of to work.
+#
+# Why this is needed: jen_commute_system.yaml has a morning automation that forces
+# the Waze profile to "Current Work", but nothing ever flipped it to "Home" for the
+# evening commute. So sensor.waze (a single dynamic sensor) tracked time-to-WORK the
+# whole drive home, and the ETA/distance climbed as she drove away from work.
+automation:
+  - id: waze_destination_home_when_heading_home
+    alias: "Waze Destination -> Home When Heading Home"
+    description: >
+      Sets the dynamic Waze destination profile to Home when Jen starts heading
+      home, and back to Current Work otherwise. Keeps sensor.waze pointed at the
+      right end of the commute for both the morning (to work) and evening (to
+      home) TRMNL screens.
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.jen_heading_home
+        to: "on"
+        id: heading_home
+      - platform: state
+        entity_id: input_boolean.jen_heading_home
+        to: "off"
+        id: not_heading_home
+    condition:
+      - condition: state
+        entity_id: input_boolean.commute_system_enabled
+        state: "on"
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: heading_home
+            sequence:
+              - action: input_select.select_option
+                target:
+                  entity_id: input_select.waze_destination_profile
+                data:
+                  option: "Home"
+        default:
+          - action: input_select.select_option
+            target:
+              entity_id: input_select.waze_destination_profile
+            data:
+              option: "Current Work"
+      # Force a fresh Waze read so the new destination takes effect immediately.
+      - action: homeassistant.update_entity
+        target:
+          entity_id:
+            - sensor.waze_destination_address
+            - sensor.waze

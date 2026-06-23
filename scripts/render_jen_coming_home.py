@@ -36,9 +36,10 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN]
 
-# Jen's commute origin (work / Bristol area). Anchors the Work->Home progress
-# from her real GPS instead of the noisy ETA. Editable if her work moves.
-WORK_ANCHOR = (51.4606, -2.5892)
+# Jen's work (Radstock) — the start of the homeward journey. Anchors the
+# Work->Home progress from her real GPS instead of the noisy ETA. The payload's
+# map_url destination is HOME; this is the opposite (work) end. Editable.
+WORK_ANCHOR = (0.0000000, -0.0000000)
 
 
 def _haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
