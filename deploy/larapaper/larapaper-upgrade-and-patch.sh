@@ -8,7 +8,10 @@ cd /home/dave/larapaper
 docker compose pull
 docker compose up -d
 
-echo "Re-applying relative preview URLs patch..."
+echo "Copying patched PluginWebhookController..."
+docker cp /home/dave/trmnl-display-scripts/PluginWebhookController.patched.php larapaper-app-1:/var/www/html/app/Http/Controllers/Api/PluginWebhookController.php
+
+echo "Re-applying relative preview URLs and sidecar stale patches..."
 docker exec -i larapaper-app-1 php <<'PHP'
 <?php
 $files = [
@@ -26,7 +29,27 @@ foreach ($files as $path) {
         }
     }
 }
+
+$pluginPath = '/var/www/html/app/Models/Plugin.php';
+if (file_exists($pluginPath)) {
+    $s = file_get_contents($pluginPath);
+    if (strpos($s, "str_starts_with(\$this->current_image") === false) {
+        $s = str_replace(
+            "public function isDataStale(): bool\n    {",
+            "public function isDataStale(): bool\n    {\n        if (str_starts_with(\$this->current_image ?? '', 'sidecar_')) {\n            return false;\n        }",
+            $s
+        );
+        $s = str_replace(
+            "public function isDataStale(): bool\r\n    {",
+            "public function isDataStale(): bool\r\n    {\r\n        if (str_starts_with(\$this->current_image ?? '', 'sidecar_')) {\r\n            return false;\r\n        }",
+            $s
+        );
+        file_put_contents($pluginPath, $s);
+        echo "Patched $pluginPath\n";
+    }
+}
 PHP
 
+docker exec -i larapaper-app-1 php -r "opcache_reset();"
 docker exec -i larapaper-app-1 php artisan view:clear
 echo "LaraPaper upgrade and patch completed successfully."
