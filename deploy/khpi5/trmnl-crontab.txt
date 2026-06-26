@@ -2,7 +2,7 @@
 # Keep non-TRMNL host maintenance jobs out of this repo.
 
 # Keep LaraPaper current; this intentionally tracks ghcr.io/usetrmnl/larapaper:latest.
-0 4 * * * cd /home/dave/larapaper && docker compose pull 2>&1 | logger -t larapaper-update && docker compose up -d 2>&1 | logger -t larapaper-update
+0 4 * * * /home/dave/bin/larapaper-upgrade-and-patch.sh 2>&1 | logger -t larapaper-update
 
 # Push calendar payloads into the Multi-Calendar LaraPaper plugin.
 */5 * * * * cd /home/dave/trmnl-calendar && /home/dave/trmnl-calendar/.venv/bin/python main.py 2>&1 | logger -t trmnl-calendar

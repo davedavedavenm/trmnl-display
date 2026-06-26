@@ -115,14 +115,6 @@ def render_empty(draw: ImageDraw.ImageDraw, theme: Theme) -> None:
 
 
 def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now_str: str, theme: Theme) -> None:
-    today_day = None
-    for d in days:
-        if d.get("date") == today:
-            today_day = d
-            break
-    if not today_day and days:
-        today_day = days[0]
-
     f_mast = font(18, bold=True)
     f_footer = font(16)
 

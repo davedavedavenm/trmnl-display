@@ -257,6 +257,10 @@ automation:
           - input_text.trmnl_ha_dashboard_bottom_right_entity
           - input_text.trmnl_ha_dashboard_bottom_right_label
           - input_text.trmnl_ha_dashboard_bottom_right_detail_label
+    condition:
+      - condition: state
+        entity_id: input_select.trmnl_display_mode
+        state: "ha_dashboard"
     action:
       - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
         data:
@@ -284,6 +288,10 @@ automation:
           - media_player.kitchen
           - media_player.gym
           - media_player.sonos_roam
+    condition:
+      - condition: state
+        entity_id: input_select.trmnl_display_mode
+        state: "ha_dashboard"
     action:
       - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
         data:
@@ -321,6 +329,10 @@ automation:
           - media_player.gym
           - media_player.sonos_roam
         attribute: media_artist
+    condition:
+      - condition: state
+        entity_id: input_select.trmnl_display_mode
+        state: "ha_dashboard"
     action:
       - service: rest_command.trmnl_ha_dashboard_refresh_sidecar
         data:
