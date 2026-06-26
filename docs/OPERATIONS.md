@@ -60,6 +60,40 @@ For colour-critical dashboard work, use the sidecar path in `docs/COLOUR_SIDECAR
 
 Routine HA sidecar refreshes must be playlist-safe: update the Home Assistant plugin's `current_image`, but do not activate playlists or update the device's `current_screen_image`. Manual mode activation remains available through `trmnl-set-display-mode ha_dashboard` when testing or intentionally switching to the HA-only playlist.
 
+## What Wakes the Pi
+
+The Pi's `trmnl-display.service` is started, stopped, and restarted by
+**two independent mechanisms** that overlap. Both are intentional and
+both are live. The full mechanism breakdown is in
+`docs/TRMNL_ORCHESTRATION_AUDIT_2026-06-26.md`; the short version:
+
+1. **Explicit SSH restart at the end of every mode change.** The
+   `trmnl-set-display-mode` script on `khpi5`
+   (`scripts/trmnl_set_display_mode.sh`) ends with:
+   ```bash
+   ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new \
+       trmnl-pi "sudo systemctl restart trmnl-display.service" || true
+   ```
+   Every call to the mode bridge (every HA mode flip, every manual
+   `trmnl-set-display-mode <mode>`) triggers this restart. The SSH
+   key is `dave@Docker-VM`, mirrored to the Pi as a trusted key.
+2. **Local systemd timers on the Pi** as a safety net:
+   - `trmnl-display-morning-start.timer` — 06:40 daily, runs
+     `systemctl start trmnl-display.service` (used as a recovery
+     safety net for the night-stop case; in normal operation it is
+     overridden by the SSH restart 1-2 s later)
+   - `trmnl-display-night-stop.timer` — 23:00 daily, runs
+     `systemctl stop trmnl-display.service`
+   - systemd unit files mirrored at
+     `deploy/trmnl-display-morning-start.{timer,service}` and
+     `deploy/trmnl-display-night-stop.{timer,service}`
+
+If you see a `trmnl-display.service` restart in the Pi journal that
+does not match the systemd timer schedule, look for an `sshd` entry
+from `192.168.1.143` (khpi5) with a `COMMAND=/usr/bin/systemctl
+restart trmnl-display.service` from `sudo` — that is the explicit
+mode-change restart from the mode script, not the local timer.
+
 ## Cron Jobs
 
 The TRMNL-specific `khpi5` cron entries are recorded in `deploy/khpi5/trmnl-crontab.txt`.

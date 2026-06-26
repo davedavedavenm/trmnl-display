@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-06-26
+
+- Orchestration audit: confirmed the jen_morning switch at 06:45 BST
+  on 2026-06-26 was the expected cascade behaviour of
+  `trmnl_resolve_display_mode_v1`, not a bug. Source:
+  `docs/TRMNL_ORCHESTRATION_AUDIT_2026-06-26.md`.
+- Identified that `scripts/trmnl_set_display_mode.sh` on `khpi5`
+  explicitly SSHes to the Pi and runs `sudo systemctl restart
+  trmnl-display.service` at the end of every mode change. This is
+  the actual cause of the 06:45:03 Pi service restart, not the
+  systemd `morning-start.timer` (which fires 2-3 s earlier and is
+  now redundant for the morning case). The timer is kept as a
+  safety net for the night-stop recovery case.
+- Verified `scripts/trmnl_set_display_mode.sh` in repo matches the
+  live `/home/dave/bin/trmnl-set-display-mode` on `khpi5` (no diff;
+  no sync required).
+- Added live schedule reference: jen_morning 06:45–07:45 BST
+  weekdays, bus 07:50–09:30, night ≥22:50 or <06:40, default
+  weekday=`calendar`, default weekend=`ha_dashboard`, per-mode
+  refresh intervals (`bus=600`, `sonos=60`, `jen_commute=420`,
+  `jen_morning=600`, `calendar=7200`, `idle=7200`,
+  `ha_dashboard=600`).
+- Cross-referenced `docs/SOURCE_OF_TRUTH.md` managed surfaces with
+  related deploy units and operational docs (added "Related docs /
+  units" column).
+- Documented "What wakes the Pi" in `docs/OPERATIONS.md` covering the
+  dual SSH-restart + systemd-timer mechanism.
+- Cross-linked `docs/HA_DISPLAY_ORCHESTRATION_PLAN.md` to the new
+  audit doc for the live schedule reference.
+- Filed as a follow-up (no change in this commit): gate the
+  `trmnl_ha_dashboard_helper_change_refresh_v1` automation in
+  `config/packages/trmnl_ha_dashboard.yaml` to only fire when
+  `input_select.trmnl_display_mode == 'ha_dashboard'`.
+
 ## 2026-05-19
 
 - Recorded a read-only live baseline: LaraPaper healthy on image label `0.34.0`, HA core check passing, mode bridge active, active playlist `ha_dashboard`, and Pi sidecar renders flowing as indexed `800x480` images prepared as `4-bpp`.

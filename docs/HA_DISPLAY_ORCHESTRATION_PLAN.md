@@ -126,3 +126,20 @@ Until the full resolver is validated:
 - keep `input_boolean.trmnl_display_automation_enabled` off by default
 - continue using the proven Sonos page as the live baseline
 - only enable the global resolver once the priority behavior is explicit and tested
+
+## Live Schedule Reference (as of 2026-06-26)
+
+For the current live values of the helpers that drive the cascade
+(`trmnl_jen_morning_start` = 06:45, `trmnl_jen_morning_end` = 07:45,
+bus window 07:50–09:30, night window 22:50–06:40, per-mode refresh
+intervals, toggle helpers), see:
+
+`docs/TRMNL_ORCHESTRATION_AUDIT_2026-06-26.md` — sections "What
+scheduled the 2026-06-26 jen_morning switch", "Current live schedule
+reference", and "HA Dashboard package observations / recommendations".
+
+The audit also documents why the Pi service restart happens at
+06:45:03 each morning (the explicit `ssh ... systemctl restart` line
+at the end of `scripts/trmnl_set_display_mode.sh`), and why the
+`trmnl-display-morning-start.timer` is now redundant for the morning
+case but worth keeping as a safety net.
