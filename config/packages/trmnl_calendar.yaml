@@ -1,0 +1,66 @@
+# trmnl_calendar.yaml
+# Home Assistant package: TRMNL Calendar sidecar integration
+#
+# Provides:
+#   - REST command to trigger a calendar sidecar refresh via the mode bridge
+#   - Input button for manual refresh from the HA UI
+#   - Automation: force refresh when the nango fetch detects new weekend events
+#     (the nango_calendar_fetch.py script updates input_boolean.trmnl_weekend_has_calendar_events
+#      whenever it runs, so a state change there means new calendar data was found)
+#
+# The mode bridge (trmnl-mode-bridge.py) also runs an internal hash-diff watcher
+# that reads /home/dave/trmnl-display-scripts/tmp/nango_calendar_payload.json every
+# 60 seconds and auto-triggers a sidecar refresh when events change — this HA automation
+# is a complementary path for same-minute responsiveness when HA knows about a change.
+
+rest_command:
+  trmnl_calendar_refresh_sidecar:
+    url: "http://192.168.1.143:8787/calendar/refresh"
+    method: POST
+    content_type: application/json
+    payload: "{}"
+
+input_button:
+  trmnl_calendar_refresh:
+    name: TRMNL Refresh Calendar
+    icon: mdi:calendar-refresh
+
+automation:
+  - id: trmnl_calendar_refresh_button_v1
+    alias: TRMNL Calendar Refresh Button
+    description: >
+      Allows manual force-refresh of the calendar sidecar from the HA UI.
+    trigger:
+      - platform: state
+        entity_id: input_button.trmnl_calendar_refresh
+    action:
+      - service: rest_command.trmnl_calendar_refresh_sidecar
+        data: {}
+      - service: system_log.write
+        data:
+          level: info
+          message: "TRMNL Calendar sidecar force-refresh requested via button."
+
+  - id: trmnl_calendar_weekend_events_changed_v1
+    alias: TRMNL Calendar Refresh on Weekend Events Change
+    description: >
+      When the nango calendar fetch detects a change in weekend/Monday events
+      (flipping input_boolean.trmnl_weekend_has_calendar_events), it means new
+      calendar data has been fetched. Trigger an immediate sidecar refresh so
+      the display reflects the change without waiting for the next cron cycle.
+    trigger:
+      - platform: state
+        entity_id: input_boolean.trmnl_weekend_has_calendar_events
+    condition:
+      - condition: state
+        entity_id: input_select.trmnl_display_mode
+        state: "calendar"
+    action:
+      - delay:
+          seconds: 5
+      - service: rest_command.trmnl_calendar_refresh_sidecar
+        data: {}
+      - service: system_log.write
+        data:
+          level: info
+          message: "TRMNL Calendar sidecar refresh triggered by weekend events state change."
