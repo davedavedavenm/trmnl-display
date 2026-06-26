@@ -133,18 +133,16 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
     # TOP BAR
     header_y = 22
 
-    if today_day:
-        day_name = today_day.get("day_name", "")
-        date_str = today_day.get("date", "")
+    if today:
         try:
-            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            dt = datetime.strptime(today, "%Y-%m-%d")
+            day_name = dt.strftime("%A")
             day_num = dt.strftime("%d")
             month_abbr = dt.strftime("%b").upper()
+            date_text = f"{day_name.upper()} {day_num} {month_abbr}"
         except (ValueError, TypeError):
-            day_num = date_str[-2:]
-            month_abbr = ""
+            date_text = today.upper()
 
-        date_text = f"{day_name.upper()} {day_num} {month_abbr}"
         draw.text((WIDTH - 24, header_y), date_text, fill=theme.dim, font=f_mast, anchor="rm")
 
     draw.line([(24, 45), (WIDTH - 24, 45)], fill=theme.dim, width=1)
