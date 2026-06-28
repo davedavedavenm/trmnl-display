@@ -14,7 +14,10 @@ fi
 
 docker cp "${SIDECAR_IMAGE_PATH}" "${LARAPAPER_CONTAINER}:${SIDECAR_CONTAINER_IMAGE_PATH}"
 
+DEVICE_ID="${TRMNL_DEVICE_ID:-1}"
+
 docker exec \
+  -e DEVICE_ID="${DEVICE_ID}" \
   -e PLUGIN_NAME="${PLUGIN_NAME}" \
   -e SIDECAR_IMAGE_NAME="${SIDECAR_IMAGE_NAME}" \
   -i "${LARAPAPER_CONTAINER}" php <<'PHP'
@@ -23,6 +26,7 @@ require '/var/www/html/vendor/autoload.php';
 $app = require '/var/www/html/bootstrap/app.php';
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
+$deviceId   = (int) getenv('DEVICE_ID');
 $pluginName = getenv('PLUGIN_NAME');
 $imageName  = getenv('SIDECAR_IMAGE_NAME');
 $metadata   = json_encode([
@@ -48,6 +52,13 @@ if ($updated < 1) {
     fwrite(STDERR, "Plugin not found: {$pluginName}\n");
     exit(2);
 }
+
+DB::table('devices')
+    ->where('id', $deviceId)
+    ->update([
+        'current_screen_image' => $imageName,
+        'updated_at' => now(),
+    ]);
 
 echo json_encode([
     'sidecar_plugin_update' => true,
