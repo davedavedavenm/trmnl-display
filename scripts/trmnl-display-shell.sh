@@ -106,11 +106,17 @@ print(json.dumps({
 
     TMP_IMG=$(mktemp -u "${TMPDIR}/trmnl-display.XXXXXX.png")
 
+    LAST_IMG="/tmp/trmnl-display.last.png"
     if curl -sf -m 30 -o "${TMP_IMG}" "${IMAGE_URL}" 2>/dev/null && [[ -s "${TMP_IMG}" ]]; then
-        if /usr/local/bin/show_img.bin "file=${TMP_IMG}" "invert=false" "mode=full" 2>/dev/null; then
-            echo "Displayed: ${TMP_IMG}"
+        if [[ -f "${LAST_IMG}" ]] && cmp -s "${TMP_IMG}" "${LAST_IMG}"; then
+            echo "Image unchanged, skipping display update"
         else
-            echo "show_img failed (exit $?), retrying on next cycle..."
+            if /usr/local/bin/show_img.bin "file=${TMP_IMG}" "invert=false" "mode=full" 2>/dev/null; then
+                echo "Displayed: ${TMP_IMG}"
+                cp -f "${TMP_IMG}" "${LAST_IMG}"
+            else
+                echo "show_img failed (exit $?), retrying on next cycle..."
+            fi
         fi
     else
         echo "Error downloading image"
