@@ -347,6 +347,7 @@ class Handler(BaseHTTPRequestHandler):
         now = time.time()
         remaining = int(SONOS_REFRESH_COOLDOWN_SECONDS - (now - self._last_sonos_refresh()))
         if not force and remaining > 0:
+            log.info("Sonos refresh skipped (cooldown %ds remaining)", remaining)
             self._send(
                 HTTPStatus.OK,
                 {
@@ -358,6 +359,7 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
 
+        log.info("Triggering Sonos sidecar refresh")
         result = subprocess.run(
             [SONOS_REFRESH_SCRIPT],
             capture_output=True,
@@ -368,6 +370,9 @@ class Handler(BaseHTTPRequestHandler):
 
         if result.returncode == 0:
             self._record_sonos_refresh()
+            log.info("Sonos sidecar refresh completed OK")
+        else:
+            log.warning("Sonos sidecar refresh failed (rc=%d): %s", result.returncode, result.stderr.strip()[:200])
 
         response = {
             "refresh": "completed" if result.returncode == 0 else "failed",
