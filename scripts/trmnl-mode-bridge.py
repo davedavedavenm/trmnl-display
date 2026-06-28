@@ -26,6 +26,9 @@ HA_REFRESH_SCRIPT = os.getenv("TRMNL_HA_REFRESH_SCRIPT", "/home/dave/bin/trmnl-r
 HA_REFRESH_COOLDOWN_SECONDS = int(os.getenv("TRMNL_HA_REFRESH_COOLDOWN_SECONDS", "120"))
 HA_REFRESH_STATE_FILE = Path(os.getenv("TRMNL_HA_REFRESH_STATE_FILE", "/tmp/trmnl-ha-sidecar-refresh.json"))
 MORNING_PUSH_SCRIPT = os.getenv("TRMNL_MORNING_PUSH_SCRIPT", "/home/dave/bin/trmnl-push-morning-data")
+SONOS_REFRESH_SCRIPT = os.getenv("TRMNL_SONOS_REFRESH_SCRIPT", "/home/dave/run_trmnl_sonos.sh")
+SONOS_REFRESH_COOLDOWN_SECONDS = int(os.getenv("TRMNL_SONOS_REFRESH_COOLDOWN_SECONDS", "3"))
+SONOS_REFRESH_STATE_FILE = Path(os.getenv("TRMNL_SONOS_REFRESH_STATE_FILE", "/tmp/trmnl-sonos-refresh.json"))
 
 # Calendar watcher config
 CALENDAR_REFRESH_SCRIPT = os.getenv("TRMNL_CALENDAR_REFRESH_SCRIPT", "/home/dave/bin/trmnl-refresh-calendar-sidecar")
@@ -180,6 +183,10 @@ class Handler(BaseHTTPRequestHandler):
             self._handle_calendar_refresh()
             return
 
+        if self.path == "/sonos/refresh":
+            self._handle_sonos_refresh()
+            return
+
         if self.path == "/jen-morning/push":
             self._handle_jen_morning_push()
             return
@@ -303,6 +310,64 @@ class Handler(BaseHTTPRequestHandler):
 
         if result.returncode == 0:
             _record_calendar_refresh()
+
+        response = {
+            "refresh": "completed" if result.returncode == 0 else "failed",
+            "returncode": result.returncode,
+            "stdout": result.stdout.strip(),
+            "stderr": result.stderr.strip(),
+        }
+        status = HTTPStatus.OK if result.returncode == 0 else HTTPStatus.BAD_GATEWAY
+        self._send(status, response)
+
+    def _last_sonos_refresh(self) -> float:
+        try:
+            with SONOS_REFRESH_STATE_FILE.open("r", encoding="utf-8") as f:
+                return float(json.load(f).get("last_success", 0))
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            return 0
+
+    def _record_sonos_refresh(self) -> None:
+        SONOS_REFRESH_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with SONOS_REFRESH_STATE_FILE.open("w", encoding="utf-8") as f:
+            json.dump({"last_success": time.time()}, f)
+
+    def _handle_sonos_refresh(self) -> None:
+        if not self._authorized():
+            self._send(HTTPStatus.UNAUTHORIZED, {"error": "unauthorized"})
+            return
+
+        try:
+            payload = self._read_json()
+        except (ValueError, json.JSONDecodeError):
+            payload = {}
+
+        force = payload.get("force", False)
+
+        now = time.time()
+        remaining = int(SONOS_REFRESH_COOLDOWN_SECONDS - (now - self._last_sonos_refresh()))
+        if not force and remaining > 0:
+            self._send(
+                HTTPStatus.OK,
+                {
+                    "refresh": "skipped",
+                    "reason": "cooldown",
+                    "cooldown_seconds": SONOS_REFRESH_COOLDOWN_SECONDS,
+                    "retry_after_seconds": remaining,
+                },
+            )
+            return
+
+        result = subprocess.run(
+            [SONOS_REFRESH_SCRIPT],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=30,
+        )
+
+        if result.returncode == 0:
+            self._record_sonos_refresh()
 
         response = {
             "refresh": "completed" if result.returncode == 0 else "failed",

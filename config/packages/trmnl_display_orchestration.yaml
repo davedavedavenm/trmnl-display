@@ -160,6 +160,13 @@ rest_command:
       {
         "mode": {{ mode | tojson }}
       }
+  trmnl_sonos_refresh_sidecar:
+    url: "http://192.168.1.143:8787/sonos/refresh"
+    method: POST
+    content_type: application/json
+    headers:
+      Authorization: !secret trmnl_mode_bridge_bearer
+    payload: "{}"
   trmnl_sonos_push:
     url: "http://192.168.1.143:4567/api/custom_plugins/f543f2e5-ba15-44d2-ab16-c4aea3b4f7e9"
     method: POST
@@ -768,3 +775,41 @@ automation:
                 TRMNL Jen commute skipped because commute context is idle.
                 heading_home={{ heading_home }},
                 state={{ commute_state_name }}
+
+  - id: trmnl_sonos_refresh_on_change_v1
+    alias: TRMNL Sonos Refresh on Change
+    description: >
+      Trigger Sonos sidecar refresh immediately when track metadata changes
+      or player transitions between playing/paused states, provided Sonos mode
+      is active.
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+      - platform: state
+        entity_id:
+          - media_player.living_room
+          - media_player.bedroom
+          - media_player.kitchen
+          - media_player.gym
+          - media_player.sonos_roam
+        attribute: media_title
+    condition:
+      - condition: state
+        entity_id: input_boolean.trmnl_display_automation_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_select.trmnl_display_mode
+        state: "sonos"
+    action:
+      - service: rest_command.trmnl_sonos_refresh_sidecar
+        data: {}
+      - service: system_log.write
+        data:
+          level: info
+          message: "TRMNL Sonos sidecar refresh triggered by track or state change."
