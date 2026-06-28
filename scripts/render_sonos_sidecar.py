@@ -284,83 +284,99 @@ def render(payload: dict, out_path: Path, source_path: Path) -> None:
     draw.rectangle([(ART_W, ART_Y), (ART_W + 3, ART_Y + ART_H)], fill=art_accent)
 
     # ---------------------------------------------------------------------------
-    # Info column — right side, colour-blocked layout
+    # Info column — right side, three fat blocks filling the full height
     # ---------------------------------------------------------------------------
-    # Right panel background — very dark grey, not pure black, gives visible depth
-    draw.rectangle([(ART_W + 3, ART_Y), (W, H)], fill=(14, 14, 14))
+    PANEL_X = ART_W + 3
+    PANEL_W = W - PANEL_X
+    CONTENT_H = H - ART_Y           # full available height below header
+    FOOTER_H = 30
+    USABLE_H = CONTENT_H - FOOTER_H
 
-    iy = ART_Y
+    # Split usable height: 42% title, 22% artist, 18% source, 18% rooms
+    T_H = int(USABLE_H * 0.42)
+    A_H = int(USABLE_H * 0.22)
+    remaining = USABLE_H - T_H - A_H
+    S_H = remaining // 2
+    R_H = remaining - S_H
 
-    # ── Title block ──────────────────────────────────────────────────────────
-    # Yellow left accent bar + white title on very dark background
-    TITLE_BLOCK_H = 144
-    draw.rectangle([(ART_W + 3, iy), (W, iy + TITLE_BLOCK_H)], fill=(22, 22, 22))
-    draw.rectangle([(ART_W + 3, iy), (ART_W + 10, iy + TITLE_BLOCK_H)], fill=YELLOW)
+    # ── Block 1: Title — dark bg, thick YELLOW left bar ──────────────────────
+    by = ART_Y
+    draw.rectangle([(PANEL_X, by), (W, by + T_H)], fill=(20, 20, 20))
+    draw.rectangle([(PANEL_X, by), (PANEL_X + 10, by + T_H)], fill=YELLOW)
 
-    title_display = shorten(title, width=26, placeholder="…")
-    title_lines = []
-    words = title_display.split()
-    line = ""
-    for word in words:
-        test = (line + " " + word).strip()
-        bb = draw.textbbox((0, 0), test, font=font_large)
-        if bb[2] - bb[0] > INFO_W - 10:
-            if line:
-                title_lines.append(line)
-            line = word
-        else:
-            line = test
-    if line:
-        title_lines.append(line)
+    # Word-wrap title into up to 2 lines at font_huge first, fall back to font_large
+    for title_font in (font_huge, font_large):
+        title_lines = []
+        line = ""
+        for word in title.split():
+            test = (line + " " + word).strip()
+            bb = draw.textbbox((0, 0), test, font=title_font)
+            if bb[2] - bb[0] > PANEL_W - 28:
+                if line:
+                    title_lines.append(line)
+                line = word
+            else:
+                line = test
+        if line:
+            title_lines.append(line)
+        if len(title_lines) <= 2:
+            break   # fits — use this font size
 
-    ty = iy + 18
-    num_title_lines = min(len(title_lines), 2)
+    line_h = draw.textbbox((0, 0), "Ag", font=title_font)[3] + 6
+    total_text_h = len(title_lines[:2]) * line_h
+    ty = by + (T_H - total_text_h) // 2
     for tl in title_lines[:2]:
-        draw.text((INFO_X, ty), tl, fill=WHITE, font=font_large)
-        ty += 48
-    # Dynamic height: fits content + comfortable padding
-    TITLE_BLOCK_H = num_title_lines * 48 + 36
-    # Re-draw the block at the correct height (draw on top of initial oversize rect)
-    draw.rectangle([(ART_W + 3, iy + TITLE_BLOCK_H), (W, iy + 200)], fill=(14, 14, 14))
-    draw.rectangle([(ART_W + 3, iy + TITLE_BLOCK_H), (ART_W + 10, iy + 200)], fill=(14, 14, 14))
-    iy += TITLE_BLOCK_H + 2
+        draw.text((PANEL_X + 18, ty), tl, fill=WHITE, font=title_font)
+        ty += line_h
+    by += T_H + 2
 
-    # ── Artist / Album band ───────────────────────────────────────────────────
-    ARTIST_BLOCK_H = 80
-    draw.rectangle([(ART_W + 3, iy), (W, iy + ARTIST_BLOCK_H)], fill=(10, 10, 10))
-    draw.rectangle([(ART_W + 3, iy), (ART_W + 10, iy + ARTIST_BLOCK_H)], fill=ORANGE)
+    # ── Block 2: Artist + Album — near-black, ORANGE left bar ────────────────
+    draw.rectangle([(PANEL_X, by), (W, by + A_H)], fill=(10, 10, 10))
+    draw.rectangle([(PANEL_X, by), (PANEL_X + 10, by + A_H)], fill=ORANGE)
 
-    artist_display = shorten(artist, width=32, placeholder="…")
-    draw.text((INFO_X, iy + 12), artist_display, fill=YELLOW, font=font_medium)
+    artist_display = shorten(artist, width=34, placeholder="…")
+    a_bb = draw.textbbox((0, 0), artist_display, font=font_medium)
+    a_h = a_bb[3] - a_bb[1]
 
     if album:
-        album_display = shorten(album, width=40, placeholder="…")
-        draw.text((INFO_X, iy + 46), album_display, fill=(200, 200, 200), font=font_tiny)
+        album_display = shorten(album, width=42, placeholder="…")
+        al_bb = draw.textbbox((0, 0), album_display, font=font_small)
+        al_h = al_bb[3] - al_bb[1]
+        total_a = a_h + 4 + al_h
+        ay = by + (A_H - total_a) // 2
+        draw.text((PANEL_X + 18, ay), artist_display, fill=YELLOW, font=font_medium)
+        draw.text((PANEL_X + 18, ay + a_h + 6), album_display, fill=(210, 210, 210), font=font_small)
+    else:
+        ay = by + (A_H - a_h) // 2
+        draw.text((PANEL_X + 18, ay), artist_display, fill=YELLOW, font=font_medium)
+    by += A_H + 2
 
-    iy += ARTIST_BLOCK_H + 3
+    # ── Block 3: Source — solid GREEN, big black text ─────────────────────────
+    draw.rectangle([(PANEL_X, by), (W, by + S_H)], fill=GREEN)
+    src_display = shorten(source or "Unknown", width=30, placeholder="…")
+    for src_font in (font_large, font_medium):
+        s_bb = draw.textbbox((0, 0), src_display, font=src_font)
+        if s_bb[2] - s_bb[0] <= PANEL_W - 36:
+            break
+    s_h = s_bb[3] - s_bb[1]
+    draw.text((PANEL_X + 18, by + (S_H - s_h) // 2), src_display, fill=BLACK, font=src_font)
+    by += S_H + 2
 
-    # ── Source — solid GREEN block ────────────────────────────────────────────
-    SRC_H = 72
-    draw.rectangle([(ART_W + 3, iy), (W, iy + SRC_H)], fill=GREEN)
-    draw.text((INFO_X, iy + 9), "SOURCE", fill=(0, 60, 0), font=font_tiny)
-    src_display = shorten(source or "Unknown", width=28, placeholder="…")
-    draw.text((INFO_X, iy + 30), src_display, fill=BLACK, font=font_medium)
-    iy += SRC_H + 2
+    # ── Block 4: Rooms — solid BLUE, big white text ───────────────────────────
+    draw.rectangle([(PANEL_X, by), (W, by + R_H)], fill=BLUE)
+    rooms_display = shorten(rooms_str, width=30, placeholder="…")
+    for rooms_font in (font_large, font_medium):
+        r_bb = draw.textbbox((0, 0), rooms_display, font=rooms_font)
+        if r_bb[2] - r_bb[0] <= PANEL_W - 36:
+            break
+    r_h = r_bb[3] - r_bb[1]
+    draw.text((PANEL_X + 18, by + (R_H - r_h) // 2), rooms_display, fill=WHITE, font=rooms_font)
+    by += R_H + 2
 
-    # ── Rooms — solid BLUE block ──────────────────────────────────────────────
-    if group_rooms:
-        ROOM_H = 72
-        draw.rectangle([(ART_W + 3, iy), (W, iy + ROOM_H)], fill=BLUE)
-        draw.text((INFO_X, iy + 9), "PLAYING IN", fill=(180, 200, 255), font=font_tiny)
-        rooms_display = shorten(rooms_str, width=32, placeholder="…")
-        draw.text((INFO_X, iy + 30), rooms_display, fill=WHITE, font=font_medium)
-        iy += ROOM_H + 2
-
-    # ── Updated timestamp — bottom strip ─────────────────────────────────────
-    bottom_y = H - 28
-    draw.rectangle([(ART_W + 3, bottom_y), (W, H)], fill=(8, 8, 8))
+    # ── Footer strip ──────────────────────────────────────────────────────────
+    draw.rectangle([(PANEL_X, by), (W, H)], fill=(8, 8, 8))
     if updated:
-        draw.text((INFO_X, bottom_y + 6), f"Updated {updated}  ·  {source or 'Sonos'}", fill=(90, 90, 90), font=font_tiny)
+        draw.text((PANEL_X + 18, by + 8), f"{updated}", fill=(80, 80, 80), font=font_tiny)
 
     # ---------------------------------------------------------------------------
     # Save source (RGB) for reference, then quantize to ACeP palette
