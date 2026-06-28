@@ -284,19 +284,27 @@ def render(payload: dict, out_path: Path, source_path: Path) -> None:
     draw.rectangle([(ART_W, ART_Y), (ART_W + 3, ART_Y + ART_H)], fill=art_accent)
 
     # ---------------------------------------------------------------------------
-    # Info column — right side
+    # Info column — right side, colour-blocked layout
     # ---------------------------------------------------------------------------
-    iy = ART_Y + PADDING
+    # Right panel background — very dark grey, not pure black, gives visible depth
+    draw.rectangle([(ART_W + 3, ART_Y), (W, H)], fill=(14, 14, 14))
 
-    # Track title — big, dominant
-    title_display = shorten(title, width=28, placeholder="…")
+    iy = ART_Y
+
+    # ── Title block ──────────────────────────────────────────────────────────
+    # Yellow left accent bar + white title on very dark background
+    TITLE_BLOCK_H = 144
+    draw.rectangle([(ART_W + 3, iy), (W, iy + TITLE_BLOCK_H)], fill=(22, 22, 22))
+    draw.rectangle([(ART_W + 3, iy), (ART_W + 10, iy + TITLE_BLOCK_H)], fill=YELLOW)
+
+    title_display = shorten(title, width=26, placeholder="…")
     title_lines = []
     words = title_display.split()
     line = ""
     for word in words:
         test = (line + " " + word).strip()
         bb = draw.textbbox((0, 0), test, font=font_large)
-        if bb[2] - bb[0] > INFO_W:
+        if bb[2] - bb[0] > INFO_W - 10:
             if line:
                 title_lines.append(line)
             line = word
@@ -305,57 +313,54 @@ def render(payload: dict, out_path: Path, source_path: Path) -> None:
     if line:
         title_lines.append(line)
 
-    for tl in title_lines[:2]:  # max 2 lines
-        draw.text((INFO_X, iy), tl, fill=WHITE, font=font_large)
-        iy += 46
+    ty = iy + 18
+    num_title_lines = min(len(title_lines), 2)
+    for tl in title_lines[:2]:
+        draw.text((INFO_X, ty), tl, fill=WHITE, font=font_large)
+        ty += 48
+    # Dynamic height: fits content + comfortable padding
+    TITLE_BLOCK_H = num_title_lines * 48 + 36
+    # Re-draw the block at the correct height (draw on top of initial oversize rect)
+    draw.rectangle([(ART_W + 3, iy + TITLE_BLOCK_H), (W, iy + 200)], fill=(14, 14, 14))
+    draw.rectangle([(ART_W + 3, iy + TITLE_BLOCK_H), (ART_W + 10, iy + 200)], fill=(14, 14, 14))
+    iy += TITLE_BLOCK_H + 2
 
-    iy += 6
+    # ── Artist / Album band ───────────────────────────────────────────────────
+    ARTIST_BLOCK_H = 80
+    draw.rectangle([(ART_W + 3, iy), (W, iy + ARTIST_BLOCK_H)], fill=(10, 10, 10))
+    draw.rectangle([(ART_W + 3, iy), (ART_W + 10, iy + ARTIST_BLOCK_H)], fill=ORANGE)
 
-    # Artist — yellow
-    artist_display = shorten(artist, width=34, placeholder="…")
-    draw.text((INFO_X, iy), artist_display, fill=YELLOW, font=font_medium)
-    iy += 34
+    artist_display = shorten(artist, width=32, placeholder="…")
+    draw.text((INFO_X, iy + 12), artist_display, fill=YELLOW, font=font_medium)
 
-    # Album — orange/small
     if album:
-        album_display = shorten(album.upper(), width=42, placeholder="…")
-        draw.text((INFO_X, iy), album_display, fill=ORANGE, font=font_tiny)
-        iy += 24
+        album_display = shorten(album, width=40, placeholder="…")
+        draw.text((INFO_X, iy + 46), album_display, fill=(200, 200, 200), font=font_tiny)
 
-    iy += 20
+    iy += ARTIST_BLOCK_H + 3
 
-    # Divider line
-    draw.rectangle([(INFO_X, iy), (W - PADDING, iy + 1)], fill=(60, 60, 60))
-    iy += 14
+    # ── Source — solid GREEN block ────────────────────────────────────────────
+    SRC_H = 72
+    draw.rectangle([(ART_W + 3, iy), (W, iy + SRC_H)], fill=GREEN)
+    draw.text((INFO_X, iy + 9), "SOURCE", fill=(0, 60, 0), font=font_tiny)
+    src_display = shorten(source or "Unknown", width=28, placeholder="…")
+    draw.text((INFO_X, iy + 30), src_display, fill=BLACK, font=font_medium)
+    iy += SRC_H + 2
 
-    # Info cards row
-    CARD_W = (INFO_W - 12) // 2
-    CARD_H = 80
+    # ── Rooms — solid BLUE block ──────────────────────────────────────────────
+    if group_rooms:
+        ROOM_H = 72
+        draw.rectangle([(ART_W + 3, iy), (W, iy + ROOM_H)], fill=BLUE)
+        draw.text((INFO_X, iy + 9), "PLAYING IN", fill=(180, 200, 255), font=font_tiny)
+        rooms_display = shorten(rooms_str, width=32, placeholder="…")
+        draw.text((INFO_X, iy + 30), rooms_display, fill=WHITE, font=font_medium)
+        iy += ROOM_H + 2
 
-    def draw_card(cx, cy, label, value, accent_col):
-        draw.rectangle([(cx, cy), (cx + CARD_W, cy + CARD_H)], fill=(18, 18, 18))
-        draw.rectangle([(cx, cy), (cx + 5, cy + CARD_H)], fill=accent_col)
-        draw.text((cx + 14, cy + 10), label.upper(), fill=(140, 140, 140), font=font_tiny)
-        # Value — may need wrapping
-        val_display = shorten(str(value), width=22, placeholder="…")
-        draw.text((cx + 14, cy + 32), val_display, fill=WHITE, font=font_reg_sm)
-
-    # Source card
-    draw_card(INFO_X, iy, "Source", source or "Unknown", GREEN)
-
-    # Rooms card
-    if len(other_rooms) > 0 or len(group_rooms) > 1:
-        draw_card(INFO_X + CARD_W + 12, iy, "Rooms", rooms_str, BLUE)
-
-    iy += CARD_H + 16
-
-    # Divider
-    draw.rectangle([(INFO_X, iy), (W - PADDING, iy + 1)], fill=(40, 40, 40))
-    iy += 12
-
-    # Music note decorative bar at bottom
-    notes = "♪  ♫  ♪  ♫  ♪  ♫  ♪  ♫  ♪  ♫  ♪  ♫  ♪"
-    draw.text((INFO_X, iy), notes, fill=(45, 45, 45), font=font_reg_sm)
+    # ── Updated timestamp — bottom strip ─────────────────────────────────────
+    bottom_y = H - 28
+    draw.rectangle([(ART_W + 3, bottom_y), (W, H)], fill=(8, 8, 8))
+    if updated:
+        draw.text((INFO_X, bottom_y + 6), f"Updated {updated}  ·  {source or 'Sonos'}", fill=(90, 90, 90), font=font_tiny)
 
     # ---------------------------------------------------------------------------
     # Save source (RGB) for reference, then quantize to ACeP palette
