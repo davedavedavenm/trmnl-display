@@ -284,99 +284,83 @@ def render(payload: dict, out_path: Path, source_path: Path) -> None:
     draw.rectangle([(ART_W, ART_Y), (ART_W + 3, ART_Y + ART_H)], fill=art_accent)
 
     # ---------------------------------------------------------------------------
-    # Info column — right side, three fat blocks filling the full height
+    # Info column — right side, premium Swiss-style light theme
     # ---------------------------------------------------------------------------
-    PANEL_X = ART_W + 3
-    PANEL_W = W - PANEL_X
-    CONTENT_H = H - ART_Y           # full available height below header
-    FOOTER_H = 30
-    USABLE_H = CONTENT_H - FOOTER_H
+    # Right panel background — clean solid white for maximum contrast & paper feel
+    draw.rectangle([(ART_W + 3, ART_Y), (W, H)], fill=WHITE)
 
-    # Split usable height: 42% title, 22% artist, 18% source, 18% rooms
-    T_H = int(USABLE_H * 0.42)
-    A_H = int(USABLE_H * 0.22)
-    remaining = USABLE_H - T_H - A_H
-    S_H = remaining // 2
-    R_H = remaining - S_H
+    iy = ART_Y + 24
 
-    # ── Block 1: Title — dark bg, thick YELLOW left bar ──────────────────────
-    by = ART_Y
-    draw.rectangle([(PANEL_X, by), (W, by + T_H)], fill=(20, 20, 20))
-    draw.rectangle([(PANEL_X, by), (PANEL_X + 10, by + T_H)], fill=YELLOW)
+    # ── Title ──
+    title_display = shorten(title, width=26, placeholder="…")
+    title_lines = []
+    line = ""
+    for word in title_display.split():
+        test = (line + " " + word).strip()
+        bb = draw.textbbox((0, 0), test, font=font_large)
+        if bb[2] - bb[0] > INFO_W:
+            if line:
+                title_lines.append(line)
+            line = word
+        else:
+            line = test
+    if line:
+        title_lines.append(line)
 
-    # Word-wrap title into up to 2 lines at font_huge first, fall back to font_large
-    for title_font in (font_huge, font_large):
-        title_lines = []
-        line = ""
-        for word in title.split():
-            test = (line + " " + word).strip()
-            bb = draw.textbbox((0, 0), test, font=title_font)
-            if bb[2] - bb[0] > PANEL_W - 28:
-                if line:
-                    title_lines.append(line)
-                line = word
-            else:
-                line = test
-        if line:
-            title_lines.append(line)
-        if len(title_lines) <= 2:
-            break   # fits — use this font size
-
-    line_h = draw.textbbox((0, 0), "Ag", font=title_font)[3] + 6
-    total_text_h = len(title_lines[:2]) * line_h
-    ty = by + (T_H - total_text_h) // 2
     for tl in title_lines[:2]:
-        draw.text((PANEL_X + 18, ty), tl, fill=WHITE, font=title_font)
-        ty += line_h
-    by += T_H + 2
+        draw.text((INFO_X, iy), tl, fill=BLACK, font=font_large)
+        iy += 44
 
-    # ── Block 2: Artist + Album — near-black, ORANGE left bar ────────────────
-    draw.rectangle([(PANEL_X, by), (W, by + A_H)], fill=(10, 10, 10))
-    draw.rectangle([(PANEL_X, by), (PANEL_X + 10, by + A_H)], fill=ORANGE)
+    iy += 6
 
-    artist_display = shorten(artist, width=34, placeholder="…")
-    a_bb = draw.textbbox((0, 0), artist_display, font=font_medium)
-    a_h = a_bb[3] - a_bb[1]
+    # ── Artist ──
+    artist_display = shorten(artist, width=32, placeholder="…")
+    draw.text((INFO_X, iy), artist_display, fill=RED, font=font_medium)
+    iy += 30
 
+    # ── Album ──
     if album:
-        album_display = shorten(album, width=42, placeholder="…")
-        al_bb = draw.textbbox((0, 0), album_display, font=font_small)
-        al_h = al_bb[3] - al_bb[1]
-        total_a = a_h + 4 + al_h
-        ay = by + (A_H - total_a) // 2
-        draw.text((PANEL_X + 18, ay), artist_display, fill=YELLOW, font=font_medium)
-        draw.text((PANEL_X + 18, ay + a_h + 6), album_display, fill=(210, 210, 210), font=font_small)
-    else:
-        ay = by + (A_H - a_h) // 2
-        draw.text((PANEL_X + 18, ay), artist_display, fill=YELLOW, font=font_medium)
-    by += A_H + 2
+        album_display = shorten(album, width=40, placeholder="…")
+        draw.text((INFO_X, iy), album_display, fill=(100, 100, 100), font=font_small)
+        iy += 24
 
-    # ── Block 3: Source — solid GREEN, big black text ─────────────────────────
-    draw.rectangle([(PANEL_X, by), (W, by + S_H)], fill=GREEN)
-    src_display = shorten(source or "Unknown", width=30, placeholder="…")
-    for src_font in (font_large, font_medium):
-        s_bb = draw.textbbox((0, 0), src_display, font=src_font)
-        if s_bb[2] - s_bb[0] <= PANEL_W - 36:
-            break
-    s_h = s_bb[3] - s_bb[1]
-    draw.text((PANEL_X + 18, by + (S_H - s_h) // 2), src_display, fill=BLACK, font=src_font)
-    by += S_H + 2
+    iy += 14
 
-    # ── Block 4: Rooms — solid BLUE, big white text ───────────────────────────
-    draw.rectangle([(PANEL_X, by), (W, by + R_H)], fill=BLUE)
-    rooms_display = shorten(rooms_str, width=30, placeholder="…")
-    for rooms_font in (font_large, font_medium):
-        r_bb = draw.textbbox((0, 0), rooms_display, font=rooms_font)
-        if r_bb[2] - r_bb[0] <= PANEL_W - 36:
-            break
-    r_h = r_bb[3] - r_bb[1]
-    draw.text((PANEL_X + 18, by + (R_H - r_h) // 2), rooms_display, fill=WHITE, font=rooms_font)
-    by += R_H + 2
+    # Divider line
+    draw.rectangle([(INFO_X, iy), (W - PADDING, iy + 1)], fill=(220, 220, 220))
+    iy += 18
 
-    # ── Footer strip ──────────────────────────────────────────────────────────
-    draw.rectangle([(PANEL_X, by), (W, H)], fill=(8, 8, 8))
+    # ── Widgets (Source & Rooms) ──
+    # Stacked vertically, using light grey cards with thick color accent bars
+    CARD_W = INFO_W
+    CARD_H = 68
+
+    def draw_light_card(cy, label, value, accent_col):
+        # Card body (very light grey)
+        draw.rectangle([(INFO_X, cy), (INFO_X + CARD_W, cy + CARD_H)], fill=(245, 245, 245))
+        # Thin outer border
+        draw.rectangle([(INFO_X, cy), (INFO_X + CARD_W, cy + CARD_H)], outline=(220, 220, 220), width=1)
+        # Thick left accent bar
+        draw.rectangle([(INFO_X, cy), (INFO_X + 6, cy + CARD_H)], fill=accent_col)
+        # Label
+        draw.text((INFO_X + 16, cy + 8), label.upper(), fill=(120, 120, 120), font=font_tiny)
+        # Value (Black text, highly legible)
+        val_display = shorten(str(value), width=28, placeholder="…")
+        draw.text((INFO_X + 16, cy + 28), val_display, fill=BLACK, font=font_medium)
+
+    # Source widget
+    draw_light_card(iy, "Source", source or "Unknown", GREEN)
+    iy += CARD_H + 12
+
+    # Rooms widget
+    if group_rooms:
+        draw_light_card(iy, "Playing In", rooms_str, BLUE)
+
+    # ── Footer strip ──
+    bottom_y = H - 28
+    draw.rectangle([(ART_W + 3, bottom_y), (W, H)], fill=(240, 240, 240))
     if updated:
-        draw.text((PANEL_X + 18, by + 8), f"{updated}", fill=(80, 80, 80), font=font_tiny)
+        draw.text((INFO_X, bottom_y + 6), f"Updated {updated}", fill=(120, 120, 120), font=font_tiny)
 
     # ---------------------------------------------------------------------------
     # Save source (RGB) for reference, then quantize to ACeP palette
