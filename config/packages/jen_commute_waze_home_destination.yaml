@@ -23,6 +23,9 @@ automation:
         entity_id: input_boolean.jen_heading_home
         to: "off"
         id: not_heading_home
+      - platform: homeassistant
+        event: start
+        id: startup
     condition:
       - condition: state
         entity_id: input_boolean.commute_system_enabled
@@ -30,8 +33,17 @@ automation:
     action:
       - choose:
           - conditions:
-              - condition: trigger
-                id: heading_home
+              - condition: or
+                conditions:
+                  - condition: trigger
+                    id: heading_home
+                  - condition: and
+                    conditions:
+                      - condition: trigger
+                        id: startup
+                      - condition: state
+                        entity_id: input_boolean.jen_heading_home
+                        state: "on"
             sequence:
               - action: input_select.select_option
                 target:
