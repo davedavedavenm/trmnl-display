@@ -1,1 +1,2 @@
 *.sh text eol=lf
+deploy/khpi5/trmnl-crontab.txt text eol=lf
