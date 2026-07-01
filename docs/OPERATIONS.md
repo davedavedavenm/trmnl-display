@@ -83,7 +83,10 @@ both are live. The full mechanism breakdown is in
      safety net for the night-stop case; in normal operation it is
      overridden by the SSH restart 1-2 s later)
    - `trmnl-display-night-stop.timer` — 23:00 daily, runs
-     `systemctl stop trmnl-display.service`
+     `systemctl stop trmnl-display.service`. This timer is deliberately
+     non-persistent so a missed 23:00 stop is not replayed after a
+     morning reboot or wake. The stop service also has a local-time guard
+     and only stops the display between 23:00 and 05:59.
    - systemd unit files mirrored at
      `deploy/trmnl-display-morning-start.{timer,service}` and
      `deploy/trmnl-display-night-stop.{timer,service}`

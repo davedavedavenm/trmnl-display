@@ -3,4 +3,5 @@ Description=TRMNL Display Night Stop
 
 [Service]
 Type=oneshot
+ExecCondition=/bin/sh -c 'h=$(date +%%H); test "$h" -ge 23 -o "$h" -lt 6'
 ExecStart=/bin/systemctl stop trmnl-display.service

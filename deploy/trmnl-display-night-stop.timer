@@ -3,7 +3,7 @@ Description=Stop TRMNL display at 11 PM nightly
 
 [Timer]
 OnCalendar=*-*-* 23:00:00
-Persistent=true
+Persistent=false
 
 [Install]
 WantedBy=timers.target

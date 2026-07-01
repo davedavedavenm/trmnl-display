@@ -148,6 +148,12 @@ already set to `ha_dashboard` or `jen_morning` for the next morning,
 the local timer at 06:40 ensures the Pi wakes up and starts polling
 even if HA is down or the mode bridge has lost the new mode.
 
+The paired night-stop timer should not replay missed stops after the
+Pi has been offline or asleep. It is intentionally configured with
+`Persistent=false`, and the stop unit has a local-time `ExecCondition`
+guard so a stale 23:00 stop cannot terminate the display during a
+morning or daytime boot.
+
 **Recommendation:** keep the timer as a safety net. Retiring it would
 require the HA resolver to also push a "wake the Pi" SSH or to make
 the Pi poll continuously. Both have higher cost than the current
