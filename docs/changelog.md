@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-07-14
+
+- Reconciled drift in `plugins/trmnl-calendar-dayview/README.md`: replaced
+  the stale four-row "Data Sources" table (which hardcoded four personal
+  calendar sources) with a portable description of the twelve-slot model
+  defined in `settings.yml`. The live plugin (LaraPaper plugin #27 on
+  `khpi5`) binds eleven slots across eight Nango connections, so the
+  README now documents the slot fields generically and stays shareable.
+- Disabled slot 8 of LaraPaper plugin #27 (Calendar Day View). Slot 8
+  pointed at the Outlook `United Kingdom holidays` sub-calendar on the
+  `REDACTED-CONNECTION` connection and was the source of unwanted UK
+  bank-holiday events appearing on the physical display. Applied as a
+  live DB edit (`calendar_8_connection_id` cleared); `settings.yml`
+  ships no slot-8 value, so no repo value required changing.
+- Read-only inventory of the `REDACTED@example.com` identity (two
+  Nango connections: Google + Outlook) confirmed the same email has a
+  dormant Google `Holidays in United Kingdom` sub-calendar
+  (`en.uk#holiday@group.v.calendar.google.com`) that is intentionally
+  not slotted, and that slot 11's "CB Holidays" label matches its source
+  calendar name (`CB Holiday Calendar`) but holds family scheduling
+  rather than public holidays.
+
 ## 2026-06-26
 
 - Orchestration audit: confirmed the jen_morning switch at 06:45 BST

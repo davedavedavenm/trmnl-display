@@ -305,6 +305,17 @@ Check the calendar job:
 ssh khpi5 "journalctl --since '30 minutes ago' -t trmnl-calendar --no-pager"
 ```
 
+### Calendar plugin slot inventory
+
+The Calendar Day View plugin (LaraPaper plugin #27 on `khpi5`) binds up to twelve Nango calendar slots. The active slot set lives in the plugin's `configuration` JSON column in the LaraPaper database — `settings.yml` in the repo only defines the field shape, not the values. When debugging "why is event X on screen" or "why is feed Y missing", read the live config from the database.
+
+Known intentional non-wired feeds (as of 2026-07-14):
+
+- Outlook `United Kingdom holidays` sub-calendar on the `REDACTED-CONNECTION` connection — was slot 8, disabled 2026-07-14 because it was surfacing UK bank holidays on the panel.
+- Google `Holidays in United Kingdom` sub-calendar on the `REDACTED@example.com (Google)` connection — never slotted; dormant twin of the Outlook feed.
+
+Provider-built-in holiday sub-calendars (Google `en.uk#holiday@group.v.calendar.google.com`, Outlook `United Kingdom holidays`) must stay unslotted unless the operator explicitly wants public holidays on the display.
+
 ## Service Reloads
 
 After changing the mode bridge:

@@ -4,14 +4,17 @@
 
 ## Data Sources
 
-The sidecar fetches events via Nango OAuth proxy. Each connected calendar uses a distinct panel colour:
+Events are fetched through a Nango OAuth proxy (`nango_base_url` and `nango_secret_key` in the plugin settings). The fetcher supports up to **twelve calendar slots**; each slot binds one Nango connection to the display and is independent of the others:
 
-| Source | Colour |
+| Slot field | Purpose |
 |---|---|
-| REDACTED@example.com | Blue |
-| REDACTED@example.com | Green |
-| REDACTED@example.com | Red |
-| Outlook Calendar | Orange |
+| `calendar_N_connection_id` | Nango connection id. Empty / `Disabled` skips the slot. |
+| `calendar_N_calendar_id` | Optional sub-calendar id. Defaults to the account's primary (Google) or default (Outlook) calendar. |
+| `calendar_N_label` | Pill label shown on screen. |
+| `calendar_N_color` | Accent colour: `blue`, `red`, `green`, `yellow`, `orange`, or `black`. |
+| `calendar_N_color_custom` | Optional hex / CSS override. |
+
+Several slots may point at the same Nango connection with different sub-calendars — for example an account's primary calendar, a shared family calendar, and the provider's auto-generated "Birthdays" aggregate can each be their own slot. Any feed the operator does not want on screen (e.g. a provider's built-in "Holidays in United Kingdom" sub-calendar) is simply left unslotted or set to `Disabled`.
 
 ## Installation
 
