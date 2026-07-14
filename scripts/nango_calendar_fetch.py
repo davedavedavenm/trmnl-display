@@ -15,7 +15,7 @@ NANGO_SECRET_KEY = os.getenv("NANGO_SECRET_KEY", "")
 PRIMARY_CALENDARS = [
     {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 0, 255], "label": "REDACTED-LABEL"},
     {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 255, 0], "label": "DAVE"},
-    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [255, 0, 0], "label": "JEN"},
+    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [255, 0, 0], "label": "REDACTED-LABEL"},
     {"connection_id": "REDACTED-CONNECTION", "provider": "outlook", "calendar_id": None, "color": [255, 128, 0], "label": "OUTLOOK"},
 ]
 

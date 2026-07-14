@@ -21,7 +21,7 @@
               "status": "confirmed",
               "attendees": [
                 {"email": "REDACTED@example.com", "name": "Dave", "status": "accepted"},
-                {"email": "REDACTED@example.com", "name": "Jen", "status": "accepted"}
+                {"email": "REDACTED@example.com", "name": "Dave", "status": "accepted"}
               ]
             }
           ]
