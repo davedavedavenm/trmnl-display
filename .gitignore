@@ -199,3 +199,12 @@ multi_cal_new.png
 # Local scratch and proof images
 /tmp/
 sidecar_calendar_day_source_next.png
+
+# Root-level live audit captures and disposable probes
+/tmp_larapaper.sqlite
+/scratch_*.py
+/review_*.png
+/current_screen.png
+/sidecar_*_next.png
+/test_*.png
+/trmnl-pi-last-display*.png
