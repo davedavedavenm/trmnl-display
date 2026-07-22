@@ -40,7 +40,7 @@ flowchart LR
 
 ## Current Modes
 
-The mode bridge accepts these modes:
+The mode bridge accepts these display modes (Home Assistant's `input_select.trmnl_display_mode` is the matching list; `status` is a query subcommand of `trmnl-set-display-mode`, not a display mode):
 
 - `ha_dashboard`
 - `calendar`
@@ -48,9 +48,9 @@ The mode bridge accepts these modes:
 - `jen_commute`
 - `jen_morning`
 - `dave_commute`
+- `bus`
 - `alert`
 - `idle`
-- `status`
 
 Home Assistant owns the priority decision. LaraPaper owns the current BYOS management path. Colour-critical dashboard rendering should move through the indexed colour sidecar path. The Pi only fetches and displays the current generated image.
 
@@ -92,7 +92,7 @@ Do not commit live secrets. Use:
 For script syntax:
 
 ```bash
-python -m py_compile scripts/trmnl_calendar_multi.py scripts/trmnl_ha_dashboard.py scripts/trmnl_mode_bridge.py scripts/trmnl_sonos_local.py
+python -m py_compile scripts/trmnl_calendar_multi.py scripts/trmnl_ha_dashboard.py scripts/trmnl_mode_bridge.py scripts/trmnl_sonos_local.py scripts/render_colour_dashboard.py
 ```
 
 For the live display path:
@@ -122,10 +122,10 @@ See [Live Deployment Workflow](docs/LIVE_DEPLOYMENT_WORKFLOW.md) for the colour 
 
 ## Status
 
-The live deployment was synced into this repo on `2026-04-30`. The latest verified live state had:
+The live deployment was re-verified against this repo on `2026-07-22`. The latest verified live state had:
 
-- LaraPaper container healthy on `khpi5`
-- `trmnl-display.service` normally active on `trmnl-pi`
-- active LaraPaper playlist: `TRMNL Mode: ha_dashboard`
-- Pi display refresh succeeding with `800 x 480` images prepared as `4-bpp`
+- LaraPaper `0.39.0` container healthy on `khpi5`
+- `trmnl-display.service` active on `trmnl-pi`, rendering `800 x 480, 8-bpp` indexed sidecar PNGs prepared as `4-bpp`
+- active LaraPaper playlist at audit time: `TRMNL Mode: calendar` (Calendar Day View sidecar)
+- mode bridge active with `/health` ok; seven mode playlists present (ha_dashboard, jen_morning, sonos, jen_commute, calendar, bus, idle)
 - direct seven-colour sidecar proof refreshed successfully on hardware on `2026-05-01`

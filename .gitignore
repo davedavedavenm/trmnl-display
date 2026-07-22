@@ -208,3 +208,10 @@ sidecar_calendar_day_source_next.png
 /sidecar_*_next.png
 /test_*.png
 /trmnl-pi-last-display*.png
+
+# Secret guardrails
+secrets.yaml
+config/trmnl/config.json
+.env.*
+!.env.example
+!.envrc

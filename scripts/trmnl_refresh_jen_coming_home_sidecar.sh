@@ -16,7 +16,7 @@ SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 # 1. Active Mode Check (the coming-home screen rides on the jen_commute mode)
 if [[ "${1:-}" != "--force" ]]; then
-  if ! /home/dave/bin/trmnl-set-display-mode status | grep -q "TRMNL Mode: jen_commute"; then
+  if ! "${TRMNL_SET_DISPLAY_MODE_BIN:-/home/dave/bin/trmnl-set-display-mode}" status | grep -q "TRMNL Mode: jen_commute"; then
     echo "Display is not in jen_commute mode. Skipping refresh."
     exit 0
   fi
@@ -45,6 +45,7 @@ docker cp "${SIDECAR_IMAGE_PATH}" "${LARAPAPER_CONTAINER}:${SIDECAR_CONTAINER_IM
 docker exec \
   -e PLUGIN_NAME="Jen Coming Home" \
   -e SIDECAR_IMAGE_NAME="${SIDECAR_IMAGE_NAME}" \
+  -e TRMNL_DEVICE_ID="${TRMNL_DEVICE_ID:-1}" \
   -i "${LARAPAPER_CONTAINER}" php <<'PHP'
 <?php
 require '/var/www/html/vendor/autoload.php';
@@ -73,7 +74,7 @@ $updated = DB::table('plugins')
     ]);
 
 DB::table('devices')
-    ->where('id', 1)
+    ->where('id', (int) (getenv('TRMNL_DEVICE_ID') ?: 1))
     ->update([
         'current_screen_image' => $imageName,
         'updated_at' => now(),

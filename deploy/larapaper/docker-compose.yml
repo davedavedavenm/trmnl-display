@@ -10,7 +10,7 @@ services:
             - DB_DATABASE=database/storage/database.sqlite
             - REGISTRATION_ENABLED=1
             - APP_TIMEZONE=Europe/London
-            - APP_URL=https://trmnl.magnusfamily.co.uk
+            - APP_URL=${LARAPAPER_APP_URL:-http://localhost:4567}
             - APP_TRUSTED_PROXIES=*
         volumes:
             - database:/var/www/html/database/storage

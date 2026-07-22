@@ -56,7 +56,7 @@ For standard monochrome TRMNL panels or when the sidecar is unavailable, the plu
 | Setting | Type | Default | Description |
 |---|---|---|---|
 | `Layout Mode` | select | `mashup` | `mashup` for split-screen with HP quote, `standalone` for full-screen |
-| `Layout Variant` | select | `maps_style` | `maps_style`, `editorial`, or `structured` |
+| `Layout Variant` | select | `automotive_hud` | `swiss_typographic`, `infographic_timeline`, `bauhaus_geometric`, `automotive_hud`, `split_contrast`, `bento_grid`, `minimalist`, `dark_tech` |
 | `Screen Label` | string | `Jen Morning` | Header label at top of commute panel |
 | `Headline Fallback` | string | `Time To Work` | Used when payload omits `headline` |
 | `Colour Profile` | select | `navy_blue` | `navy_blue`, `slate`, or `forest` gradient for left panel |

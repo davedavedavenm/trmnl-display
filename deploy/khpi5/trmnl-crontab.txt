@@ -1,24 +1,12 @@
+# TRMNL-stack cron entries for khpi5. This is the TRMNL-relevant subset of the
+# host crontab; unrelated homelab jobs (monitoring, fleet pipelines, etc.) live
+# in the live host crontab but are intentionally not tracked in this repo.
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-0 3 * * * /usr/local/bin/openclaw-browser-cleanup >> /tmp/browser-cleanup.log 2>&1
-*/10 * * * * /home/dave/.local/bin/beszel/run_beszel_long_down_watch.sh >> /home/dave/.local/share/beszel-watch/reports/long_down_watch_cron.log 2>&1
-*/15 * * * * /home/dave/.local/bin/beszel/check_beszel_long_down_watch_freshness.sh >> /home/dave/.local/share/beszel-watch/reports/long_down_freshness_cron.log 2>&1
-EXCLUDE_IMAGE_SUBSTRINGS=ghcr.io/czlonkowski/n8n-mcp
 0 4 * * * /home/dave/bin/larapaper-upgrade-and-patch.sh 2>&1 | logger -t larapaper-update
 # * * * * * /home/dave/run_trmnl_sonos.sh 2>&1 | logger -t trmnl-sonos-local
 */10 * * * * /home/dave/bin/trmnl-refresh-ha-sidecar 2>&1 | logger -t trmnl-ha-dashboard
-
-# Universalcron governance pipeline ΓÇö Monday 08:00 UTC
-0 8 * * 1 bash /home/dave/universalcron/scripts/run-pipeline.sh >> /var/log/maintenance/cron.log 2>&1
-
-# Weekly fleet WhatsApp summary ΓÇö Monday 08:30 UTC
-30 8 * * 1 bash /home/dave/universalcron/scripts/run-weekly-summary.sh >> /var/log/maintenance/cron.log 2>&1
-
-# Compose snapshot pipeline - daily 03:00 UTC
-0 3 * * * /opt/scripts/compose-snapshot/run_snapshot.sh
 0 5 * * * sudo python3 /home/dave/restore_color_model.py 2>&1 | logger -t trmnl-db-restore
 */10 * * * * /home/dave/bin/trmnl-refresh-bus-sidecar 2>&1 | logger -t trmnl-bus-departures
 */15 * * * * /home/dave/bin/trmnl-refresh-calendar-sidecar 2>&1 | logger -t trmnl-calendar-sidecar
-# Drain host notification spools to a central artifact (daily 07:50 UTC, before the Mon pipeline)
-50 7 * * * cd /home/dave/universalcron && python3 scripts/collect_notify_events.py --json-output /var/log/maintenance/notify_events_collected.json >> /var/log/maintenance/cron.log 2>&1
 */5 * * * * /home/dave/bin/trmnl-refresh-morning-mashup 2>&1 | logger -t trmnl-morning-mashup
 */2 * * * * /home/dave/bin/trmnl-refresh-jen-coming-home-sidecar 2>&1 | logger -t trmnl-jen-coming-home
