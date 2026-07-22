@@ -22,6 +22,8 @@ Several slots may point at the same Nango connection with different sub-calendar
 
 Standard LaraPaper webhook plugin. Create a webhook plugin named "Calendar Week Ahead" and configure the Nango secret key.
 
+**Configuration source (portability).** All twelve calendar slots are configured per-instance in the LaraPaper/TRMNL Web UI: each `calendar_N_connection_id` is a free-text Nango connection id (paste the id from your Nango instance), with optional `calendar_N_calendar_id`, `calendar_N_label`, and `calendar_N_color` / `calendar_N_color_custom`. The companion fetcher (`scripts/nango_calendar_fetch.py`) reads these slot values from the plugin's stored configuration, never from source — so a fresh install is configured entirely through the UI. Non-standard (UUID-style) connection ids that do not contain the word `outlook` are mapped to their provider via the `TRMNL_OUTLOOK_CONNECTION_IDS` environment variable on the host that runs the fetcher.
+
 ## Payload Format
 
 The renderer expects a JSON payload with this shape:
@@ -62,5 +64,4 @@ The renderer expects a JSON payload with this shape:
 | `scripts/trmnl_update_calendar_sidecar_image.sh` | Playlist-safe handoff into LaraPaper |
 | `scripts/trmnl_refresh_calendar_sidecar.sh` | Combined fetch-render-handoff wrapper |
 | `plugins/trmnl-calendar-dayview/settings.yml` | Plugin configuration |
-| `plugins/trmnl-calendar-dayview/fields.schema.json` | Sidecar field schema |
 | `plugins/trmnl-calendar-dayview/payload.example.json` | Example payload |

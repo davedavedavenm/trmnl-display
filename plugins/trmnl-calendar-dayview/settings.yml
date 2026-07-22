@@ -25,7 +25,7 @@ custom_fields:
   - keyname: nango_base_url
     name: Nango Base URL
     field_type: string
-    default: "https://nango.example.com"
+    default: ""
     description: Nango API base URL for calendar proxy
   - keyname: nango_secret_key
     name: Nango Secret Key
@@ -36,18 +36,9 @@ custom_fields:
   # Calendar 1
   - keyname: calendar_1_connection_id
     name: Calendar 1 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_1_calendar_id
     name: Calendar 1 ID
     field_type: string
@@ -78,18 +69,9 @@ custom_fields:
   # Calendar 2
   - keyname: calendar_2_connection_id
     name: Calendar 2 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_2_calendar_id
     name: Calendar 2 ID
     field_type: string
@@ -120,18 +102,9 @@ custom_fields:
   # Calendar 3
   - keyname: calendar_3_connection_id
     name: Calendar 3 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_3_calendar_id
     name: Calendar 3 ID
     field_type: string
@@ -162,18 +135,9 @@ custom_fields:
   # Calendar 4
   - keyname: calendar_4_connection_id
     name: Calendar 4 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_4_calendar_id
     name: Calendar 4 ID
     field_type: string
@@ -204,18 +168,9 @@ custom_fields:
   # Calendar 5
   - keyname: calendar_5_connection_id
     name: Calendar 5 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_5_calendar_id
     name: Calendar 5 ID
     field_type: string
@@ -246,18 +201,9 @@ custom_fields:
   # Calendar 6
   - keyname: calendar_6_connection_id
     name: Calendar 6 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_6_calendar_id
     name: Calendar 6 ID
     field_type: string
@@ -288,18 +234,9 @@ custom_fields:
   # Calendar 7
   - keyname: calendar_7_connection_id
     name: Calendar 7 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_7_calendar_id
     name: Calendar 7 ID
     field_type: string
@@ -330,18 +267,9 @@ custom_fields:
   # Calendar 8
   - keyname: calendar_8_connection_id
     name: Calendar 8 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_8_calendar_id
     name: Calendar 8 ID
     field_type: string
@@ -372,18 +300,9 @@ custom_fields:
   # Calendar 9
   - keyname: calendar_9_connection_id
     name: Calendar 9 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_9_calendar_id
     name: Calendar 9 ID
     field_type: string
@@ -414,18 +333,9 @@ custom_fields:
   # Calendar 10
   - keyname: calendar_10_connection_id
     name: Calendar 10 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_10_calendar_id
     name: Calendar 10 ID
     field_type: string
@@ -456,18 +366,9 @@ custom_fields:
   # Calendar 11
   - keyname: calendar_11_connection_id
     name: Calendar 11 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_11_calendar_id
     name: Calendar 11 ID
     field_type: string
@@ -498,18 +399,9 @@ custom_fields:
   # Calendar 12
   - keyname: calendar_12_connection_id
     name: Calendar 12 Connection
-    field_type: select
+    field_type: string
     optional: true
-    options:
-      - "Disabled": ""
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Google)": "REDACTED-UUID"
-      - "REDACTED@example.com (Outlook)": "REDACTED-CONNECTION"
-      - "REDACTED@example.com (Outlook)": "REDACTED-UUID"
-      - "david_magnus@hotmail.com (Outlook)": "REDACTED-UUID"
+    description: Nango connection id for this calendar slot (for example `google-calendar-work`, or a provider connection UUID). Paste the id from your Nango instance; leave empty to disable this slot.
   - keyname: calendar_12_calendar_id
     name: Calendar 12 ID
     field_type: string
