@@ -9,6 +9,8 @@ conflate the two.
 
 > **Rendering path (official exception).** This plugin ships **no Liquid screen template**. The on-screen image is produced by the repo's indexed-colour sidecar (`scripts/render_jen_coming_home.py`) and installed into LaraPaper via its **generated-image / image-webhook handoff** — an official LaraPaper screen-generation mechanism (LaraPaper supports Screenshot / Image Webhook / API rendering alongside recipe Liquid). The official TRMNL Liquid/CSS design system targets the 800×480 2-bit grayscale panel, so the colour sidecar is a deliberate BYOS extension for the 6/7-colour ACeP Spectra panel. The plugin stays fully configurable through `settings.yml` and the documented `merge_variables` payload; the sidecar reads the same contract, not hardcoded values. See `docs/PLUGIN_RECIPE_CONTRACT.md`.
 
+**Portability note.** The commute origin used for the work→home progress indicator is read from the `TRMNL_WORK_ANCHOR` environment variable (`latitude,longitude`) on the host running the renderer; it is intentionally not stored in source.
+
 ## How it fits together
 
 - **Plugin**: LaraPaper webhook custom plugin `Jen Coming Home` (id 28,

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -36,10 +37,11 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 PANEL_PALETTE = [BLACK, WHITE, RED, YELLOW, BLUE, GREEN]
 
-# Jen's work (Radstock) — the start of the homeward journey. Anchors the
-# Work->Home progress from her real GPS instead of the noisy ETA. The payload's
-# map_url destination is HOME; this is the opposite (work) end. Editable.
-WORK_ANCHOR = (0.0000000, -0.0000000)
+try:
+    _work_anchor_parts = [float(p) for p in os.getenv("TRMNL_WORK_ANCHOR", "0.0,0.0").split(",")]
+    WORK_ANCHOR = (_work_anchor_parts[0], _work_anchor_parts[1])
+except (ValueError, IndexError):
+    WORK_ANCHOR = (0.0, 0.0)
 
 
 def _haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
