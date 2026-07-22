@@ -29,7 +29,7 @@ ALBUM_ART_MONO_CONTRAST = float(os.getenv("TRMNL_ALBUM_ART_MONO_CONTRAST", "1.1"
 
 HA_URL = os.getenv("HA_URL", "http://192.168.1.89:8123").strip()
 HA_TOKEN = os.getenv("HA_TOKEN", "").strip()
-sonos_entities = [e.strip() for e in os.getenv("TRMNL_SONOS_ENTITIES", "media_player.living_room,media_player.bedroom,media_player.kitchen,media_player.gym,media_player.sonos_roam").split(",") if e.strip()]
+sonos_entities = [e.strip() for e in os.getenv("TRMNL_SONOS_ENTITIES", "").split(",") if e.strip()]
 
 def build_processed_album_art_data_uri(url: str, saturation: float, contrast: float) -> str:
     if not url:

@@ -32,20 +32,6 @@ LIGHT_DIM = (160, 160, 160)
 
 PANEL_PALETTE = [BLACK, WHITE, GREEN, BLUE, RED, YELLOW]
 
-SOURCE_COLORS = {
-    "REDACTED-CONNECTION": BLUE,
-    "REDACTED-CONNECTION": GREEN,
-    "REDACTED-CONNECTION": RED,
-    "REDACTED-CONNECTION": ORANGE,
-}
-
-SOURCE_LABELS = {
-    "REDACTED-CONNECTION": "REDACTED-LABEL",
-    "REDACTED-CONNECTION": "DAVE",
-    "REDACTED-CONNECTION": "REDACTED-LABEL",
-    "REDACTED-CONNECTION": "OUTLOOK",
-}
-
 
 def closest_panel_color(rgb: tuple[int, int, int] | list[int]) -> tuple[int, int, int]:
     if not rgb or len(rgb) < 3:
@@ -149,7 +135,7 @@ def render_featured(draw: ImageDraw.ImageDraw, days: list[dict], today: str, now
         for cal in day.get("calendars", []):
             cal_name_raw = cal.get("name", "?")
             cal_color = closest_panel_color(cal.get("color", [128, 128, 128]))
-            cal_label = cal.get("label") or SOURCE_LABELS.get(cal_name_raw, cal_name_raw.split("-")[-1].capitalize()[:10])
+            cal_label = cal.get("label") or cal_name_raw.split("-")[-1].capitalize()[:10]
             
             for ev in cal.get("events", []):
                 day_events.append({

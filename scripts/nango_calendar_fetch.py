@@ -9,15 +9,10 @@ from pathlib import Path
 
 import requests
 
-NANGO_BASE_URL = os.getenv("NANGO_BASE_URL", "https://nango.example.com")
+NANGO_BASE_URL = os.getenv("NANGO_BASE_URL", "")
 NANGO_SECRET_KEY = os.getenv("NANGO_SECRET_KEY", "")
 
-PRIMARY_CALENDARS = [
-    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 0, 255], "label": "REDACTED-LABEL"},
-    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [0, 255, 0], "label": "DAVE"},
-    {"connection_id": "REDACTED-CONNECTION", "provider": "google-calendar", "calendar_id": "REDACTED@example.com", "color": [255, 0, 0], "label": "REDACTED-LABEL"},
-    {"connection_id": "REDACTED-CONNECTION", "provider": "outlook", "calendar_id": None, "color": [255, 128, 0], "label": "OUTLOOK"},
-]
+PRIMARY_CALENDARS: list[dict] = []
 
 PALETTE_MAP = {
     "blue": [0, 0, 255],
@@ -55,7 +50,10 @@ def load_plugin_config() -> dict:
 
 
 def get_provider(connection_id: str) -> str:
-    if "outlook" in connection_id or connection_id in ["REDACTED-UUID", "REDACTED-UUID"]:
+    if "outlook" in connection_id:
+        return "outlook"
+    extra_outlook = [x.strip() for x in os.getenv("TRMNL_OUTLOOK_CONNECTION_IDS", "").split(",") if x.strip()]
+    if connection_id in extra_outlook:
         return "outlook"
     return "google-calendar"
 

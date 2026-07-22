@@ -8,25 +8,20 @@ on:
 
 jobs:
   lint:
-    name: Lint every plugin with official trmnlp (safe rollout)
+    name: Lint every plugin with the official trmnlp image (safe rollout)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Set up Ruby (trmnlp requires Ruby >= 3.4)
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4"
-
-      - name: Install trmnlp (official TRMNL plugin tool)
-        run: gem install trmnl_preview
+      - name: Pull official trmnlp image
+        run: docker pull trmnl/trmnlp
 
       - name: >-
-          Lint each plugins/* via a flat->src shim; tolerate the four sidecar-only
-          plugins (no Liquid by design, see docs/PLUGIN_RECIPE_CONTRACT.md).
-          continue-on-error is a temporary safety net: flip it to false once this
-          job is confirmed green in this repo's layout.
+          Lint each plugins/* with the official trmnlp container via a flat->src
+          shim; tolerate the four sidecar-only plugins (no Liquid by design, see
+          docs/PLUGIN_RECIPE_CONTRACT.md). continue-on-error stays as a temporary
+          net until a run confirms real PASS lines with no ::error::, then remove it.
         continue-on-error: true
         run: |
           rc=0
@@ -40,7 +35,7 @@ jobs:
             cp "${d}settings.yml" "${d}src/" 2>/dev/null || true
             cp "${d}"*.liquid "${d}src/" 2>/dev/null || true
             printf 'watch:\n  - src\n' > "${d}.trmnlp.yml"
-            if ( cd "$d" && trmnlp lint ); then
+            if docker run --rm -v "$PWD/${d%/}:/plugin" -w /plugin trmnl/trmnlp lint; then
               echo "PASS ${id}"
             else
               case " ${SIDECAR_ONLY} " in
