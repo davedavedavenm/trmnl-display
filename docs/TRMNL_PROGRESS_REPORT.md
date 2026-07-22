@@ -1,5 +1,7 @@
 # TRMNL Integration: Progress Report
 
+> **Historical snapshot.** Palette/model numbers in this report (e.g. palette id `6` / `color-7a`) predate the live configuration and are superseded by `docs/HARDWARE.md` (palette id `10`, model `inky_impression_7_3`, bit depth `3`). Read this as project history, not current state.
+
 ## Accomplishments to Date
 
 ### 1. Documentation Deep-Dive

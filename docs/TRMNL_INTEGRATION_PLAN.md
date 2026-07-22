@@ -1,5 +1,7 @@
 # TRMNL BYOS Integration & Migration Plan
 
+> **Superseded.** This pre-LaraPaper migration plan (Go-client / `byos_fastapi` evaluation, Waveshare / 4-level-grayscale assumptions) is historical. The live stack uses LaraPaper BYOS + a Pi thin client + a repo-owned colour sidecar; see `README.md`, `docs/HARDWARE.md`, and `docs/ROBUST_BYOS_FLOW.md` for the current architecture. The 4-level-grayscale framing here does **not** apply to the live 6/7-colour ACeP Spectra panel.
+
 ## Overview
 This plan outlines the transition from Inky Impression 7.3's Python/Playwright architecture to a TRMNL-compatible "Bring Your Own Server" (BYOS) system. This aims to leverage TRMNL's optimized Go-based client, 4-level grayscale support, and zero-flicker refresh technology while maintaining local control.
 

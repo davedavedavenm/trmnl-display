@@ -47,7 +47,7 @@ scripts/tmp/sidecar_colour_dashboard_source_next.png
 scripts/tmp/sidecar_colour_dashboard_next.png
 ```
 
-The output PNG is an indexed six-color image using:
+The output PNG is an indexed image using the six native ACeP pigments (a seven-colour palette once dithered Orange is counted):
 
 - black
 - white

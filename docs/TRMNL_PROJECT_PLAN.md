@@ -1,5 +1,7 @@
 # TRMNL Project Plan
 
+> **Historical snapshot.** Palette/model numbers in this plan predate the live configuration and are superseded by `docs/HARDWARE.md` (palette id `10`, model `inky_impression_7_3`, bit depth `3`). Read this as project history, not current state.
+
 ## Phase 1: Hardware PoC [COMPLETE]
 - [x] Verify Pimoroni Inky Impression 7.3" compatibility with trmnl-display
 - [x] Build and deploy Go client on Pi Zero
