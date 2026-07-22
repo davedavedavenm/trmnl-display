@@ -157,13 +157,25 @@ Every user-facing screen must remain installable/configurable like a normal TRMN
 
 CRITICAL: Every single plugin/recipe MUST be fully configurable and editable via the TRMNL/LaraPaper Web UI. Sidecar renderers and sync scripts must read settings (like themes, layouts, layout variants, preferences, entity mappings, credentials) from the plugin's payload or database configurations, NOT from hardcoded values or private `.env` files. This ensures that any plugin or recipe is immediately shareable with the community.
 
-Every user-facing screen should include these files:
+Official format reference (verified 2026-07-22 against current TRMNL/LaraPaper/trmnlp sources):
 
-- `settings.yml`
-- `README.md`
-- `full.liquid` or a documented equivalent
-- `payload.example.json`
-- `fields.schema.json`
+- The shareable/importable artifact is a **flat** set of files. Per the official TRMNL "Importing and exporting private plugins" guide, a plugin ZIP contains only `settings.yml` (required) plus any of `full.liquid`, `half_horizontal.liquid`, `half_vertical.liquid`, `quadrant.liquid`. There is **no** `payload.example.json`, **no** `fields.schema.json`, and **no** `src/` directory in the official interchange format. (`src/` is only the *dev-time* layout used by the official `trmnlp` tool, which zips it flat on `push`/`build`.)
+- This repo stores the **flat interchange shape** as source of truth (templates and `settings.yml` at each plugin root) because the repo's sidecar renderers and `scripts/validate_trmnl_ha_plugin_contract.py` read those paths directly. Do not migrate plugins into `src/` without updating those consumers.
+- `settings.yml` must follow the official schema (`name`, `strategy`, `refresh_interval`, `no_screen_padding`, `dark_mode`, optional `custom_fields`, and an `id` — `trmnlp push` requires the `id`). The official `custom_fields` shape (`keyname`/`name`/`field_type`/`options`, plus `default`/`optional`/`description`) is what this repo uses.
+- Webhook payloads use the official `merge_variables` wrapper; incremental updates may use `merge_strategy: deep_merge` or `stream` (docs.trmnl.com private-plugins/webhooks).
+- Liquid layout names (`full`, `half_vertical`, `half_horizontal`, `quadrant`) are official (docs.trmnl.com private-plugins/templates).
+- For local preview data and plugin secrets, the official home is `.trmnlp.yml` (`variables:` / `custom_fields:` / env interpolation) per the `trmnlp` README — prefer that over committing live values anywhere.
+
+Required files per plugin (official-aligned):
+
+- `settings.yml` — required, official schema, with an `id`.
+- `README.md` — required, install/config instructions and the documented `merge_variables` (required vs optional fields, fallback behaviour).
+- `full.liquid` (and other view templates as needed) — required **only for plugins that render through Liquid**. A webhook plugin whose image is supplied by the repo's indexed-colour sidecar via LaraPaper's generated-image / image-webhook handoff is **exempt** from shipping a Liquid template; its README must state that rendering path explicitly (see the exception process below). This is an official LaraPaper screen-generation mechanism, not a gap.
+
+Optional repo conventions (NOT official TRMNL/LaraPaper/trmnlp artifacts — keep only where they earn their place):
+
+- `payload.example.json` — useful as human-readable example and as the default/fallback input some sidecar renderers read (e.g. `render_colour_dashboard.py`, `render_morning_mashup.py`). When present it **must** use the `merge_variables` wrapper. It is not required by any official tool.
+- `fields.schema.json` — a repo-internal sidecar/automation contract document. No official tool reads it. Keep it aligned with `settings.yml` when present (if a field changes in one, update both in the same change), but do not mass-create it for plugins that have no sidecar consuming it.
 
 `settings.yml` must expose user-editable fields rather than hardcoding this house. For Home Assistant dashboards, expected fields include:
 
@@ -175,11 +187,11 @@ Every user-facing screen should include these files:
 - weather, person, media player, door/lock, washer, blind/cover, and thermostat/temperature entity IDs
 - refresh interval when the platform supports it
 
-`payload.example.json` must use TRMNL's `merge_variables` wrapper and show the shape consumed by both Liquid and sidecar renderers. Document required and optional merge variables in the plugin README.
+Do not hardcode local entity IDs, labels, URLs, room names, or private assumptions into reusable plugin logic or into the optional `payload.example.json` / `fields.schema.json` examples — use generic placeholders there.
 
-`fields.schema.json` is the sidecar/automation contract. It must stay aligned with `settings.yml`; if a field is added, renamed, or removed in one, update the other in the same change.
+Continuous integration: the official best practice is `trmnlp lint` (github.com/usetrmnl/trmnlp). Because this is a monorepo (GitHub only reads workflows from the repo-root `.github/workflows/`), the official per-plugin workflow is adapted into a single root workflow that lints every `plugins/*/` via a flat→`src/` shim. The official workflow's `trmnlp push` job targets trmnl.com cloud and is **omitted** here — this stack distributes through LaraPaper BYOS and this repo, not the TRMNL cloud marketplace.
 
-When adding a sidecar-only capability, update the plugin fields, payload example, schema, and README at the same time. The sidecar must consume the plugin contract or a direct derivative of it. Do not hardcode local entity IDs, labels, URLs, room names, or private assumptions into reusable plugin logic.
+Colour exception grounding: the official TRMNL Liquid/CSS design system targets the 800x480 2-bit grayscale panel (docs.trmnl.com private-plugins/templates). The live device is a 6/7-colour ACeP Spectra panel, and the repo's indexed-colour sidecar uses LaraPaper's generated-image handoff to supply panel-correct colour output. That is a legitimate BYOS extension; document it per the exception process rather than treating monochrome as the target.
 
 If an official TRMNL/LaraPaper guideline cannot be followed, add an explicit exception section to that plugin README with:
 

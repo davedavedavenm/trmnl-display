@@ -1,0 +1,59 @@
+name: trmnlp lint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint every plugin with official trmnlp (safe rollout)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby (trmnlp requires Ruby >= 3.4)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+
+      - name: Install trmnlp (official TRMNL plugin tool)
+        run: gem install trmnl_preview
+
+      - name: >-
+          Lint each plugins/* via a flat->src shim; tolerate the four sidecar-only
+          plugins (no Liquid by design, see docs/PLUGIN_RECIPE_CONTRACT.md).
+          continue-on-error is a temporary safety net: flip it to false once this
+          job is confirmed green in this repo's layout.
+        continue-on-error: true
+        run: |
+          rc=0
+          SIDECAR_ONLY="trmnl-bus-departures trmnl-calendar-dayview trmnl-hp-quotes trmnl-jen-coming-home"
+          shopt -s nullglob
+          for d in plugins/*/; do
+            id="$(basename "$d")"
+            echo "::group::trmnlp lint ${id}"
+            rm -rf "${d}src"
+            mkdir -p "${d}src"
+            cp "${d}settings.yml" "${d}src/" 2>/dev/null || true
+            cp "${d}"*.liquid "${d}src/" 2>/dev/null || true
+            printf 'watch:\n  - src\n' > "${d}.trmnlp.yml"
+            if ( cd "$d" && trmnlp lint ); then
+              echo "PASS ${id}"
+            else
+              case " ${SIDECAR_ONLY} " in
+                *" ${id} "*)
+                  echo "::warning::${id} is sidecar-only (image via LaraPaper generated-image handoff); trmnlp lint markup findings are expected and tolerated."
+                  ;;
+                *)
+                  echo "::error::${id} failed trmnlp lint"
+                  rc=1
+                  ;;
+              esac
+            fi
+            rm -rf "${d}src" "${d}.trmnlp.yml"
+            echo "::endgroup::"
+          done
+          exit "$rc"

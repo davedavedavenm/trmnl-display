@@ -2,6 +2,8 @@
 
 Real-time UK bus departure board for TRMNL/LaraPaper BYOS, with optional repo-owned colour sidecar for improved indexed-colour rendering on Spectra/ACeP panels.
 
+> **Rendering path (official exception).** This plugin ships **no Liquid screen template**. The polling recipe supplies the departure data, but the visible 800×480 image is produced by the repo's indexed-colour sidecar and installed into LaraPaper via its **generated-image / image-webhook handoff** — an official LaraPaper screen-generation mechanism (LaraPaper supports Screenshot / Image Webhook / API rendering alongside recipe Liquid). The official TRMNL Liquid/CSS design system targets the 800×480 2-bit grayscale panel, so the colour sidecar is a deliberate BYOS extension for the 6/7-colour ACeP Spectra panel. The plugin stays fully configurable through `settings.yml`; the sidecar reads the same contract, not hardcoded values. See `docs/PLUGIN_RECIPE_CONTRACT.md`.
+
 ## Installation Modes
 
 ### Standard LaraPaper (polling recipe)
