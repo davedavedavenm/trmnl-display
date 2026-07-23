@@ -74,7 +74,7 @@ Use the repo files as the desired state:
 
 - `deploy/larapaper/docker-compose.yml` -> `/home/dave/larapaper/docker-compose.yml` on `khpi5`
 - `deploy/larapaper/nginx/*` -> `/home/dave/larapaper/nginx/` on `khpi5`
-- `scripts/trmnl_mode_bridge.py` -> `/home/dave/bin/trmnl-mode-bridge.py` on `khpi5`
+- `scripts/trmnl-mode-bridge.py` -> `/home/dave/bin/trmnl-mode-bridge.py` on `khpi5`
 - `scripts/trmnl_set_display_mode.sh` -> `/home/dave/bin/trmnl-set-display-mode` on `khpi5`
 - `scripts/trmnl-display-shell.sh` -> `/home/dave/bin/trmnl-display-shell.sh` on `trmnl-pi`
 - `deploy/systemd/*.service` -> `/etc/systemd/system/` on the relevant hosts
@@ -92,7 +92,7 @@ Do not commit live secrets. Use:
 For script syntax:
 
 ```bash
-python -m py_compile scripts/trmnl_calendar_multi.py scripts/trmnl_ha_dashboard.py scripts/trmnl_mode_bridge.py scripts/trmnl_sonos_local.py scripts/render_colour_dashboard.py
+python -m py_compile scripts/trmnl_calendar_multi.py scripts/trmnl_ha_dashboard.py scripts/trmnl-mode-bridge.py scripts/trmnl_sonos_local.py scripts/render_colour_dashboard.py scripts/nango_calendar_fetch.py scripts/render_calendar_dayview.py scripts/render_jen_coming_home.py scripts/fire_calendar_fetch.py
 ```
 
 For the live display path:

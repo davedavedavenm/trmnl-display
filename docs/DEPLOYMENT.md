@@ -54,7 +54,7 @@ Repo files:
 - `scripts/render_colour_dashboard.py`
 - `scripts/trmnl_sonos_local.py`
 - `scripts/run_trmnl_sonos.sh`
-- `scripts/trmnl_mode_bridge.py`
+- `scripts/trmnl-mode-bridge.py`
 - `scripts/trmnl_set_display_mode.sh`
 - `scripts/trmnl_refresh_ha_sidecar.sh`
 - `scripts/trmnl_update_ha_sidecar_image.sh`
@@ -70,7 +70,7 @@ scp scripts/trmnl_ha_dashboard.py khpi5:/home/dave/trmnl_ha_dashboard.py
 scp scripts/render_colour_dashboard.py khpi5:/home/dave/render_colour_dashboard.py
 scp scripts/trmnl_sonos_local.py khpi5:/home/dave/trmnl-sonos-local.py
 scp scripts/run_trmnl_sonos.sh khpi5:/home/dave/run_trmnl_sonos.sh
-scp scripts/trmnl_mode_bridge.py khpi5:/home/dave/bin/trmnl-mode-bridge.py
+scp scripts/trmnl-mode-bridge.py khpi5:/home/dave/bin/trmnl-mode-bridge.py
 scp scripts/trmnl_set_display_mode.sh khpi5:/home/dave/bin/trmnl-set-display-mode
 scp scripts/trmnl_refresh_ha_sidecar.sh khpi5:/home/dave/bin/trmnl-refresh-ha-sidecar
 scp scripts/trmnl_update_ha_sidecar_image.sh khpi5:/home/dave/bin/trmnl-update-ha-sidecar-image

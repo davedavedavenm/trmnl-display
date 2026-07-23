@@ -116,7 +116,7 @@ Sonos currently updates when the companion script next pulls Home Assistant medi
 
 Implemented improvement:
 
-- `scripts/trmnl_mode_bridge.py` exposes authenticated `POST /ha-dashboard/refresh`
+- `scripts/trmnl-mode-bridge.py` exposes authenticated `POST /ha-dashboard/refresh`
 - the endpoint runs `/home/dave/bin/trmnl-refresh-ha-sidecar`
 - Home Assistant can call the endpoint when configured `media_player.*` entities change state, title, or artist
 - the endpoint rate-limits successful refreshes with a default 120-second cooldown unless `{"force": true}` is posted

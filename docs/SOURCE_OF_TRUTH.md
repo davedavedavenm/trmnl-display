@@ -10,7 +10,7 @@ Live hosts are allowed to run the system, but they are not allowed to become the
 |---|---|---|
 | `/home/dave/larapaper/docker-compose.yml` | `deploy/larapaper/docker-compose.yml` | `docs/DEPLOYMENT.md` |
 | `/home/dave/larapaper/nginx/*` | `deploy/larapaper/nginx/` | `docs/DEPLOYMENT.md` |
-| `/home/dave/bin/trmnl-mode-bridge.py` | `scripts/trmnl_mode_bridge.py` | `docs/HA_DISPLAY_ORCHESTRATION_PLAN.md`; systemd: `deploy/systemd/trmnl-mode-bridge.service` |
+| `/home/dave/bin/trmnl-mode-bridge.py` | `scripts/trmnl-mode-bridge.py` | `docs/HA_DISPLAY_ORCHESTRATION_PLAN.md`; systemd: `deploy/systemd/trmnl-mode-bridge.service` |
 | `/home/dave/bin/trmnl-set-display-mode` | `scripts/trmnl_set_display_mode.sh` | `docs/TRMNL_ORCHESTRATION_AUDIT_2026-06-26.md` (SSH restart line); `docs/HA_DISPLAY_ORCHESTRATION_PLAN.md` |
 | `/home/dave/bin/trmnl-refresh-ha-sidecar` | `scripts/trmnl_refresh_ha_sidecar.sh` | `docs/HA_COLOUR_DASHBOARD_PLAN.md`, `docs/COLOUR_SIDECAR_PATH.md` |
 | `/home/dave/bin/trmnl-update-ha-sidecar-image` | `scripts/trmnl_update_ha_sidecar_image.sh` | `docs/HA_COLOUR_DASHBOARD_PLAN.md`, `docs/COLOUR_SIDECAR_PATH.md` |
@@ -64,7 +64,7 @@ For urgent live fixes, reverse steps 1 and 2 only temporarily:
 Use these to compare live files against the repo.
 
 ```bash
-scp khpi5:/home/dave/bin/trmnl-mode-bridge.py scripts/trmnl_mode_bridge.py
+scp khpi5:/home/dave/bin/trmnl-mode-bridge.py scripts/trmnl-mode-bridge.py
 scp khpi5:/home/dave/bin/trmnl-set-display-mode scripts/trmnl_set_display_mode.sh
 scp khpi5:/home/dave/bin/trmnl-refresh-ha-sidecar scripts/trmnl_refresh_ha_sidecar.sh
 scp khpi5:/home/dave/bin/trmnl-update-ha-sidecar-image scripts/trmnl_update_ha_sidecar_image.sh

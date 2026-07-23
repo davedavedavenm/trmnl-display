@@ -9,6 +9,7 @@ import time
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,6 +30,13 @@ MORNING_PUSH_SCRIPT = os.getenv("TRMNL_MORNING_PUSH_SCRIPT", "/home/dave/bin/trm
 SONOS_REFRESH_SCRIPT = os.getenv("TRMNL_SONOS_REFRESH_SCRIPT", "/home/dave/run_trmnl_sonos.sh")
 SONOS_REFRESH_COOLDOWN_SECONDS = int(os.getenv("TRMNL_SONOS_REFRESH_COOLDOWN_SECONDS", "3"))
 SONOS_REFRESH_STATE_FILE = Path(os.getenv("TRMNL_SONOS_REFRESH_STATE_FILE", "/tmp/trmnl-sonos-refresh.json"))
+
+# Fire hallway dashboard calendar endpoint.
+# Why: HA rest sensor in packages/fire_calendar.yaml pulls multi-account calendar
+# JSON from this GET endpoint. The script reuses nango_calendar_fetch helpers so
+# behaviour matches the TRMNL Pi's calendar mix but extended to 7 accounts.
+FIRE_CALENDAR_SCRIPT = os.getenv("FIRE_CALENDAR_SCRIPT", "/home/dave/trmnl-display-scripts/fire_calendar_fetch.py")
+FIRE_CALENDAR_TIMEOUT = int(os.getenv("FIRE_CALENDAR_TIMEOUT", "60"))
 
 # Calendar watcher config
 CALENDAR_REFRESH_SCRIPT = os.getenv("TRMNL_CALENDAR_REFRESH_SCRIPT", "/home/dave/bin/trmnl-refresh-calendar-sidecar")
@@ -146,10 +154,56 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self) -> None:
-        if self.path != "/health":
-            self._send(HTTPStatus.NOT_FOUND, {"error": "not_found"})
+        if self.path == "/health":
+            self._send(HTTPStatus.OK, {"ok": True})
             return
-        self._send(HTTPStatus.OK, {"ok": True})
+        # Why: Fire dashboard pulls upcoming calendar JSON from this endpoint.
+        parsed = urlparse(self.path)
+        if parsed.path == "/calendar/upcoming":
+            if not self._authorized():
+                self._send(HTTPStatus.UNAUTHORIZED, {"error": "unauthorized"})
+                return
+            self._handle_calendar_upcoming(parsed)
+            return
+        self._send(HTTPStatus.NOT_FOUND, {"error": "not_found"})
+
+    def _handle_calendar_upcoming(self, parsed) -> None:
+        query = parse_qs(parsed.query)
+        try:
+            days = max(1, min(30, int(query.get("days", ["7"])[0])))
+        except ValueError:
+            days = 7
+        log.info("Calendar upcoming request: days=%d", days)
+        try:
+            result = subprocess.run(
+                ["python3", FIRE_CALENDAR_SCRIPT, str(days)],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=FIRE_CALENDAR_TIMEOUT,
+            )
+        except subprocess.TimeoutExpired:
+            self._send(HTTPStatus.GATEWAY_TIMEOUT, {"error": "timeout", "timeout_s": FIRE_CALENDAR_TIMEOUT})
+            return
+        if result.returncode != 0:
+            log.warning("Fire calendar fetch failed (rc=%d): %s", result.returncode, result.stderr.strip()[:200])
+            self._send(
+                HTTPStatus.BAD_GATEWAY,
+                {"error": "fetch_failed", "returncode": result.returncode, "stderr": result.stderr.strip()[:500]},
+            )
+            return
+        try:
+            payload = json.loads(result.stdout)
+        except json.JSONDecodeError as exc:
+            self._send(HTTPStatus.BAD_GATEWAY, {"error": "invalid_json", "detail": str(exc)})
+            return
+        body = json.dumps(payload).encode("utf-8")
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def _authorized(self) -> bool:
         if not TOKEN:

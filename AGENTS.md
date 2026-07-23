@@ -73,7 +73,7 @@ Never leave live-only drift undocumented.
 Python syntax:
 
 ```bash
-python -m py_compile scripts/trmnl_calendar_multi.py scripts/trmnl_ha_dashboard.py scripts/trmnl_mode_bridge.py scripts/trmnl_sonos_local.py scripts/render_colour_dashboard.py
+python -m py_compile scripts/trmnl_calendar_multi.py scripts/trmnl_ha_dashboard.py scripts/trmnl-mode-bridge.py scripts/trmnl_sonos_local.py scripts/render_colour_dashboard.py scripts/nango_calendar_fetch.py scripts/render_calendar_dayview.py scripts/render_jen_coming_home.py scripts/fire_calendar_fetch.py
 ```
 
 Home Assistant package check:

@@ -14,6 +14,13 @@ while [ -h "$SOURCE" ]; do
 done
 SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
+JEN_HOME_ENV="${TRMNL_JEN_COMING_HOME_ENV:-/home/dave/.env.trmnl-jen-coming-home}"
+if [[ -f "${JEN_HOME_ENV}" ]]; then
+  set -a
+  source "${JEN_HOME_ENV}"
+  set +a
+fi
+
 # 1. Active Mode Check (the coming-home screen rides on the jen_commute mode)
 if [[ "${1:-}" != "--force" ]]; then
   if ! "${TRMNL_SET_DISPLAY_MODE_BIN:-/home/dave/bin/trmnl-set-display-mode}" status | grep -q "TRMNL Mode: jen_commute"; then
