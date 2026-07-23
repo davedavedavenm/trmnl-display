@@ -10,3 +10,4 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 */15 * * * * /home/dave/bin/trmnl-refresh-calendar-sidecar 2>&1 | logger -t trmnl-calendar-sidecar
 */5 * * * * /home/dave/bin/trmnl-refresh-morning-mashup 2>&1 | logger -t trmnl-morning-mashup
 */2 * * * * /home/dave/bin/trmnl-refresh-jen-coming-home-sidecar 2>&1 | logger -t trmnl-jen-coming-home
+* * * * * /home/dave/bin/trmnl-reconcile-device-screen >/dev/null 2>&1
