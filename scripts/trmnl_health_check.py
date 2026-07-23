@@ -68,10 +68,15 @@ def main():
 
     # 5. Nango API
     check("Nango API reachable")
-    ok, out = run(["curl", "-sf", "-o", "/dev/null", "-w", "%{http_code}", "https://nango.example.com/health"])
-    result(ok, out)
-    if not ok:
-        all_ok = False
+    import os
+    nango_base = os.getenv("NANGO_BASE_URL", "").strip().rstrip("/")
+    if nango_base:
+        ok, out = run(["curl", "-sf", "-o", "/dev/null", "-w", "%{http_code}", f"{nango_base}/health"])
+        result(ok, out)
+        if not ok:
+            all_ok = False
+    else:
+        result(False, "NANGO_BASE_URL not set; skipping")
 
     # 6. Plugin health via DB
     check("LaraPaper plugins with valid images")

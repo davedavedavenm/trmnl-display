@@ -10,36 +10,28 @@
   README now documents the slot fields generically and stays shareable.
 - Disabled slot 8 of LaraPaper plugin #27 (Calendar Day View). Slot 8
   pointed at the Outlook `United Kingdom holidays` sub-calendar on the
-  `REDACTED-CONNECTION` connection and was the source of unwanted UK
+  `outlook-example` connection and was the source of unwanted UK
   bank-holiday events appearing on the physical display. Applied as a
   live DB edit (`calendar_8_connection_id` cleared); `settings.yml`
   ships no slot-8 value, so no repo value required changing.
-- Read-only inventory of the `REDACTED@example.com` identity (two
-  Nango connections: Google + Outlook) confirmed the same email has a
-  dormant Google `Holidays in United Kingdom` sub-calendar
-  (`en.uk#holiday@group.v.calendar.google.com`) that is intentionally
-  not slotted, and that slot 11's "CB Holidays" label matches its source
-  calendar name (`CB Holiday Calendar`) but holds family scheduling
-  rather than public holidays.
+- Read-only inventory of one identity that has two Nango connections
+  (Google + Outlook) confirmed a dormant Google
+  `Holidays in United Kingdom` sub-calendar that is intentionally not
+  slotted, and that one slot's on-screen label matches its source
+  calendar name but holds family scheduling rather than public holidays.
 - Relabeled Calendar Day View slots on LaraPaper plugin #27 to match
-  account reality: slot 3 `REDACTED@example.com` -> `REDACTED-LABEL`
-  (was `DAVE`) and slot 4 -> `REDACTED-LABEL` (was `JEN`). The slot 4
-  account was previously misattributed to Jen; its primary calendar id
-  now resolves to `REDACTED@example.com` because the Google account
-  added that address (both `REDACTED@example.com` and
-  `REDACTED@example.com` log in to the same account).
-- The Nango connection_id handle `REDACTED-CONNECTION` is
-  intentionally retained: Nango's admin API does not support renaming a
-  connection_id (it is the immutable primary key; `PATCH
+  account reality (a couple of slots were relabeled to the correct
+  owner; one had been misattributed). Where a Google account's primary
+  calendar id differs from the address originally used to connect it,
+  the slot now resolves to the current primary id.
+- A Nango connection_id handle that no longer matches its owner's current
+  address is intentionally retained: Nango's admin API does not support
+  renaming a connection_id (it is the immutable primary key; `PATCH
   /connections/{id}` only edits tags/webhook/end_user). The handle is
-  invisible to viewers — only the on-screen label changes. Updated repo
-  display text in `settings.yml` and fallbacks in
-  `scripts/nango_calendar_fetch.py` (`PRIMARY_CALENDARS`) and
-  `scripts/render_calendar_dayview.py` (`SOURCE_LABELS`) from
-  `REDACTED@example.com` / `JEN` to `REDACTED@example.com` /
-  `REDACTED-LABEL`; `fields.schema.json` connection enums and all
-  `calendar_N_connection_id` values still reference the immutable
-  `REDACTED-CONNECTION` handle by design.
+  invisible to viewers — only the on-screen label changes. (Note: the
+  per-slot connection list and labels now live in the plugin's Web UI
+  settings / the sidecar fetcher config rather than as hardcoded enums —
+  see the Phase 2 PII removal in `docs/AUDIT_2026-07-22.md`.)
 
 ## 2026-06-26
 

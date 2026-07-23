@@ -311,8 +311,8 @@ The Calendar Day View plugin (LaraPaper plugin #27 on `khpi5`) binds up to twelv
 
 Known intentional non-wired feeds (as of 2026-07-14):
 
-- Outlook `United Kingdom holidays` sub-calendar on the `REDACTED-CONNECTION` connection — was slot 8, disabled 2026-07-14 because it was surfacing UK bank holidays on the panel.
-- Google `Holidays in United Kingdom` sub-calendar on the `REDACTED@example.com (Google)` connection — never slotted; dormant twin of the Outlook feed.
+- Outlook `United Kingdom holidays` sub-calendar on an Outlook connection — was slot 8, disabled 2026-07-14 because it was surfacing UK bank holidays on the panel.
+- Google `Holidays in United Kingdom` sub-calendar on a Google connection — never slotted; dormant twin of the Outlook feed.
 
 Provider-built-in holiday sub-calendars (Google `en.uk#holiday@group.v.calendar.google.com`, Outlook `United Kingdom holidays`) must stay unslotted unless the operator explicitly wants public holidays on the display.
 

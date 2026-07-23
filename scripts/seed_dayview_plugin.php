@@ -15,7 +15,7 @@ if (!is_array($current)) {
 }
 $current['theme'] = $current['theme'] ?? 'dark';
 $current['layout'] = $current['layout'] ?? 'featured';
-$current['nango_base_url'] = $current['nango_base_url'] ?? 'https://nango.example.com';
+$current['nango_base_url'] = $current['nango_base_url'] ?? (getenv('NANGO_BASE_URL') ?: '');
 
 $strategy = $data['strategy'] ?? 'polling';
 DB::table('plugins')->where('id', 27)->update([
