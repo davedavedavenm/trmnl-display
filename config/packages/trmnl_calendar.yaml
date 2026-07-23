@@ -15,7 +15,7 @@
 
 rest_command:
   trmnl_calendar_refresh_sidecar:
-    url: "http://192.168.1.143:8787/calendar/refresh"
+    url: !secret trmnl_mode_bridge_calendar_refresh_url
     method: POST
     content_type: application/json
     headers:

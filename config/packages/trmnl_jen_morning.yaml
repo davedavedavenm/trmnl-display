@@ -46,7 +46,7 @@ input_datetime:
 
 rest_command:
   trmnl_jen_morning_push:
-    url: "http://192.168.1.143:8787/jen-morning/push"
+    url: !secret trmnl_mode_bridge_jen_morning_push_url
     method: POST
     content_type: application/json
     headers:

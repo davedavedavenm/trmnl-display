@@ -151,7 +151,7 @@ input_datetime:
 
 rest_command:
   trmnl_set_display_mode:
-    url: "http://192.168.1.143:8787/mode"
+    url: !secret trmnl_mode_bridge_mode_url
     method: POST
     content_type: application/json
     headers:
@@ -161,14 +161,14 @@ rest_command:
         "mode": {{ mode | tojson }}
       }
   trmnl_sonos_refresh_sidecar:
-    url: "http://192.168.1.143:8787/sonos/refresh"
+    url: !secret trmnl_mode_bridge_sonos_refresh_url
     method: POST
     content_type: application/json
     headers:
       Authorization: !secret trmnl_mode_bridge_bearer
     payload: "{}"
   trmnl_sonos_push:
-    url: "http://192.168.1.143:4567/api/custom_plugins/f543f2e5-ba15-44d2-ab16-c4aea3b4f7e9"
+    url: !secret trmnl_larapaper_sonos_push_url
     method: POST
     content_type: application/json
     payload: >
@@ -193,7 +193,7 @@ rest_command:
   trmnl_jen_commute_push:
     # Points at the "Jen Coming Home" webhook plugin (id 28). The old "Jen Commute"
     # plugin (uuid 0c7061b9-...daee93a) is retained but no longer driven.
-    url: "http://192.168.1.143:4567/api/custom_plugins/6ff47f52-f6bf-4cbf-bca1-2207166dfa90"
+    url: !secret trmnl_larapaper_jen_commute_push_url
     method: POST
     content_type: application/json
     payload: >
@@ -212,7 +212,7 @@ rest_command:
         }
       }
   trmnl_alert_push:
-    url: "http://192.168.1.143:4567/api/custom_plugins/c9c3fbde-9542-4bed-8817-85d57c6d0cc0"
+    url: !secret trmnl_larapaper_alert_push_url
     method: POST
     content_type: application/json
     payload: >

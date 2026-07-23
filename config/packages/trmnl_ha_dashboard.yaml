@@ -123,6 +123,10 @@ input_text:
     name: TRMNL HA Bottom Right Detail
     initial: Sonos
     max: 80
+  trmnl_ha_internal_url:
+    name: TRMNL HA Internal URL (base used to proxy album-art entity pictures)
+    initial: http://192.168.1.89:8123
+    max: 255
 
 input_button:
   trmnl_ha_dashboard_refresh:
@@ -130,7 +134,7 @@ input_button:
 
 rest_command:
   trmnl_ha_dashboard_refresh_sidecar:
-    url: "http://192.168.1.143:8787/ha-dashboard/refresh"
+    url: !secret trmnl_mode_bridge_ha_dashboard_refresh_url
     method: POST
     content_type: application/json
     headers:
@@ -143,7 +147,7 @@ rest_command:
       }
 
   trmnl_ha_dashboard_push:
-    url: "http://192.168.1.143:4567/api/custom_plugins/4349fdad-a273-450b-aa00-3d32f2de788d"
+    url: !secret trmnl_larapaper_ha_dashboard_push_url
     method: POST
     content_type: application/json
     payload: >
@@ -190,7 +194,7 @@ rest_command:
               "title": "{{ state_attr(player.entity_id, 'media_title') | default('', true) }}",
               "artist": "{{ state_attr(player.entity_id, 'media_artist') | default('', true) }}",
               {% set pic = state_attr(player.entity_id, 'entity_picture') | default('', true) %}
-              "picture": "{% if pic.startswith('/') %}http://192.168.1.89:8123{{ pic }}{% else %}{{ pic }}{% endif %}"
+              "picture": "{% if pic.startswith('/') %}{{ states('input_text.trmnl_ha_internal_url') }}{{ pic }}{% else %}{{ pic }}{% endif %}"
             }{% if not loop.last %},{% endif %}
             {% endfor %}
           ],
