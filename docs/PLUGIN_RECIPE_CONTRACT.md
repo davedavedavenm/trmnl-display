@@ -135,3 +135,24 @@ If a screen cannot be packaged as a normal plugin/recipe, its README must includ
 - what would be needed to remove the exception
 
 Absent that explanation, plugin packaging is mandatory.
+
+## Official `trmnlp lint` (advisory by design)
+
+`trmnlp lint` (the official TRMNL best-practice checker) is run over every
+plugin in `.github/workflows/trmnl-lint.yml` as an **advisory** signal, not a
+blocking gate. Two of its findings are expected and accepted for this repo:
+
+- *Markup uses too many inline styles.* The official Framework classes target the
+  800x480 2-bit grayscale panel and cannot express the arbitrary ACeP colours
+  this stack's colour templates require, so inline `style=` colour/background
+  declarations are deliberate.
+- *Some markup layouts are empty.* Sidecar-primary plugins render their image
+  through LaraPaper's generated-image handoff and ship only the Liquid layouts
+  they actually use (often just `full`); an absent `half_*`/`quadrant` template
+  is intentional, not an oversight.
+
+`trmnlp lint` exposes no flag to suppress individual rules (only `--dir` and
+`--quiet`), so a hard gate would fail on these deliberate choices. The workflow
+therefore reports findings as warnings and stays green; promote to a blocking
+gate only if/when a plugin is intended to render purely through the official
+monochrome Framework (i.e. not a colour/sidecar plugin).

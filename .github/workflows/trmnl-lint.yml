@@ -23,8 +23,10 @@ jobs:
           intentionally use inline styles (the official Framework classes target
           the monochrome 2-bit panel and cannot express ACeP colours), and
           sidecar-primary plugins ship only the layouts they render. See
-          docs/PLUGIN_RECIPE_CONTRACT.md. Promote to a blocking gate only after a
-          deliberate Liquid-quality pass.
+          docs/PLUGIN_RECIPE_CONTRACT.md. trmnlp lint exposes no per-rule
+          suppression flag, so advisory is the terminal posture for colour and
+          sidecar plugins (not a temporary net); the inline-style and
+          single-layout findings are accepted exceptions.
         run: |
           shopt -s nullglob
           for d in plugins/*/; do
