@@ -70,13 +70,6 @@ $updated = DB::table('plugins')
         'updated_at' => now(),
     ]);
 
-// Also ensure the device displays this sidecar image immediately
-DB::table('devices')
-    ->where('id', (int) (getenv('TRMNL_DEVICE_ID') ?: 1))
-    ->update([
-        'current_screen_image' => $imageName,
-        'updated_at' => now(),
-    ]);
 
 
 if ($updated < 1) {

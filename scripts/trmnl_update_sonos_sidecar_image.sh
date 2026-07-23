@@ -53,12 +53,6 @@ if ($updated < 1) {
     exit(2);
 }
 
-DB::table('devices')
-    ->where('id', $deviceId)
-    ->update([
-        'current_screen_image' => $imageName,
-        'updated_at' => now(),
-    ]);
 
 echo json_encode([
     'sidecar_plugin_update' => true,
