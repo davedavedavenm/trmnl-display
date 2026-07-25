@@ -60,6 +60,16 @@ For colour-critical dashboard work, use the sidecar path in `docs/COLOUR_SIDECAR
 
 Routine HA sidecar refreshes must be playlist-safe: update the Home Assistant plugin's `current_image`, but do not activate playlists or update the device's `current_screen_image`. Manual mode activation remains available through `trmnl-set-display-mode ha_dashboard` when testing or intentionally switching to the HA-only playlist.
 
+### Device-screen ownership (reconciler)
+
+`devices.current_screen_image` is what the LaraPaper Web UI shows as the device's current screen, and it used to drift because sidecar wrappers overwrote it on every timed run regardless of the active mode. It is now owned exclusively by:
+
+- `trmnl-set-display-mode` on every mode switch (writes the active mode's image),
+- `/api/display` (`RunDeviceDisplayCycle`) on each Pi poll,
+- `scripts/trmnl_reconcile_device_screen.sh`, cron `* * * * *` on `khpi5`, which sets the field to the active playlist's served image every minute (idempotent, uses the container's Laravel DB connection).
+
+Sidecar refresh wrappers and update scripts **must not** write `devices.current_screen_image`; that write was removed from all of them on 2026-07-23. If a new sidecar is added, do not reintroduce it — the reconciler keeps the Web UI in sync with the panel.
+
 ## What Wakes the Pi
 
 The Pi's `trmnl-display.service` is started, stopped, and restarted by
