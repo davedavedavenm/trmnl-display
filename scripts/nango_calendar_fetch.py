@@ -24,6 +24,49 @@ PALETTE_MAP = {
 }
 
 
+def _source_result(cal: dict, events: list[dict], error: dict | None = None) -> dict:
+    """Return events with explicit health so an outage cannot look empty."""
+    return {
+        "name": cal["connection_id"],
+        "label": cal.get("label"),
+        "color": cal["color"],
+        "events": events,
+        "status": "error" if error else "ok",
+        "error": error,
+    }
+
+
+def _request_error(exc: requests.RequestException) -> dict:
+    """Keep diagnostics useful without leaking headers or credentials."""
+    response = getattr(exc, "response", None)
+    return {
+        "type": type(exc).__name__,
+        "http_status": getattr(response, "status_code", None),
+    }
+
+
+def aggregate_health(calendars: list[dict]) -> dict:
+    """Summarise source health for every calendar consumer."""
+    sources = [
+        {
+            "name": cal["name"],
+            "label": cal.get("label") or cal["name"],
+            "status": cal.get("status", "ok"),
+            "error": cal.get("error"),
+            "event_count": len(cal.get("events", [])),
+        }
+        for cal in calendars
+    ]
+    failed_sources = [source["label"] for source in sources if source["status"] != "ok"]
+    if not sources or len(failed_sources) == len(sources):
+        health = "unavailable"
+    elif failed_sources:
+        health = "degraded"
+    else:
+        health = "healthy"
+    return {"health": health, "failed_sources": failed_sources, "sources": sources}
+
+
 def load_plugin_config() -> dict:
     plugin_id = os.getenv("TRMNL_PLUGIN_ID", "27")
     container = os.getenv("TRMNL_LARAPAPER_CONTAINER", "larapaper-app-1")
@@ -149,8 +192,10 @@ def fetch_google_events(cal: dict, time_min: str, time_max: str) -> dict:
                 "attendees": attendees,
             })
     except requests.RequestException as e:
-        print(f"Warning: {cal['connection_id']}: {e}")
-    return {"name": cal["connection_id"], "label": cal.get("label"), "color": cal["color"], "events": events}
+        error = _request_error(e)
+        print(f"Warning: {cal['connection_id']}: {error}")
+        return _source_result(cal, events, error)
+    return _source_result(cal, events)
 
 
 def fetch_outlook_events(cal: dict, time_min: str, time_max: str) -> dict:
@@ -177,10 +222,11 @@ def fetch_outlook_events(cal: dict, time_min: str, time_max: str) -> dict:
                 "all_day": False,
                 "location": (item.get("location") or {}).get("displayName", ""),
             })
-        return {"name": cal["connection_id"], "label": cal.get("label"), "color": cal["color"], "events": events}
+        return _source_result(cal, events)
     except requests.RequestException as e:
-        print(f"Warning: {cal['connection_id']}: {e}")
-        return {"name": cal["connection_id"], "label": cal.get("label"), "color": cal["color"], "events": []}
+        error = _request_error(e)
+        print(f"Warning: {cal['connection_id']}: {error}")
+        return _source_result(cal, [], error)
 
 
 def group_events_by_day(calendars: list[dict], start: datetime, days: int) -> list[dict]:
@@ -255,12 +301,14 @@ def fetch_payload() -> dict:
             calendars.append(fetch_outlook_events(cal, time_min, time_max))
 
     days = group_events_by_day(calendars, week_start, 7)
+    health = aggregate_health(calendars)
 
     return {
         "days": days,
         "today": now.strftime("%Y-%m-%d"),
         "theme": theme,
         "layout": layout,
+        **health,
     }
 
 
@@ -271,6 +319,14 @@ def update_ha_weekend_events(payload: dict):
     ha_token = os.getenv("HA_TOKEN", "").strip()
     if not ha_token:
         print("HA_TOKEN not found in environment, skipping HA state update.")
+        return
+    if payload.get("health") != "healthy":
+        # Why: an upstream outage must not overwrite the last trustworthy
+        # weekend-event state with a false OFF value.
+        print(
+            "Calendar health is not healthy; preserving the existing "
+            "HA weekend-events state."
+        )
         return
 
     today_str = payload.get("today", "")
@@ -374,4 +430,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

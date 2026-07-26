@@ -20,7 +20,9 @@ packages/fire_calendar.yaml. Schema:
         "today": "YYYY-MM-DD",
         "calendars": [{label, color, name}],
         "generated_at": "iso8601",
-        "source": "fire_calendar_fetch.py"
+        "source": "fire_calendar_fetch.py",
+        "health": "healthy|degraded|unavailable",
+        "failed_sources": ["calendar label"]
     }
 """
 from __future__ import annotations
@@ -28,6 +30,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -86,6 +89,7 @@ def fetch_caldav_events(cal: dict, time_min: str, time_max: str) -> dict:
     ncf fetchers. Recurring events are expanded client-side with
     recurring_ical_events because server-side expand support varies."""
     events = []
+    error = None
     try:
         import caldav
         import recurring_ical_events
@@ -97,34 +101,60 @@ def fetch_caldav_events(cal: dict, time_min: str, time_max: str) -> dict:
         start_dt = datetime.fromisoformat(time_min)
         end_dt = datetime.fromisoformat(time_max)
 
-        with caldav.DAVClient(url=url, username=user, password=pw) as client:
-            for dav_cal in client.principal().calendars():
-                try:
-                    found = dav_cal.search(start=start_dt, end=end_dt, event=True)
-                except Exception:
-                    continue
-                for obj in found:
-                    try:
-                        ical = ICal.from_ical(obj.data)
-                    except Exception:
-                        continue
-                    for occ in recurring_ical_events.of(ical).between(start_dt, end_dt):
-                        dtstart = occ.get("DTSTART")
-                        dtend = occ.get("DTEND") or dtstart
-                        sv, ev_ = dtstart.dt, dtend.dt
-                        all_day = not isinstance(sv, datetime)
-                        events.append({
-                            "summary": str(occ.get("SUMMARY", "(no title)")),
-                            "start": sv.isoformat(),
-                            "end": ev_.dt.isoformat() if hasattr(ev_, "dt") else ev_.isoformat(),
-                            "all_day": all_day,
-                            "location": str(occ.get("LOCATION", "") or ""),
-                            "description": str(occ.get("DESCRIPTION", "") or ""),
-                            "status": str(occ.get("STATUS", "CONFIRMED")).lower(),
-                            "attendees": [],
-                        })
-    except Exception as e:
-        print(f"Warning: CalDAV fetch failed for {cal['connection_id']}: {e}", file=sys.stderr)
+        # Why: SpaceMail is behind Cloudflare and occasionally closes a DAV
+        # connection. A browser-like UA plus one immediate retry keeps a
+        # transient close from becoming a false empty calendar.
+        client_kwargs = {
+            "url": url,
+            "username": user,
+            "password": pw,
+            "timeout": 30,
+            "headers": {"User-Agent": "TRMNL-Fire-Calendar/1.0"},
+        }
+        last_exc = None
+        for attempt in range(4):
+            try:
+                attempt_events = []
+                # Keep the client open through both discovery and REPORT/search;
+                # Calendar objects retain the client's authenticated session.
+                with caldav.DAVClient(**client_kwargs) as client:
+                    dav_calendars = client.principal().calendars()
+                    if not dav_calendars:
+                        raise RuntimeError("CalDAV returned no calendar collections")
+                    for dav_cal in dav_calendars:
+                        found = dav_cal.search(start=start_dt, end=end_dt, event=True)
+                        for obj in found:
+                            try:
+                                ical = ICal.from_ical(obj.data)
+                            except Exception:
+                                continue
+                            for occ in recurring_ical_events.of(ical).between(start_dt, end_dt):
+                                dtstart = occ.get("DTSTART")
+                                dtend = occ.get("DTEND") or dtstart
+                                sv, ev_ = dtstart.dt, dtend.dt
+                                all_day = not isinstance(sv, datetime)
+                                attempt_events.append({
+                                    "summary": str(occ.get("SUMMARY", "(no title)")),
+                                    "start": sv.isoformat(),
+                                    "end": ev_.isoformat(),
+                                    "all_day": all_day,
+                                    "location": str(occ.get("LOCATION", "") or ""),
+                                    "description": str(occ.get("DESCRIPTION", "") or ""),
+                                    "status": str(occ.get("STATUS", "CONFIRMED")).lower(),
+                                    "attendees": [],
+                                })
+                events = attempt_events
+                last_exc = None
+                break
+            except Exception as exc:
+                last_exc = exc
+                if attempt < 3:
+                    time.sleep(0.5 * (2 ** attempt))
+        if last_exc is not None:
+            raise last_exc
+    except Exception as exc:
+        error = {"type": type(exc).__name__}
+        print(f"Warning: CalDAV fetch failed for {cal['connection_id']}: {error}", file=sys.stderr)
 
     # De-duplicate occurrences that appear via multiple DAV collections.
     seen = set()
@@ -136,12 +166,7 @@ def fetch_caldav_events(cal: dict, time_min: str, time_max: str) -> dict:
             unique.append(ev2)
     unique.sort(key=lambda x: x["start"])
 
-    return {
-        "name": cal["connection_id"],
-        "label": cal["label"],
-        "color": cal["color"],
-        "events": unique,
-    }
+    return ncf._source_result(cal, unique, error)
 
 
 def fetch_fire_payload(days: int = 7) -> dict:
@@ -166,6 +191,21 @@ def fetch_fire_payload(days: int = 7) -> dict:
             calendars.append(fetch_caldav_events(cal, time_min, time_max))
 
     day_breakdown = ncf.group_events_by_day(calendars, start, days)
+    provider_by_name = {
+        item["connection_id"]: item["provider"] for item in FIRE_CALENDARS
+    }
+    sources = [
+        {
+            "name": cal["name"],
+            "label": cal.get("label") or cal["name"],
+            "provider": provider_by_name.get(cal["name"], "unknown"),
+            "status": cal.get("status", "ok"),
+            "error": cal.get("error"),
+            "event_count": len(cal.get("events", [])),
+        }
+        for cal in calendars
+    ]
+    aggregate = ncf.aggregate_health(calendars)
 
     return {
         "days": day_breakdown,
@@ -176,6 +216,9 @@ def fetch_fire_payload(days: int = 7) -> dict:
         ],
         "generated_at": now.isoformat(),
         "source": "fire_calendar_fetch.py",
+        "health": aggregate["health"],
+        "failed_sources": aggregate["failed_sources"],
+        "sources": sources,
     }
 
 

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-07-26
+
+- Added explicit `healthy`, `degraded`, and `unavailable` source health to the
+  Nango and Fire calendar payloads. Provider failures now carry redacted type
+  and HTTP-status diagnostics instead of being indistinguishable from an empty
+  calendar.
+- Kept the SpaceMail CalDAV client open through discovery and event search,
+  added bounded retry/backoff, and verified five consecutive live 30-day reads.
+- Coalesced simultaneous 7-day and 30-day Home Assistant requests into one
+  cached 30-day provider fetch, then safely trimmed each response. This removes
+  the two-sensor CalDAV race without changing either dashboard's horizon.
+- Preserved the previous HA weekend-event helper state whenever source health
+  is not fully healthy, preventing an outage from writing a false `off` state.
+- Added four regression tests for healthy, partial-failure, total-failure and
+  credential-safe diagnostic behavior. Python compilation and tests pass; the
+  live bridge was backed up, deployed, restarted and verified active.
+
 ## 2026-07-14
 
 - Reconciled drift in `plugins/trmnl-calendar-dayview/README.md`: replaced

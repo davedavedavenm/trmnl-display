@@ -114,11 +114,35 @@ The TRMNL-specific `khpi5` cron entries are recorded in `deploy/khpi5/trmnl-cron
 Current jobs:
 
 - LaraPaper image update daily at `04:00`
-- Multi-calendar payload every `5` minutes
+- Multi-calendar payload every `15` minutes
 - Sonos payload every minute
 - Home Assistant dashboard payload every `10` minutes
 
 ## Common Incidents
+
+### Calendar looks empty during an upstream outage
+
+The calendar fetchers expose aggregate `health`, `failed_sources`, and
+per-provider `sources` fields. Treat `healthy` plus zero events as genuinely
+empty. Treat `degraded` as partial data and `unavailable` as no trustworthy
+data; never render either failure state as `Free`.
+
+The Fire and standalone HA sensors request 7 and 30 days at the same time. The
+mode bridge deliberately performs one 30-day fetch, caches it for 15 seconds,
+and trims the `days` array for each caller. Do not remove this coalescing: two
+parallel SpaceMail DAV sessions can cause one Cloudflare connection to close.
+
+Checks:
+
+```bash
+ssh khpi5 "cd /home/dave/trmnl-display-scripts && python3 fire_calendar_fetch.py 30 | jq '{health,failed_sources,sources}'"
+ssh khpi5 "systemctl status trmnl-mode-bridge.service --no-pager"
+ssh khpi5 "journalctl -u trmnl-mode-bridge.service --since '15 minutes ago' --no-pager"
+```
+
+The source-of-truth endpoint is `/calendar/upcoming?days=N`. A 200 response may
+intentionally be degraded so the UI can explain which providers failed. HTTP
+502/504 remains reserved for bridge execution, JSON, or timeout failures.
 
 ### LaraPaper dashboard works through proxy but not local IP
 

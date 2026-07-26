@@ -6,6 +6,7 @@ import os
 import subprocess
 import threading
 import time
+from datetime import date, timedelta
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -37,6 +38,11 @@ SONOS_REFRESH_STATE_FILE = Path(os.getenv("TRMNL_SONOS_REFRESH_STATE_FILE", "/tm
 # behaviour matches the TRMNL Pi's calendar mix but extended to 7 accounts.
 FIRE_CALENDAR_SCRIPT = os.getenv("FIRE_CALENDAR_SCRIPT", "/home/dave/trmnl-display-scripts/fire_calendar_fetch.py")
 FIRE_CALENDAR_TIMEOUT = int(os.getenv("FIRE_CALENDAR_TIMEOUT", "60"))
+# Why: the two HA REST sensors refresh together. Coalesce their requests so
+# SpaceMail receives one CalDAV session rather than two competing sessions.
+FIRE_CALENDAR_CACHE_SECONDS = int(os.getenv("FIRE_CALENDAR_CACHE_SECONDS", "15"))
+FIRE_CALENDAR_FETCH_LOCK = threading.Lock()
+FIRE_CALENDAR_CACHE: dict = {"stored_at": 0.0, "payload": None}
 
 # Calendar watcher config
 CALENDAR_REFRESH_SCRIPT = os.getenv("TRMNL_CALENDAR_REFRESH_SCRIPT", "/home/dave/bin/trmnl-refresh-calendar-sidecar")
@@ -174,28 +180,50 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             days = 7
         log.info("Calendar upcoming request: days=%d", days)
+        with FIRE_CALENDAR_FETCH_LOCK:
+            cached = FIRE_CALENDAR_CACHE.get("payload")
+            cache_age = time.time() - float(FIRE_CALENDAR_CACHE.get("stored_at", 0))
+            if cached is not None and cache_age <= FIRE_CALENDAR_CACHE_SECONDS:
+                payload = cached
+            else:
+                try:
+                    # Why: one 30-day payload serves both HA sensors and avoids
+                    # concurrent provider requests; each response is trimmed below.
+                    result = subprocess.run(
+                        ["python3", FIRE_CALENDAR_SCRIPT, "30"],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                        timeout=FIRE_CALENDAR_TIMEOUT,
+                    )
+                except subprocess.TimeoutExpired:
+                    self._send(HTTPStatus.GATEWAY_TIMEOUT, {"error": "timeout", "timeout_s": FIRE_CALENDAR_TIMEOUT})
+                    return
+                if result.returncode != 0:
+                    log.warning("Fire calendar fetch failed (rc=%d): %s", result.returncode, result.stderr.strip()[:200])
+                    self._send(
+                        HTTPStatus.BAD_GATEWAY,
+                        {"error": "fetch_failed", "returncode": result.returncode, "stderr": result.stderr.strip()[:500]},
+                    )
+                    return
+                try:
+                    payload = json.loads(result.stdout)
+                except json.JSONDecodeError as exc:
+                    self._send(HTTPStatus.BAD_GATEWAY, {"error": "invalid_json", "detail": str(exc)})
+                    return
+                FIRE_CALENDAR_CACHE["payload"] = payload
+                FIRE_CALENDAR_CACHE["stored_at"] = time.time()
+
+        payload = dict(payload)
         try:
-            result = subprocess.run(
-                ["python3", FIRE_CALENDAR_SCRIPT, str(days)],
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=FIRE_CALENDAR_TIMEOUT,
-            )
-        except subprocess.TimeoutExpired:
-            self._send(HTTPStatus.GATEWAY_TIMEOUT, {"error": "timeout", "timeout_s": FIRE_CALENDAR_TIMEOUT})
-            return
-        if result.returncode != 0:
-            log.warning("Fire calendar fetch failed (rc=%d): %s", result.returncode, result.stderr.strip()[:200])
-            self._send(
-                HTTPStatus.BAD_GATEWAY,
-                {"error": "fetch_failed", "returncode": result.returncode, "stderr": result.stderr.strip()[:500]},
-            )
-            return
-        try:
-            payload = json.loads(result.stdout)
-        except json.JSONDecodeError as exc:
-            self._send(HTTPStatus.BAD_GATEWAY, {"error": "invalid_json", "detail": str(exc)})
+            start = date.fromisoformat(payload["today"])
+            end = start + timedelta(days=days)
+            payload["days"] = [
+                item for item in payload.get("days", [])
+                if start <= date.fromisoformat(item["date"]) < end
+            ]
+        except (KeyError, TypeError, ValueError):
+            self._send(HTTPStatus.BAD_GATEWAY, {"error": "invalid_calendar_dates"})
             return
         body = json.dumps(payload).encode("utf-8")
         self.send_response(HTTPStatus.OK)
