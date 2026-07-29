@@ -1,7 +1,5 @@
 name: Harry Potter Quotes
-description: A colour sidecar-rendered Harry Potter quote display for Spectra-class e-paper panels. Shows a random quote with decorative house-themed layout. Designed for full-screen evening display and half-vertical morning mashup use.
-author: David
-version: 1.0.0
+description: A colour sidecar-rendered Harry Potter quote display for Spectra-class e-paper panels.
 no_screen_padding: 'yes'
 dark_mode: 'no'
 strategy: webhook
@@ -9,30 +7,50 @@ refresh_interval: 10
 id: trmnl-hp-quotes
 custom_fields:
   - keyname: layout_mode
-    field_type: text
+    field_type: select
     name: Layout Mode
-    default: "full_screen"
-    placeholder: "full_screen"
-  - keyname: theme
-    field_type: text
-    name: Theme
-    default: "parchment"
-    placeholder: "parchment"
+    default: full_screen
+    options:
+      - Full Screen: full_screen
+      - Half-Vertical (mashup): half_vertical
+    description: Full-screen standalone display or half-vertical for mashup compositing.
+    group: Display
   - keyname: house_accent
-    field_type: text
+    field_type: select
     name: House Accent
-    default: "auto"
-    placeholder: "auto"
+    default: auto
+    options:
+      - Auto (match quote): auto
+      - None: none
+      - Gryffindor: gryffindor
+      - Slytherin: slytherin
+      - Ravenclaw: ravenclaw
+      - Hufflepuff: hufflepuff
+    description: Force a specific Hogwarts house colour scheme, or auto-detect from the quote.
+    group: Display
   - keyname: show_house_banner
-    field_type: checkbox
-    name: Show house banner when known
-    default: "1"
+    field_type: boolean
+    name: Show House Banner
+    default: true
+    optional: true
+    description: Display the house crest banner when a quote's house is known.
+    group: Display
   - keyname: show_source_book
-    field_type: checkbox
-    name: Show source book
-    default: "1"
+    field_type: boolean
+    name: Show Source Book
+    default: true
+    optional: true
+    description: Show the book title beneath each quote.
+    group: Display
   - keyname: screen_label
-    field_type: text
+    field_type: string
     name: Screen Label
-    default: "Harry Potter"
-    placeholder: "Harry Potter"
+    default: Harry Potter
+    optional: true
+    description: Small label shown in the corner of the display.
+    group: Display
+  - keyname: about
+    field_type: author_bio
+    name: About This Plugin
+    description: A colour sidecar-rendered Harry Potter quote display for Spectra-class e-paper panels. Shows a random quote with decorative house-themed layout. Designed for full-screen evening display and half-vertical morning mashup use.
+    category: humor

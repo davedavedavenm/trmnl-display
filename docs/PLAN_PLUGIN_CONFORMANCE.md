@@ -35,12 +35,12 @@ logic, no spec violations. Then build the new display modes from
 
 | Plugin | Violation | Fix | Done |
 |---|---|---|---|
-| trmnl-hp-quotes | `checkbox` (not an official type) x2 | → `boolean`, default `true` | [ ] |
-| trmnl-hp-quotes | dead `theme` field (unused by renderer) | remove field | [ ] |
-| trmnl-hp-quotes | `layout_mode`/`house_accent` as free `text` | → `select` with renderer-verified values | [ ] |
-| trmnl-hp-quotes | top-level `author: David` (PII, non-standard) | remove; `author_bio` field, generic | [ ] |
-| trmnl-bus-departures | `timespan` = `number` carrying `options` (a `select` trait) | → `select`, default `2` (value) | [ ] |
-| trmnl-bus-departures | `atco` default is a specific local stop | default `""`, placeholder example | [ ] |
+| trmnl-hp-quotes | `checkbox` (not an official type) x2 | → `boolean`, default `true` | [x] |
+| trmnl-hp-quotes | dead `theme` field (unused by renderer) | remove field | [x] |
+| trmnl-hp-quotes | `layout_mode`/`house_accent` as free `text` | → `select` with renderer-verified values | [x] |
+| trmnl-hp-quotes | top-level `author: David` (PII, non-standard) | remove; `author_bio` field, generic | [x] |
+| trmnl-bus-departures | `timespan` = `number` carrying `options` (a `select` trait) | → `select`, default `2` (value) | [x] |
+| trmnl-bus-departures | `atco` default is a specific local stop | default `""`, placeholder example | [x] |
 
 ### A2. Usability pass (all plugins) — repo-only
 

@@ -30,7 +30,7 @@ custom_fields:
   - keyname: screen_label
     name: Screen Label
     field_type: string
-    default: Jen Morning
+    default: Morning Commute
     optional: true
     description: Header label shown at the top of the commute panel.
   - keyname: headline_fallback

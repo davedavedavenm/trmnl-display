@@ -8,7 +8,7 @@ custom_fields:
   - keyname: screen_label
     name: Screen Label
     field_type: string
-    default: Jen Commute
+    default: Commute
     optional: true
     description: Optional small heading shown above the main commute headline.
   - keyname: theme

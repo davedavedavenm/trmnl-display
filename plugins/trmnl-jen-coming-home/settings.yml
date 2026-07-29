@@ -5,6 +5,18 @@ strategy: webhook
 refresh_interval: 2
 id: trmnl-jen-coming-home
 custom_fields:
+  - keyname: work_anchor
+    name: Work Location
+    field_type: lat_lon
+    optional: true
+    description: Workplace location used for the homeward-journey progress indicator. Search a city/address or enter lat,lon directly.
+  - keyname: waypoint_label
+    name: Waypoint Label
+    field_type: string
+    default: ""
+    optional: true
+    description: Label shown on the route when the via-waypoint state is active. Leave empty to hide the waypoint.
+    placeholder: "Preferred Stop"
   - keyname: show_home_prep
     name: Show Home Prep
     field_type: boolean

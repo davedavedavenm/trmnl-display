@@ -8,29 +8,35 @@ custom_fields:
   - keyname: atco
     name: ATCO Code
     field_type: string
-    default: "0100BRP90003"
-    description: ATCO stop code (e.g. 0100BRP90003 for Stokes Croft)
+    default: ""
+    description: ATCO stop code for your bus stop
+    placeholder: "0100BRP90003"
   - keyname: timespan
-    name: Timespan (hours)
-    field_type: number
+    name: Timespan
+    field_type: select
     default: "2"
     options:
       - "1 hour": "1"
       - "2 hours": "2"
       - "3 hours": "3"
       - "4 hours": "4"
+    description: How far ahead to fetch departures.
   - keyname: app_id
     name: TransportAPI App ID
     field_type: string
     default: ""
     description: Your TransportAPI application ID
+    placeholder: "your-app-id"
   - keyname: app_key
     name: TransportAPI API Key
     field_type: password
     default: ""
     description: Your TransportAPI API key
+    placeholder: "your-api-key"
   - keyname: stop_name
     name: Stop Display Name
     field_type: string
     default: "Bus Stop"
-    description: Friendly name shown on the colour sidecar display
+    optional: true
+    description: Friendly name shown on the colour sidecar display.
+    placeholder: "Main Road"
