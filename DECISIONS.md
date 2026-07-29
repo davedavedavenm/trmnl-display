@@ -39,3 +39,14 @@ read the flat paths directly.
 The official `trmnlp push`-to-cloud CI job is intentionally omitted. This
 stack distributes through LaraPaper BYOS and this repo, not the TRMNL cloud
 marketplace — don't add a push-to-cloud step expecting it to be needed.
+
+## Repo hygiene & scratch artifacts — Active
+
+`scripts/tmp/` is for disposable dev artifacts: only the two dated sidecar
+proof PNGs (`sidecar_colour_dashboard_proof_2026-05-01.png` and its source
+proof) are tracked; everything else there is cleaned periodically and must
+not be relied on or referenced. Root-level scratch/review/test images,
+`scratch_*.py`, and `/tmp/` are never tracked. A cleanup pass on 2026-07-29
+removed ~200 ignored clutter files plus five unreferenced tracked dev
+artifacts; `.env`, `.gemini/`, and the proof PNGs are intentionally kept.
+Keep the tree clean rather than letting scratch files accumulate.
