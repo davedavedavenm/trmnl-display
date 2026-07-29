@@ -148,12 +148,12 @@ intentionally be degraded so the UI can explain which providers failed. HTTP
 
 The proxied UI and LAN UI are different browser origins:
 
-- proxy: `https://trmnl.magnusfamily.co.uk`
+- proxy: `https://trmnl.example.com`
 - LAN: `http://192.168.1.143:4567`
 
 If `/dashboard` on the LAN IP redirects to `/login`, that is expected for an unauthenticated LAN session. Sign in separately on the LAN origin, or use the proxied URL for routine web UI work.
 
-If the LaraPaper UI loads on the LAN IP but the device screen preview is broken, check the generated image URL. With `APP_URL=https://trmnl.magnusfamily.co.uk`, LaraPaper's default `Storage::disk('public')->url(...)` can emit an absolute proxied image URL. The LAN page then tries to load the preview through Pangolin, which can redirect the image request to auth and leave only the image alt text visible.
+If the LaraPaper UI loads on the LAN IP but the device screen preview is broken, check the generated image URL. With `APP_URL=https://trmnl.example.com`, LaraPaper's default `Storage::disk('public')->url(...)` can emit an absolute proxied image URL. The LAN page then tries to load the preview through Pangolin, which can redirect the image request to auth and leave only the image alt text visible.
 
 The live deployment carries a local LaraPaper view patch to use relative generated-image URLs for device previews. See `deploy/larapaper/patches/relative-preview-image-urls.md`.
 
@@ -166,7 +166,7 @@ curl -I http://192.168.1.143:4567/build/assets/app-D97lLgKN.css
 ssh khpi5 "cd /home/dave/larapaper && docker compose exec -T app printenv | grep -E '^(APP_URL|ASSET_URL|APP_TRUSTED_PROXIES)='"
 ```
 
-The live deployment intentionally keeps `APP_URL=https://trmnl.magnusfamily.co.uk` for canonical external links while the Pi still polls the LAN API.
+The live deployment intentionally keeps `APP_URL=https://trmnl.example.com` for canonical external links while the Pi still polls the LAN API.
 
 ### Display does not update
 

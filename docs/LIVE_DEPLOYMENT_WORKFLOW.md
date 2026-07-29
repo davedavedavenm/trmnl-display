@@ -94,7 +94,7 @@ Treat that configuration drift as a primary diagnostic check whenever colour dis
 
 ## Pangolin Reverse Proxy Setup
 
-LaraPaper runs on `khpi5` (port 4567) and is served externally through a **Pangolin** reverse proxy at `https://trmnl.magnusfamily.co.uk`.
+LaraPaper runs on `khpi5` (port 4567) and is served externally through a **Pangolin** reverse proxy at `https://trmnl.example.com`.
 
 ### Docker Compose Configuration
 
@@ -107,7 +107,7 @@ services:
         ports:
             - "4567:8080"
         environment:
-            - APP_URL=https://trmnl.magnusfamily.co.uk
+            - APP_URL=https://trmnl.example.com
             - APP_TRUSTED_PROXIES=*
             - APP_TIMEZONE=Europe/London
             - ...
@@ -122,7 +122,7 @@ Key environment variables:
 
 | Variable | Value | Purpose |
 |---|---|---|
-| `APP_URL` | `https://trmnl.magnusfamily.co.uk` | Tells Laravel the canonical external URL. Used for route generation, email links, etc. |
+| `APP_URL` | `https://trmnl.example.com` | Tells Laravel the canonical external URL. Used for route generation, email links, etc. |
 | `APP_TRUSTED_PROXIES` | `*` | Trusts all reverse proxy IPs so Laravel reads `X-Forwarded-*` headers correctly |
 | `ASSET_URL` | *(not set)* | Deliberately omitted — assets resolve relative to the request origin. Set this only if you need a dedicated CDN. |
 
@@ -148,9 +148,9 @@ fastcgi_param  HTTPS $https_flag;
 | URL | Use Case |
 |---|---|
 | `http://192.168.1.143:4567` | Direct LAN access (Pi Zero device fetches from here) |
-| `https://trmnl.magnusfamily.co.uk` | External access via Pangolin proxy (web UI, mobile) |
+| `https://trmnl.example.com` | External access via Pangolin proxy (web UI, mobile) |
 
-**Note:** The proxied hostname and the LAN IP are separate browser origins. A session cookie for `https://trmnl.magnusfamily.co.uk` does not authenticate `http://192.168.1.143:4567`. If the LAN `/dashboard` appears not to load, first check whether it has redirected to `/login` and sign in separately on the LAN origin. Current live checks show the LAN asset URLs under `/build/assets/` return `200`; the LAN UI is not expected to inherit the proxied session.
+**Note:** The proxied hostname and the LAN IP are separate browser origins. A session cookie for `https://trmnl.example.com` does not authenticate `http://192.168.1.143:4567`. If the LAN `/dashboard` appears not to load, first check whether it has redirected to `/login` and sign in separately on the LAN origin. Current live checks show the LAN asset URLs under `/build/assets/` return `200`; the LAN UI is not expected to inherit the proxied session.
 
 ### Physical Device Fetch Path
 

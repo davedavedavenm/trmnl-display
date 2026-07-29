@@ -95,7 +95,7 @@ def fetch_caldav_events(cal: dict, time_min: str, time_max: str) -> dict:
         import recurring_ical_events
         from icalendar import Calendar as ICal
 
-        url = os.getenv("CALDAV_SERVER_URL", "https://caldav.spacemail.com")
+        url = os.getenv("CALDAV_SERVER_URL", "")
         user = os.getenv("CALDAV_USERNAME", "")
         pw = os.getenv("CALDAV_PASSWORD", "")
         start_dt = datetime.fromisoformat(time_min)

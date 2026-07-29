@@ -23,7 +23,7 @@ flowchart LR
 | LaraPaper server | `khpi5` / `192.168.1.143` | Docker Compose LaraPaper, companion scripts, mode bridge |
 | Display client | `trmnl-pi` / `192.168.1.74` | Polls LaraPaper and writes images to the e-paper panel |
 | Orchestrator | `home-assistant` / `192.168.1.89` | Helpers, automations, REST commands, display mode selection |
-| External UI | `https://trmnl.magnusfamily.co.uk` | Pangolin-proxied LaraPaper UI |
+| External UI | `https://trmnl.example.com` | Pangolin-proxied LaraPaper UI |
 
 ## Repository Layout
 

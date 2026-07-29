@@ -45,11 +45,11 @@ PHP
 Expected: a URL like:
 
 ```text
-https://trmnl.magnusfamily.co.uk/api/custom_plugins/<plugin-uuid>
+https://trmnl.example.com/api/custom_plugins/<plugin-uuid>
 ```
 
 ## Notes
 
 This is a LaraPaper view compatibility patch. It does not change the sidecar image path or the Pi BYOS polling contract.
 
-LaraPaper `0.35.0` includes an upstream fix for this route parameter issue. During the 2026-05-19 update to `0.35.0`, this patch was not reapplied; a live route check generated the expected `https://trmnl.magnusfamily.co.uk/api/custom_plugins/<plugin-uuid>` URL.
+LaraPaper `0.35.0` includes an upstream fix for this route parameter issue. During the 2026-05-19 update to `0.35.0`, this patch was not reapplied; a live route check generated the expected `https://trmnl.example.com/api/custom_plugins/<plugin-uuid>` URL.
