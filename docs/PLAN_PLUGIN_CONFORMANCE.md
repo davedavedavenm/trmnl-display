@@ -63,9 +63,9 @@ Rule: each renderer must resolve user-facing settings as
 | render_jen_commute.py | DB `configuration` (SELECT data_payload, configuration) | reads config — OK | none | [x] verified |
 | render_morning_mashup.py | DB `configuration` | reads config — OK | none | [x] verified |
 | render_jen_coming_home.py | payload only (`data_payload`) | **disconnected** — `show_home_prep` toggle + work anchor not config-driven | read `configuration` for plugin 28; config-first, env fallback | [x] |
-| render_hp_quotes.py | payload only (`data.get(...)`) | **disconnected** — layout/house/banner/book not config-driven | verify if morning-mashup passes config; add config read if needed | [ ] |
+| render_hp_quotes.py | `payload.example.json` file only (no DB access) | **disconnected** — layout/house/banner/book/toggle come from the repo file, not the live plugin config | add `load_data_from_db` + read `configuration`; verify standalone invocation path provides DB (docker-cp) | [ ] pending |
 | render_bus_departures.py | polling model | settings used by LaraPaper polling (connected); sidecar `stop_name` from payload — OK | none | [x] verified |
-| render_sonos_sidecar.py | payload from push (push uses env, not config) | **disconnected** — preferred_room, art mode, toggles not config-driven | push or render reads config; config-first, env fallback | [ ] |
+| render_sonos_sidecar.py | push uses env (not config) + render reads payload | **disconnected** — `preferred_room`/`album_art_mode` in push; `show_album`/`show_album_art`/`show_next_tracks` in render; neither reads plugin config | push reads config for room/art-mode; render reads config for toggles. Two-script fix | [ ] pending |
 | render_calendar_dayview.py | fetcher reads config → payload carries theme/layout | **connected** (config → fetcher → payload → render) | none | [x] verified |
 | render_colour_dashboard.py | HA helpers (input_text/input_select) | **connected via HA** (architectural decision: HA helpers are the live config layer for this house-specific dashboard; plugin Web-UI fields serve as documentation/portability contract) | document the boundary; no code fix needed | [x] documented |
 
