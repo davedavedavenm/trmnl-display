@@ -2,6 +2,11 @@
 
 This repo is the source of truth for the live TRMNL/LaraPaper BYOS display stack. Agents working here must preserve that contract.
 
+**Read [DECISIONS.md](DECISIONS.md) before starting work** — settled,
+closed questions (colour architecture, plugin portability, interchange
+format, CI scope). Check it before proposing to change or redo something;
+update it in the same session a decision is settled or reversed.
+
 ## Mission
 
 Maintain a Home Assistant-orchestrated e-paper display system that uses:
