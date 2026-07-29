@@ -125,12 +125,21 @@ def load_data_from_db() -> dict[str, Any]:
         try:
             db = sqlite3.connect(p)
             row = db.execute(
-                "SELECT data_payload FROM plugins WHERE name = ?", (PLUGIN_NAME,)
+                "SELECT data_payload, configuration FROM plugins WHERE name = ?", (PLUGIN_NAME,)
             ).fetchone()
             db.close()
             if row and row[0]:
                 payload = json.loads(row[0])
-                return payload.get("merge_variables", payload)
+                data = payload.get("merge_variables", payload)
+                if row[1]:
+                    try:
+                        config = json.loads(row[1])
+                        for k in ("work_anchor", "waypoint_label", "show_home_prep"):
+                            if k in config:
+                                data.setdefault(k, config[k])
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+                return data
         except Exception as e:  # pragma: no cover - diagnostic only
             print(f"DB load error {p}: {e}")
     return {}
@@ -173,8 +182,14 @@ def render(data: dict[str, Any]) -> Image.Image:
     # Position the car from her REAL GPS (origin) along Work->Home, falling back
     # to the ETA proxy only if the coordinates can't be read.
     cur, home_pt = coords_from_map_url(str(data.get("map_url", "")))
+    wa_str = str(data.get("work_anchor", "")).strip()
+    if wa_str:
+        wa = _latlon(wa_str)
+        effective_work_anchor = wa if wa else WORK_ANCHOR
+    else:
+        effective_work_anchor = WORK_ANCHOR
     if cur and home_pt:
-        done = _haversine_km(WORK_ANCHOR, cur)
+        done = _haversine_km(effective_work_anchor, cur)
         remaining = _haversine_km(cur, home_pt)
         progress = max(0.04, min(0.96, done / (done + remaining))) if (done + remaining) > 0 else 0.5
     else:
@@ -205,9 +220,10 @@ def render(data: dict[str, Any]) -> Image.Image:
     d.line([(car_x, base_y), (x1, base_y)], fill=BLACK, width=6)
 
     if commute_state == "via_clean_bean":
+        wlabel = str(data.get("waypoint_label", "")).strip() or "CLEAN BEAN"
         wx = int(x0 + (x1 - x0) * 0.42)
         d.ellipse([wx - 9, base_y - 9, wx + 9, base_y + 9], fill=YELLOW, outline=BLACK, width=2)
-        d.text((wx, base_y + 16), "CLEAN BEAN", fill=BLACK, font=font(12, bold=True), anchor="ma")
+        d.text((wx, base_y + 16), wlabel, fill=BLACK, font=font(12, bold=True), anchor="ma")
 
     d.ellipse([x0 - 18, base_y - 18, x0 + 18, base_y + 18], fill=RED, outline=BLACK, width=2)
     d.rectangle([x0 - 7, base_y - 6, x0 + 7, base_y + 6], fill=WHITE)
@@ -245,6 +261,10 @@ def render(data: dict[str, Any]) -> Image.Image:
         d.text((WIDTH // 2, base_y + 84), stamp, fill=scol, font=font(13, bold=True), anchor="ma")
 
     # ---------------- PREP CARD (footer) ----------------
+    show_prep = str(data.get("show_home_prep", True)).lower() not in ("false", "0", "")
+    if not show_prep:
+        return img
+
     cy0, cy1 = 360, 462
     m = 26
     prep_l = home_prep.lower()

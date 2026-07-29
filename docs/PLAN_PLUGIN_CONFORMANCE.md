@@ -62,12 +62,12 @@ Rule: each renderer must resolve user-facing settings as
 |---|---|---|---|---|
 | render_jen_commute.py | DB `configuration` (SELECT data_payload, configuration) | reads config — OK | none | [x] verified |
 | render_morning_mashup.py | DB `configuration` | reads config — OK | none | [x] verified |
-| render_jen_coming_home.py | payload only (`data_payload`) | **disconnected** — `show_home_prep` toggle + work anchor not config-driven | read `configuration` for plugin 28; config-first, env fallback | [ ] |
-| render_hp_quotes.py | payload fields (`data.get(layout_mode...)`) | payload-driven; verify payload carries config or merge config | verify + merge config if missing | [ ] |
-| render_bus_departures.py | payload (polling data) | polling model — settings used by LaraPaper polling; sidecar only needs `stop_name` — verify it comes from config/payload | verify | [ ] |
-| render_sonos_sidecar.py | payload (from trmnl_sonos_local push) | verify `preferred_room`, `album_art_mode`, toggles come from config | verify + fix if disconnected | [ ] |
-| render_calendar_dayview.py | slots via fetcher config (good); theme/layout? | verify theme/layout come from config not hardcode | verify + fix if needed | [ ] |
-| render_colour_dashboard.py | payload (from trmnl_ha_dashboard.py / HA helpers) | HA-helper-driven by design; plugin Web-UI fields may be partially decorative | document boundary; fix only clearly-broken fields | [ ] |
+| render_jen_coming_home.py | payload only (`data_payload`) | **disconnected** — `show_home_prep` toggle + work anchor not config-driven | read `configuration` for plugin 28; config-first, env fallback | [x] |
+| render_hp_quotes.py | payload only (`data.get(...)`) | **disconnected** — layout/house/banner/book not config-driven | verify if morning-mashup passes config; add config read if needed | [ ] |
+| render_bus_departures.py | polling model | settings used by LaraPaper polling (connected); sidecar `stop_name` from payload — OK | none | [x] verified |
+| render_sonos_sidecar.py | payload from push (push uses env, not config) | **disconnected** — preferred_room, art mode, toggles not config-driven | push or render reads config; config-first, env fallback | [ ] |
+| render_calendar_dayview.py | fetcher reads config → payload carries theme/layout | **connected** (config → fetcher → payload → render) | none | [x] verified |
+| render_colour_dashboard.py | HA helpers (input_text/input_select) | **connected via HA** (architectural decision: HA helpers are the live config layer for this house-specific dashboard; plugin Web-UI fields serve as documentation/portability contract) | document the boundary; no code fix needed | [x] documented |
 
 ### A4. Calendar connection selection
 
