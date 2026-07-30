@@ -49,9 +49,19 @@ logic, no spec violations. Then build the new display modes from
 - Long forms (`trmnl-ha-dashboard`, `trmnl-multi-calendar`,
   `trmnl-calendar-dayview`) get `group` accordions per official guidance.
 - Personal-name defaults → generic (`Jen Commute` → `Commute`,
-  `Jen Morning` → `Morning Commute`, `Jen Coming Home` → `Coming Home`).
+  `Jen Morning` → `Morning Commute`). **Done** for jen-commute + jen-morning.
 - `lat_lon` field type for location inputs (coming-home work anchor +
   waypoint label becomes a `string` field); names/descriptions reviewed.
+  **Done** for jen-coming-home.
+- `group` accordions on long forms: **pending** (multi-calendar, ha-dashboard,
+  calendar-dayview).
+
+### A5. Domain placeholders — **Done**
+
+Replaced `trmnl.magnusfamily.co.uk` with `trmnl.example.com` in all docs/patches.
+Blanked `caldav.spacemail.com` default in `fire_calendar_fetch.py` (env-driven;
+`CALDAV_SERVER_URL` verified present in live `.env.spacemail`). The repo now
+carries no personal domain or hostname.
 
 ### A3. Settings-wiring audit + fixes — per renderer, offline-validated
 
