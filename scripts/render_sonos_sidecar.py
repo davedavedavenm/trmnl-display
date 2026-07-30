@@ -88,13 +88,14 @@ def _find_font(candidates: list[str], size: int) -> ImageFont.FreeTypeFont | Ima
 # ---------------------------------------------------------------------------
 
 def load_payload_from_db() -> dict:
-    """Read the latest Sonos payload from LaraPaper's SQLite DB via docker exec."""
+    """Read the latest Sonos payload + plugin config from LaraPaper's DB."""
     php = (
         "require '/var/www/html/vendor/autoload.php';"
         "$app = require '/var/www/html/bootstrap/app.php';"
         "$app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();"
         f"$p = DB::table('plugins')->where('name', '{PLUGIN_NAME}')->first();"
-        "echo $p ? ($p->data_payload ?? '{}') : '{}';"
+        "echo json_encode(['payload' => $p ? ($p->data_payload ?? '{}') : '{}',"
+        "                 'config'  => $p ? ($p->configuration ?? '{}') : '{}']);"
     )
     result = subprocess.run(
         ["docker", "exec", LARAPAPER_CONTAINER, "php", "-r", php],
@@ -103,9 +104,14 @@ def load_payload_from_db() -> dict:
     raw = (result.stdout or "").strip()
     if not raw:
         return {}
-    data = json.loads(raw)
-    # Unwrap merge_variables wrapper if present
-    return data.get("merge_variables", data)
+    bundle = json.loads(raw)
+    data = json.loads(bundle.get("payload", "{}"))
+    data = data.get("merge_variables", data)
+    config = json.loads(bundle.get("config", "{}"))
+    for k in ("show_album", "show_album_art", "show_next_tracks", "preferred_room"):
+        if k in config:
+            data.setdefault(k, config[k])
+    return data
 
 
 def load_payload_from_file(path: str) -> dict:
@@ -191,8 +197,9 @@ def render(payload: dict, out_path: Path, source_path: Path) -> None:
     else:
         rooms_str = room
 
-    # Load album art
-    art = _load_album_art(payload)
+    # Load album art (gated by show_album_art from plugin config; default true)
+    show_album_art = str(payload.get("show_album_art", True)).lower() not in ("false", "0", "")
+    art = _load_album_art(payload) if show_album_art else None
 
     # Choose accent colours based on dominant art colour if available
     if art:
