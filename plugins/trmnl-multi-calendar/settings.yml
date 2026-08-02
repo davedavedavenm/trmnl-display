@@ -8,6 +8,7 @@ custom_fields:
   - keyname: theme
     name: Theme
     field_type: select
+    group: Display
     default: dark
     options:
       - Dark: dark
@@ -17,6 +18,7 @@ custom_fields:
   - keyname: layout_style
     name: Layout Style
     field_type: select
+    group: Display
     default: editorial
     options:
       - Editorial: editorial
@@ -27,6 +29,7 @@ custom_fields:
   - keyname: days_ahead
     name: Days Ahead
     field_type: select
+    group: Display
     default: 7
     options:
       - 3 days: 3
@@ -37,6 +40,7 @@ custom_fields:
   - keyname: time_format
     name: Time Format
     field_type: select
+    group: Display
     default: 24h
     options:
       - 24 hours: 24h
@@ -45,6 +49,7 @@ custom_fields:
   - keyname: date_format
     name: Date Format
     field_type: select
+    group: Display
     default: '%d %b (%a)'
     options:
       - 28 Mar (Sat): '%d %b (%a)'
@@ -55,62 +60,73 @@ custom_fields:
   - keyname: timezone_override
     name: Time Zone Override
     field_type: time_zone
+    group: Display
     optional: true
     description: Optional timezone override for event rendering.
 
   - keyname: show_source_labels
     name: Show Calendar Labels
     field_type: boolean
+    group: Display
     default: true
     optional: true
 
   - keyname: show_all_day_events
     name: Show All-Day Events
     field_type: boolean
+    group: Display
     default: true
     optional: true
 
   - keyname: hide_empty_days
     name: Hide Empty Days
     field_type: boolean
+    group: Display
     default: true
     optional: true
 
   - keyname: highlight_today
     name: Highlight Today
     field_type: boolean
+    group: Display
     default: true
     optional: true
 
   - keyname: max_events_per_day
     name: Max Events Per Day
     field_type: number
+    group: Display
     default: 6
     optional: true
 
   - keyname: number_columns
     name: Column Count
     field_type: number
+    group: Display
     default: 4
     optional: true
 
   - keyname: setup_notes
     name: Setup Notes
     field_type: text
+    group: Display
     optional: true
     default: "Configure up to six ICS feeds in the companion sync script env file. See README for Google, Apple, Outlook, and CalDAV setup instructions."
 
   - keyname: calendar_1_enabled
     name: Calendar 1 Enabled
     field_type: boolean
+    group: Calendar 1
     default: true
   - keyname: calendar_1_label
     name: Calendar 1 Label
     field_type: string
+    group: Calendar 1
     default: Calendar 1
   - keyname: calendar_1_color
     name: Calendar 1 Color
     field_type: select
+    group: Calendar 1
     default: blue
     options:
       - Blue: blue
@@ -122,29 +138,35 @@ custom_fields:
   - keyname: calendar_1_color_custom
     name: Calendar 1 Custom Color
     field_type: string
+    group: Calendar 1
     optional: true
     description: Optional CSS color or hex override.
   - keyname: calendar_1_ics_url
     name: Calendar 1 ICS URL
     field_type: url
+    group: Calendar 1
     optional: true
   - keyname: calendar_1_headers
     name: Calendar 1 Headers
     field_type: string
+    group: Calendar 1
     optional: true
     description: Optional HTTP headers in key=value&key2=value2 format.
 
   - keyname: calendar_2_enabled
     name: Calendar 2 Enabled
     field_type: boolean
+    group: Calendar 2
     default: true
   - keyname: calendar_2_label
     name: Calendar 2 Label
     field_type: string
+    group: Calendar 2
     default: Calendar 2
   - keyname: calendar_2_color
     name: Calendar 2 Color
     field_type: select
+    group: Calendar 2
     default: red
     options:
       - Blue: blue
@@ -156,28 +178,34 @@ custom_fields:
   - keyname: calendar_2_color_custom
     name: Calendar 2 Custom Color
     field_type: string
+    group: Calendar 2
     optional: true
   - keyname: calendar_2_ics_url
     name: Calendar 2 ICS URL
     field_type: url
+    group: Calendar 2
     optional: true
   - keyname: calendar_2_headers
     name: Calendar 2 Headers
     field_type: string
+    group: Calendar 2
     optional: true
     description: Optional HTTP headers in key=value&key2=value2 format.
 
   - keyname: calendar_3_enabled
     name: Calendar 3 Enabled
     field_type: boolean
+    group: Calendar 3
     default: false
   - keyname: calendar_3_label
     name: Calendar 3 Label
     field_type: string
+    group: Calendar 3
     default: Calendar 3
   - keyname: calendar_3_color
     name: Calendar 3 Color
     field_type: select
+    group: Calendar 3
     default: green
     options:
       - Blue: blue
@@ -189,28 +217,34 @@ custom_fields:
   - keyname: calendar_3_color_custom
     name: Calendar 3 Custom Color
     field_type: string
+    group: Calendar 3
     optional: true
   - keyname: calendar_3_ics_url
     name: Calendar 3 ICS URL
     field_type: url
+    group: Calendar 3
     optional: true
   - keyname: calendar_3_headers
     name: Calendar 3 Headers
     field_type: string
+    group: Calendar 3
     optional: true
     description: Optional HTTP headers in key=value&key2=value2 format.
 
   - keyname: calendar_4_enabled
     name: Calendar 4 Enabled
     field_type: boolean
+    group: Calendar 4
     default: false
   - keyname: calendar_4_label
     name: Calendar 4 Label
     field_type: string
+    group: Calendar 4
     default: Calendar 4
   - keyname: calendar_4_color
     name: Calendar 4 Color
     field_type: select
+    group: Calendar 4
     default: yellow
     options:
       - Blue: blue
@@ -222,28 +256,34 @@ custom_fields:
   - keyname: calendar_4_color_custom
     name: Calendar 4 Custom Color
     field_type: string
+    group: Calendar 4
     optional: true
   - keyname: calendar_4_ics_url
     name: Calendar 4 ICS URL
     field_type: url
+    group: Calendar 4
     optional: true
   - keyname: calendar_4_headers
     name: Calendar 4 Headers
     field_type: string
+    group: Calendar 4
     optional: true
     description: Optional HTTP headers in key=value&key2=value2 format.
 
   - keyname: calendar_5_enabled
     name: Calendar 5 Enabled
     field_type: boolean
+    group: Calendar 5
     default: false
   - keyname: calendar_5_label
     name: Calendar 5 Label
     field_type: string
+    group: Calendar 5
     default: Calendar 5
   - keyname: calendar_5_color
     name: Calendar 5 Color
     field_type: select
+    group: Calendar 5
     default: orange
     options:
       - Blue: blue
@@ -255,28 +295,34 @@ custom_fields:
   - keyname: calendar_5_color_custom
     name: Calendar 5 Custom Color
     field_type: string
+    group: Calendar 5
     optional: true
   - keyname: calendar_5_ics_url
     name: Calendar 5 ICS URL
     field_type: url
+    group: Calendar 5
     optional: true
   - keyname: calendar_5_headers
     name: Calendar 5 Headers
     field_type: string
+    group: Calendar 5
     optional: true
     description: Optional HTTP headers in key=value&key2=value2 format.
 
   - keyname: calendar_6_enabled
     name: Calendar 6 Enabled
     field_type: boolean
+    group: Calendar 6
     default: false
   - keyname: calendar_6_label
     name: Calendar 6 Label
     field_type: string
+    group: Calendar 6
     default: Calendar 6
   - keyname: calendar_6_color
     name: Calendar 6 Color
     field_type: select
+    group: Calendar 6
     default: black
     options:
       - Blue: blue
@@ -288,13 +334,16 @@ custom_fields:
   - keyname: calendar_6_color_custom
     name: Calendar 6 Custom Color
     field_type: string
+    group: Calendar 6
     optional: true
   - keyname: calendar_6_ics_url
     name: Calendar 6 ICS URL
     field_type: url
+    group: Calendar 6
     optional: true
   - keyname: calendar_6_headers
     name: Calendar 6 Headers
     field_type: string
+    group: Calendar 6
     optional: true
     description: Optional HTTP headers in key=value&key2=value2 format.

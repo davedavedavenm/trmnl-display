@@ -53,8 +53,7 @@ logic, no spec violations. Then build the new display modes from
 - `lat_lon` field type for location inputs (coming-home work anchor +
   waypoint label becomes a `string` field); names/descriptions reviewed.
   **Done** for jen-coming-home.
-- `group` accordions on long forms: **pending** (multi-calendar, ha-dashboard,
-  calendar-dayview).
+- `group` accordions on long forms: **Done** (multi-calendar → Display, Calendar 1-6; ha-dashboard → Dashboard, Home Assistant Connection, Entity Mappings, Card Slots; calendar-dayview → Display, Nango Connection, Calendar 1-12).
 
 ### A5. Domain placeholders — **Done**
 
@@ -75,7 +74,7 @@ Rule: each renderer must resolve user-facing settings as
 | render_jen_coming_home.py | payload only (`data_payload`) | **disconnected** — `show_home_prep` toggle + work anchor not config-driven | read `configuration` for plugin 28; config-first, env fallback | [x] |
 | render_hp_quotes.py | `payload.example.json` file only (no DB access) | **N/A for live** — plugin 14 "Potter Quotes" exists in DB but is not in any playlist; the quote is rendered internally by `render_morning_mashup` (which reads config). `render_hp_quotes` standalone path is never invoked live. Settings.yml is a conformant repo artifact for future standalone use. | none needed now; add config read if a standalone mode is created | [x] documented |
 | render_bus_departures.py | polling model | settings used by LaraPaper polling (connected); sidecar `stop_name` from payload — OK | none | [x] verified |
-| render_sonos_sidecar.py | push uses env (not config) + render reads payload | **partially fixed** — renderer now reads `configuration`; `show_album_art` toggle wired (config-first, default true). `show_album`/`show_next_tracks` config values loaded but draw gating pending (needs render-body audit). Push-side `preferred_room`/`album_art_mode` still env-driven. | render: config read + show_album_art gate done; push + remaining toggles pending | [x] partial |
+| render_sonos_sidecar.py | push uses env (not config) + render reads payload | **fixed** — push script now reads DB config for preferred_room + album_art_mode (env fallback); renderer respects album_art_mode for art variant selection; show_album + show_next_tracks draw gating complete; renderer adds next-tracks rendering section. | [x] fixed |
 | render_calendar_dayview.py | fetcher reads config → payload carries theme/layout | **connected** (config → fetcher → payload → render) | none | [x] verified |
 | render_colour_dashboard.py | HA helpers (input_text/input_select) | **connected via HA** (architectural decision: HA helpers are the live config layer for this house-specific dashboard; plugin Web-UI fields serve as documentation/portability contract) | document the boundary; no code fix needed | [x] documented |
 

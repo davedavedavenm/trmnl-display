@@ -108,7 +108,8 @@ def load_payload_from_db() -> dict:
     data = json.loads(bundle.get("payload", "{}"))
     data = data.get("merge_variables", data)
     config = json.loads(bundle.get("config", "{}"))
-    for k in ("show_album", "show_album_art", "show_next_tracks", "preferred_room"):
+    for k in ("show_album", "show_album_art", "show_next_tracks",
+              "preferred_room", "album_art_mode"):
         if k in config:
             data.setdefault(k, config[k])
     return data
@@ -124,9 +125,26 @@ def load_payload_from_file(path: str) -> dict:
 # ---------------------------------------------------------------------------
 
 def _load_album_art(payload: dict) -> Image.Image | None:
-    """Try to load album art from the base64 data URI variants in the payload."""
-    for key in ("album_art_balanced_data_uri", "album_art_data_uri",
-                "album_art_vivid_data_uri", "album_art_mono_data_uri"):
+    """Try to load album art from the base64 data URI in the payload.
+
+    Uses the album_art_mode config value (default 'raw') to select the variant:
+      raw → album_art_data_uri
+      vivid → album_art_vivid_data_uri
+      balanced → album_art_balanced_data_uri
+      mono → album_art_mono_data_uri
+    If the preferred variant is unavailable, falls back through the full list.
+    """
+    mode = str(payload.get("album_art_mode", "raw")).strip().lower()
+    variant_keys = {
+        "raw":      "album_art_data_uri",
+        "vivid":    "album_art_vivid_data_uri",
+        "balanced": "album_art_balanced_data_uri",
+        "mono":     "album_art_mono_data_uri",
+    }
+    preferred_key = variant_keys.get(mode, "album_art_data_uri")
+    all_keys = [preferred_key] + [k for k in variant_keys.values() if k != preferred_key]
+
+    for key in all_keys:
         uri = payload.get(key, "")
         if uri and uri.startswith("data:image"):
             try:
@@ -200,6 +218,9 @@ def render(payload: dict, out_path: Path, source_path: Path) -> None:
     # Load album art (gated by show_album_art from plugin config; default true)
     show_album_art = str(payload.get("show_album_art", True)).lower() not in ("false", "0", "")
     art = _load_album_art(payload) if show_album_art else None
+
+    show_album = str(payload.get("show_album", True)).lower() not in ("false", "0", "")
+    show_next_tracks = str(payload.get("show_next_tracks", True)).lower() not in ("false", "0", "")
 
     # Choose accent colours based on dominant art colour if available
     if art:
@@ -326,7 +347,7 @@ def render(payload: dict, out_path: Path, source_path: Path) -> None:
     iy += 30
 
     # ── Album ──
-    if album:
+    if show_album and album:
         album_display = shorten(album, width=40, placeholder="…")
         draw.text((INFO_X, iy), album_display, fill=(100, 100, 100), font=font_small)
         iy += 24
@@ -362,6 +383,23 @@ def render(payload: dict, out_path: Path, source_path: Path) -> None:
     # Rooms widget
     if group_rooms:
         draw_light_card(iy, "Playing In", rooms_str, BLUE)
+        iy += CARD_H + 12
+
+    # ── Next Tracks ──
+    next_tracks = payload.get("next_tracks", [])
+    if show_next_tracks and next_tracks:
+        next_y = iy
+        num_tracks = min(len(next_tracks), 3)
+        for idx in range(num_tracks):
+            track = next_tracks[idx]
+            track_title = shorten(track.get("title", ""), width=32, placeholder="…")
+            track_artist = shorten(track.get("artist", ""), width=28, placeholder="…")
+            draw.text((INFO_X, next_y), f"{idx + 1}. {track_title}", fill=BLACK, font=font_reg_sm)
+            next_y += 20
+            if track_artist:
+                draw.text((INFO_X + 16, next_y), track_artist, fill=(120, 120, 120), font=font_tiny)
+                next_y += 16
+            next_y += 4
 
     # ── Footer strip ──
     bottom_y = H - 28

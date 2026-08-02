@@ -11,295 +11,354 @@ custom_fields:
   - keyname: dashboard_title
     field_type: text
     name: Dashboard Title
+    group: Dashboard
     default: "Home Assistant"
     placeholder: "Home Assistant"
   - keyname: instance_label
     field_type: text
     name: Instance Label
+    group: Dashboard
     default: "Home"
     placeholder: "Home"
   - keyname: layout_variant
     field_type: text
     name: Layout Variant
+    group: Dashboard
     default: "bento"
     placeholder: "bento or compact_grid"
   - keyname: colour_profile
     field_type: text
     name: Colour Profile
+    group: Dashboard
     default: "inky_spectra_7"
     placeholder: "inky_spectra_7"
   - keyname: ha_url
     field_type: text
     name: Home Assistant URL
+    group: Home Assistant Connection
     default: "http://homeassistant.local:8123"
     placeholder: "http://homeassistant.local:8123"
   - keyname: ha_token
     field_type: password
     name: Home Assistant Long-Lived Token
+    group: Home Assistant Connection
     default: ""
     placeholder: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   - keyname: sonos_entities
     field_type: multi_string
     name: Sonos Media Players (comma-separated)
+    group: Entity Mappings
     default: ""
     placeholder: "media_player.living_room, media_player.kitchen"
   - keyname: light_entities
     field_type: multi_string
     name: Light Entities (comma-separated)
+    group: Entity Mappings
     default: ""
     placeholder: "light.living_room, light.bedroom, light.kitchen"
   - keyname: light_labels
     field_type: multi_string
     name: Light Labels (comma-separated)
+    group: Entity Mappings
     default: ""
     placeholder: "Living, Bedroom, Kitchen"
   - keyname: person_entities
     field_type: multi_string
     name: Person Entities (comma-separated)
+    group: Entity Mappings
     default: "person.example"
     placeholder: "person.alex, person.sam"
   - keyname: weather_entity
     field_type: text
     name: Weather Entity
+    group: Entity Mappings
     default: "weather.forecast_home"
     placeholder: "weather.forecast_home"
   - keyname: door_entity
     field_type: text
     name: Door Lock Entity
+    group: Entity Mappings
     default: ""
     placeholder: "binary_sensor.front_door_locked"
   - keyname: door_label
     field_type: text
     name: Door Label
+    group: Entity Mappings
     default: "Front door"
     placeholder: "Front door"
   - keyname: door_detail_label
     field_type: text
     name: Door Detail Label
+    group: Entity Mappings
     default: "Security"
     placeholder: "Security"
   - keyname: washer_entity
     field_type: text
     name: Washer Status Entity
+    group: Entity Mappings
     default: ""
     placeholder: "binary_sensor.washer_running"
   - keyname: washer_label
     field_type: text
     name: Washer Label
+    group: Entity Mappings
     default: "Washer"
     placeholder: "Washer"
   - keyname: washer_detail_label
     field_type: text
     name: Washer Detail Label
+    group: Entity Mappings
     default: "Utility"
     placeholder: "Utility"
   - keyname: blind_entity
     field_type: text
     name: Blinds Entity
+    group: Entity Mappings
     default: ""
     placeholder: "cover.living_room_blinds"
   - keyname: blind_label
     field_type: text
     name: Blind Label
+    group: Entity Mappings
     default: "Blinds"
     placeholder: "Blinds"
   - keyname: blind_detail_label
     field_type: text
     name: Blind Detail Label
+    group: Entity Mappings
     default: "Position"
     placeholder: "Position"
   - keyname: blind_open_position
     field_type: text
     name: Blind Open Position
+    group: Entity Mappings
     default: "100"
     placeholder: "100"
   - keyname: thermostat_entity
     field_type: text
     name: Thermostat Entity
+    group: Entity Mappings
     default: ""
     placeholder: "climate.thermostat"
   - keyname: thermostat_label
     field_type: text
     name: Thermostat Label
+    group: Entity Mappings
     default: "Climate"
     placeholder: "Climate"
   - keyname: thermostat_detail_label
     field_type: text
     name: Thermostat Detail Label
+    group: Entity Mappings
     default: "Indoor"
     placeholder: "Indoor"
   - keyname: sonos_label
     field_type: text
     name: Sonos Label
+    group: Entity Mappings
     default: "Sonos"
     placeholder: "Sonos"
   - keyname: people_label
     field_type: text
     name: People Label
+    group: Entity Mappings
     default: "People"
     placeholder: "People"
   - keyname: media_label
     field_type: text
     name: Media Label
+    group: Entity Mappings
     default: "Media"
     placeholder: "Media"
   - keyname: generic_entities
     field_type: multi_string
     name: Generic Entities (comma-separated)
+    group: Entity Mappings
     default: ""
     placeholder: "sensor.server_status, sensor.bin_day"
   - keyname: generic_labels
     field_type: multi_string
     name: Generic Entity Labels (comma-separated)
+    group: Entity Mappings
     default: ""
     placeholder: "Server, Bins"
   - keyname: generic_icons
     field_type: multi_string
     name: Generic Entity Icons (comma-separated)
+    group: Entity Mappings
     default: ""
     placeholder: "server, calendar"
   - keyname: generic_status_colours
     field_type: multi_string
     name: Generic Status Colours (comma-separated)
+    group: Entity Mappings
     default: ""
     placeholder: "green, yellow"
   - keyname: top_left_card_type
     field_type: text
     name: Top Left Card Type
+    group: Card Slots
     default: "weather"
     placeholder: "weather"
   - keyname: top_left_entity
     field_type: text
     name: Top Left Entity
+    group: Card Slots
     default: ""
     placeholder: "sensor.example"
   - keyname: top_left_label
     field_type: text
     name: Top Left Label
+    group: Card Slots
     default: ""
     placeholder: "Weather"
   - keyname: top_left_detail_label
     field_type: text
     name: Top Left Detail Label
+    group: Card Slots
     default: ""
     placeholder: "Today"
   - keyname: top_right_card_type
     field_type: text
     name: Top Right Card Type
+    group: Card Slots
     default: "indoor"
     placeholder: "indoor"
   - keyname: top_right_entity
     field_type: text
     name: Top Right Entity
+    group: Card Slots
     default: ""
     placeholder: "sensor.example"
   - keyname: top_right_label
     field_type: text
     name: Top Right Label
+    group: Card Slots
     default: ""
     placeholder: "Indoor"
   - keyname: top_right_detail_label
     field_type: text
     name: Top Right Detail Label
+    group: Card Slots
     default: ""
     placeholder: "Home"
   - keyname: status_1_card_type
     field_type: text
     name: Status 1 Card Type
+    group: Card Slots
     default: "door_lock"
     placeholder: "door_lock"
   - keyname: status_1_entity
     field_type: text
     name: Status 1 Entity
+    group: Card Slots
     default: ""
     placeholder: "binary_sensor.front_door_locked"
   - keyname: status_1_label
     field_type: text
     name: Status 1 Label
+    group: Card Slots
     default: "Front door"
     placeholder: "Front door"
   - keyname: status_1_detail_label
     field_type: text
     name: Status 1 Detail Label
+    group: Card Slots
     default: "Security"
     placeholder: "Security"
   - keyname: status_2_card_type
     field_type: text
     name: Status 2 Card Type
+    group: Card Slots
     default: "cover"
     placeholder: "cover"
   - keyname: status_2_entity
     field_type: text
     name: Status 2 Entity
+    group: Card Slots
     default: ""
     placeholder: "cover.living_room_blinds"
   - keyname: status_2_label
     field_type: text
     name: Status 2 Label
+    group: Card Slots
     default: "Blinds"
     placeholder: "Blinds"
   - keyname: status_2_detail_label
     field_type: text
     name: Status 2 Detail Label
+    group: Card Slots
     default: "Position"
     placeholder: "Position"
   - keyname: status_3_card_type
     field_type: text
     name: Status 3 Card Type
+    group: Card Slots
     default: "washer"
     placeholder: "washer"
   - keyname: status_3_entity
     field_type: text
     name: Status 3 Entity
+    group: Card Slots
     default: ""
     placeholder: "binary_sensor.washer_running"
   - keyname: status_3_label
     field_type: text
     name: Status 3 Label
+    group: Card Slots
     default: "Washer"
     placeholder: "Washer"
   - keyname: status_3_detail_label
     field_type: text
     name: Status 3 Detail Label
+    group: Card Slots
     default: "Utility"
     placeholder: "Utility"
   - keyname: bottom_left_card_type
     field_type: text
     name: Bottom Left Card Type
+    group: Card Slots
     default: "person_group"
     placeholder: "person_group"
   - keyname: bottom_left_entity
     field_type: text
     name: Bottom Left Entity
+    group: Card Slots
     default: ""
     placeholder: "sensor.example"
   - keyname: bottom_left_label
     field_type: text
     name: Bottom Left Label
+    group: Card Slots
     default: "People"
     placeholder: "People"
   - keyname: bottom_left_detail_label
     field_type: text
     name: Bottom Left Detail Label
+    group: Card Slots
     default: ""
     placeholder: "Presence"
   - keyname: bottom_right_card_type
     field_type: text
     name: Bottom Right Card Type
+    group: Card Slots
     default: "media"
     placeholder: "media"
   - keyname: bottom_right_entity
     field_type: text
     name: Bottom Right Entity
+    group: Card Slots
     default: ""
     placeholder: "media_player.living_room"
   - keyname: bottom_right_label
     field_type: text
     name: Bottom Right Label
+    group: Card Slots
     default: "Media"
     placeholder: "Media"
   - keyname: bottom_right_detail_label
     field_type: text
     name: Bottom Right Detail Label
+    group: Card Slots
     default: "Sonos"
     placeholder: "Sonos"

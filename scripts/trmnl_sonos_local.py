@@ -3,6 +3,7 @@ import os
 import datetime
 import json
 import base64
+import subprocess
 import sys
 import requests
 from io import BytesIO
@@ -14,9 +15,48 @@ load_dotenv()
 load_dotenv(os.getenv("TRMNL_SONOS_ENV", "/home/dave/.env.sonos-trmnl"))
 load_dotenv("/home/dave/.env")
 
+LARAPAPER_CONTAINER = os.getenv("TRMNL_LARAPAPER_CONTAINER", "larapaper-app-1")
+PLUGIN_NAME = os.getenv("TRMNL_SONOS_PLUGIN_NAME", "Sonos Local")
+
 WEBHOOK_URL = os.getenv("TRMNL_WEBHOOK_URL", "").strip()
-PREFERRED_ROOM = os.getenv("TRMNL_SONOS_ROOM", "").strip()
 UPDATED_AT_FORMAT = os.getenv("TRMNL_UPDATED_AT_FORMAT", "%d %b %H:%M")
+
+
+def _load_plugin_config():
+    """Read the Sonos Local plugin configuration from LaraPaper's DB."""
+    php = (
+        "require '/var/www/html/vendor/autoload.php';"
+        "$app = require '/var/www/html/bootstrap/app.php';"
+        "$app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();"
+        f"$p = DB::table('plugins')->where('name', '{PLUGIN_NAME}')->first();"
+        "echo $p ? ($p->configuration ?? '{}') : '{}';"
+    )
+    try:
+        result = subprocess.run(
+            ["docker", "exec", LARAPAPER_CONTAINER, "php", "-r", php],
+            capture_output=True, text=True, timeout=15,
+        )
+        raw = (result.stdout or "").strip()
+        if raw:
+            return json.loads(raw)
+    except Exception as e:
+        print(f"Warning: could not load plugin config from DB: {e}", file=sys.stderr)
+    return {}
+
+
+_config_cache = None
+
+
+def _get_plugin_config():
+    global _config_cache
+    if _config_cache is None:
+        _config_cache = _load_plugin_config()
+    return _config_cache
+
+
+config = _get_plugin_config()
+PREFERRED_ROOM = os.getenv("TRMNL_SONOS_ROOM", "").strip() or config.get("preferred_room", "").strip()
+ALBUM_ART_MODE = os.getenv("TRMNL_ALBUM_ART_MODE", "").strip() or config.get("album_art_mode", "raw").strip()
 
 ALBUM_ART_SATURATION = float(os.getenv("TRMNL_ALBUM_ART_SATURATION", "0.65"))
 ALBUM_ART_CONTRAST = float(os.getenv("TRMNL_ALBUM_ART_CONTRAST", "1.1"))
@@ -201,6 +241,7 @@ def main():
             "album_art_balanced_data_uri": album_art_variants["balanced"],
             "album_art_vivid_data_uri": album_art_variants["vivid"],
             "album_art_mono_data_uri": album_art_variants["mono"],
+            "album_art_mode": ALBUM_ART_MODE,
             "source": source,
             "multiple_active": multiple_active,
             "other_active_rooms": other_active_rooms,
