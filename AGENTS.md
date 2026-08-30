@@ -214,6 +214,15 @@ Any non-trivial change should update the relevant docs:
 - live operations or incident response: `docs/OPERATIONS.md`
 - historical/project notes: `docs/TRMNL_PROGRESS_REPORT.md` or `docs/TRMNL_PROJECT_PLAN.md`
 
+## MCP Tools
+
+**Tool discovery is mandatory, not optional.** Do not assume a tool exists or doesn't exist — call `retrieve_tools` on the local MCPProxy (Windows: `http://127.0.0.1:8080/mcp`; khpi5: `http://127.0.0.1:9092`) at the moment you need a capability, and verify the exact `server:tool` name before every call, especially before any write.
+
+Relevant surfaces: `hass-mcp-plus` for read-only HA entity/state checks (the orchestrator layer); SSH validation commands above remain the deploy/verify path for LaraPaper, the bridge and the Pi. Calendar-consuming renderers keep their own documented credential paths — do not substitute a new MCP surface without checking the renderer's contract.
+
+### Signed-in Edge Browser (Windows MCPProxy only)
+For authenticated-browser tasks (the LaraPaper web UI, signed-in sites), use the MCPProxy upstream `playwright-edge` — Microsoft's official Playwright Extension attached to the live Edge `Default` profile (`David M` / `davidm@live.co.uk`). **This route exists only on the Windows MCPProxy (`http://127.0.0.1:8080/mcp`) — khpi5 has no signed-in browser route.** Never use Edge debugging mode, port 9222, or profile clones. Canonical runbook: `C:\Users\Dave\repos\windows\mcpproxy\signed-in-edge-automation.md`; prove health with `Test-SignedInEdgeAutomation.ps1 -RequireLiveProof` before first use (operational, full gate + authenticated identity readback verified 2026-08-30).
+
 ## Git Rules
 
 - Stage only intentional files.
